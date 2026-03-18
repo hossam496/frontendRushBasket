@@ -6,7 +6,6 @@ import { useCart } from "../CartContext";
 import { FaChevronRight, FaMinus, FaPlus, FaShoppingCart, FaThList } from "react-icons/fa";
 import { categories } from "../assets/dummyData";
 import axios from 'axios'
-import { cacheProducts, getCachedProducts } from '../utils/indexedDB'
 
 const ItemsHome = () => {
   const [products, setProducts] = useState([])
@@ -18,23 +17,18 @@ const ItemsHome = () => {
     localStorage.setItem("activeCategory", activeCategory);
   }, [activeCategory]);
 
-  // fetch products with IndexedDB offline support
+  // fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/items")
+        const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/items`)
         const normalized = res.data.map((p) => ({
           ...p,
           id: p._id,
         }))
         setProducts(normalized)
-        await cacheProducts(normalized)
       } catch (err) {
-        console.error('Error fetching products, falling back to cache:', err)
-        const cached = await getCachedProducts()
-        if (cached.length) {
-          setProducts(cached)
-        }
+        console.error('Error fetching products:', err)
       }
     }
     fetchProducts()
@@ -75,7 +69,7 @@ const ItemsHome = () => {
       updateQuantity(lineId, getQuantity(product._id) + 1)
     }
     else{
-      addToCart(product._id, 1)
+      addToCart(product._id, 1, { name: product.name, price: product.price, imageUrl: product.imageUrl })
     }
   }
 
@@ -212,7 +206,7 @@ const ItemsHome = () => {
                   <div key={product.id} className={itemsHomeStyles.productCard}>
                     <div className={itemsHomeStyles.imageContainer}>
                       <img
-                        src={`http://localhost:5000${product.imageUrl}`}
+                        src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${product.imageUrl}`}
                         alt={product.name}
                         className={itemsHomeStyles.productImage}
                         onError={(e) => {

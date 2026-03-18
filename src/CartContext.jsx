@@ -12,7 +12,26 @@ const getAuthHeader = () => {
 
   return token
     ? { headers: { Authorization: `Bearer ${token}` } }
-    : {};
+    : null;
+};
+
+const isAuthenticated = () => {
+  return Boolean(localStorage.getItem("authToken") || localStorage.getItem("token"));
+};
+
+const GUEST_CART_KEY = 'guestCart';
+
+const getGuestCart = () => {
+  try {
+    const stored = localStorage.getItem(GUEST_CART_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveGuestCart = (items) => {
+  localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
 };
 
 const normalizeItems = (rawItems = []) => {
@@ -20,46 +39,102 @@ const normalizeItems = (rawItems = []) => {
     .map(item => {
       return {
         ...item,
-        id: item._id,
-        productId: item.product?._id || item.product,
-        name: item.product?.name || 'Unnamed',
-        price: item.product?.price ?? 0,
-        imageUrl: item.product?.imageUrl || '',
+        id: item._id || item.id,
+        productId: item.product?._id || item.product || item.productId,
+        name: item.product?.name || item.name || 'Unnamed',
+        price: item.product?.price ?? item.price ?? 0,
+        imageUrl: item.product?.imageUrl || item.imageUrl || '',
         quantity: item.quantity || 0,
       };
     })
-    .filter(item => item.id != null);
+    .filter(item => item.productId != null);
 };
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastFetch, setLastFetch] = useState(0);
+  const [authStatus, setAuthStatus] = useState(isAuthenticated());
+
+  // Sync auth status
+  useEffect(() => {
+    const checkAuth = () => setAuthStatus(isAuthenticated());
+    window.addEventListener('authStateChanged', checkAuth);
+    window.addEventListener('storage', checkAuth);
+    return () => {
+      window.removeEventListener('authStateChanged', checkAuth);
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, []);
 
   const fetchCart = useCallback(async (force = false) => {
-    // منع الجلب المتكرر خلال ثانيتين
     const now = Date.now();
     if (!force && now - lastFetch < 2000) {
       return;
     }
 
+    // If not authenticated, load from localStorage
+    if (!isAuthenticated()) {
+      setCart(getGuestCart());
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/cart', getAuthHeader());
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart`,
+        getAuthHeader()
+      );
       
       const items = Array.isArray(res.data) ? res.data : [];
-      setCart(normalizeItems(items));
+      const normalized = normalizeItems(items);
+      setCart(normalized);
       setLastFetch(now);
     } catch (err) {
       console.error('Error fetching cart:', err);
       if (err.response?.status === 401) {
-        // توكن منتهي - تجاهل
-        setCart([]);
+        setCart(getGuestCart());
       }
     } finally {
       setLoading(false);
     }
   }, [lastFetch]);
+
+  // Sync guest cart to backend after login
+  const syncGuestCartToBackend = useCallback(async () => {
+    const guestItems = getGuestCart();
+    if (guestItems.length === 0) return;
+
+    try {
+      // Add each guest item to backend
+      for (const item of guestItems) {
+        await axios.post(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart`,
+          { productId: item.productId, quantity: item.quantity },
+          getAuthHeader()
+        );
+      }
+      // Clear guest cart after sync
+      localStorage.removeItem(GUEST_CART_KEY);
+      // Fetch merged cart from backend
+      await fetchCart(true);
+    } catch (err) {
+      console.error('Error syncing guest cart:', err);
+    }
+  }, [fetchCart]);
+
+  // Watch for login and sync cart
+  useEffect(() => {
+    const wasAuth = authStatus;
+    const nowAuth = isAuthenticated();
+    
+    if (!wasAuth && nowAuth) {
+      // User just logged in - sync guest cart
+      syncGuestCartToBackend();
+    }
+    setAuthStatus(nowAuth);
+  }, [authStatus, syncGuestCartToBackend]);
 
   useEffect(() => {
     fetchCart();
@@ -69,12 +144,13 @@ export const CartProvider = ({ children }) => {
   const updateLocalCart = useCallback((productId, quantity, productData = null) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.productId === productId);
+      let newCart;
       
       if (existingItem) {
         if (quantity <= 0) {
-          return prevCart.filter(item => item.productId !== productId);
+          newCart = prevCart.filter(item => item.productId !== productId);
         } else {
-          return prevCart.map(item =>
+          newCart = prevCart.map(item =>
             item.productId === productId
               ? { ...item, quantity }
               : item
@@ -90,9 +166,17 @@ export const CartProvider = ({ children }) => {
           price: productData.price || 0,
           imageUrl: productData.imageUrl || '',
         };
-        return [...prevCart, newItem];
+        newCart = [...prevCart, newItem];
+      } else {
+        newCart = prevCart;
       }
-      return prevCart;
+
+      // Save to localStorage if not authenticated
+      if (!isAuthenticated()) {
+        saveGuestCart(newCart);
+      }
+      
+      return newCart;
     });
   }, []);
 
@@ -100,9 +184,13 @@ export const CartProvider = ({ children }) => {
     // تحديث محلي فوري
     updateLocalCart(productId, quantity, productData);
     
+    if (!isAuthenticated()) {
+      return; // Guest cart - no API call needed
+    }
+    
     try {
       await axios.post(
-        'http://localhost:5000/api/cart',
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart`,
         { productId, quantity },
         getAuthHeader()
       );
@@ -110,8 +198,10 @@ export const CartProvider = ({ children }) => {
       fetchCart(true);
     } catch (err) {
       console.error('Error adding to cart:', err);
-      // في حالة الخطأ، نرجع للتحديث القديم
-      fetchCart(true);
+      if (err.response?.status === 401) {
+        // Token expired - save to guest cart instead
+        saveGuestCart(cart);
+      }
     }
   };
 
@@ -123,9 +213,17 @@ export const CartProvider = ({ children }) => {
       )
     );
 
+    if (!isAuthenticated()) {
+      const updatedCart = cart.map(item =>
+        item.id === lineId ? { ...item, quantity } : item
+      );
+      saveGuestCart(updatedCart);
+      return;
+    }
+
     try {
       await axios.put(
-        `http://localhost:5000/api/cart/${lineId}`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart/${lineId}`,
         { quantity },
         getAuthHeader()
       );
@@ -139,8 +237,14 @@ export const CartProvider = ({ children }) => {
     // تحديث محلي فوري
     setCart(prevCart => prevCart.filter(item => item.id !== lineId));
 
+    if (!isAuthenticated()) {
+      const updatedCart = cart.filter(item => item.id !== lineId);
+      saveGuestCart(updatedCart);
+      return;
+    }
+
     try {
-      await axios.delete(`http://localhost:5000/api/cart/${lineId}`, getAuthHeader());
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart/${lineId}`, getAuthHeader());
     } catch (err) {
       console.error('Error removing from cart:', err);
       fetchCart(true);
@@ -149,8 +253,12 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     setCart([]);
+    localStorage.removeItem(GUEST_CART_KEY);
+    
+    if (!isAuthenticated()) return;
+
     try {
-      await axios.post('http://localhost:5000/api/cart/clear', {}, getAuthHeader());
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart/clear`, {}, getAuthHeader());
     } catch (err) {
       console.error('Error clearing cart:', err);
     }
@@ -178,6 +286,7 @@ export const CartProvider = ({ children }) => {
         getCartTotal,
         cartCount,
         refreshCart: () => fetchCart(true),
+        isAuthenticated: () => isAuthenticated(),
       }}
     >
       {children}

@@ -51,7 +51,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/user/login',
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/user/login`,
         {
           email: formData.email,
           password: formData.password
@@ -63,12 +63,17 @@ const Login = () => {
         const {token, user} = response.data
         localStorage.setItem('authToken', token)
         localStorage.setItem('userData', JSON.stringify(user))
+        localStorage.setItem('userRole', user.role || 'user')
 
         setShowToast(true)
         window.dispatchEvent(new Event('authStateChanged'))
 
         setTimeout(() => {
-          navigate("/")
+          if (user.role === 'admin') {
+            navigate("/admin")
+          } else {
+            navigate("/")
+          }
         }, 1000)
       }else{
         setError(response.data.message || "Login Failed")

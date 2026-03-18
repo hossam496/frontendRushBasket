@@ -13,7 +13,7 @@ import { data, Link, useLocation, useNavigate } from "react-router-dom";
 import { groceryData } from "../assets/dummyDataItem";
 import axios from "axios";
 
-const BACKEND_URL = 'http://localhost:5000'
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 // Product Card Component
 const ProductCard = ({ item }) => {
@@ -25,7 +25,7 @@ const ProductCard = ({ item }) => {
   const quantity = cartItem?.quantity || 0;
 
   const handleAddToCart = () => {
-    addToCart(productId, 1);
+    addToCart(productId, 1, { name: item.name, price: item.price, imageUrl: rawImage });
   };
 
   const handleIncement = () => {

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ordersPageStyles } from '../assets/dummyStyles'
 import axios from 'axios'
-import { cacheOrders, getCachedOrders } from '../utils/indexedDB'
 import {FiArrowLeft, FiCreditCard, FiMail, FiMapPin, FiPackage, FiPhone, FiSearch, FiUser, FiX} from 'react-icons/fi'
 
 const MyOrders = () => {
@@ -14,22 +13,26 @@ const MyOrders = () => {
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')
   const userEmail = userData.email || ''
 
-  // fetching order with offline cache
+  // fetching orders
+  // fetching orders
   const fetchAndFilterOrders = async () => {
     try {
-      const resp = await axios.get('http://localhost:5000/api/orders')
-      const allOrders = resp.data
-
-      const mine = allOrders.filter(o => 
-        o.customer?.email?.toLowerCase() === userEmail.toLowerCase()
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      const resp = await axios.get(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders/my/orders`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
       )
-      setOrders(mine)
-      await cacheOrders(mine, userEmail)
+      
+      if (resp.data.success) {
+        setOrders(resp.data.orders || [])
+      } else {
+        console.error('Failed to fetch orders:', resp.data.message);
+      }
     } 
     catch (err) {
-      console.error('Error fetching orders, loading from cache:', err);
-      const cached = await getCachedOrders(userEmail)
-      setOrders(cached)
+      console.error('Error fetching orders:', err);
     }
   }
 
@@ -195,17 +198,17 @@ const MyOrders = () => {
                       <div className='mb-3'>
                         <div className='font-medium text-emerald-100'>{selectedOrder.customer.name}</div>
                         <div className='text-emerald-300 flex items-center mt-2'>
-                          <FiMail className='mr-2 flex-shrink-0' />
+                          <FiMail className='mr-2 shrink-0' />
                           {selectedOrder.customer.email || 'No email found'}
                         </div>
                         <div className='text-emerald-300 flex items-center mt-2'>
-                          <FiPhone className='mr-2 flex-shrink-0' />
+                          <FiPhone className='mr-2 shrink-0' />
                           {selectedOrder.customer.phone}
                         </div>
                       </div>
 
                       <div className='flex items-start mt-3'>
-                        <FiMapPin className='text-emerald-400 mr-2 mt-1 flex-shrink-0' />
+                        <FiMapPin className='text-emerald-400 mr-2 mt-1 shrink-0' />
                         <div className='text-emerald-300'>{selectedOrder.customer.address}</div>
                       </div>
                     </div>
@@ -242,7 +245,7 @@ const MyOrders = () => {
                           : ""
                         }`}>
                           {item.imageUrl ? (
-                            <img src={`http://localhost:5000${item.imageUrl}`} alt={item.name} 
+                            <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${item.imageUrl}`} alt={item.name} 
                             className='w-16 h-16 object-cover rounded-lg mr-4'/>
                           ): (
                             <div className='bg-emerald-800 border-2 border-dashed border-emerald-700 rounded-xl
@@ -251,7 +254,7 @@ const MyOrders = () => {
                             </div>
                           )}
 
-                          <div className='flex-grow'>
+                          <div className='grow'>
                             <div className='font-medium text-emerald-100'>{item.name}</div>
                             <div className='text-emerald-400'>{item.price.toFixed(2)} × {item.quantity}</div>
                           </div>
@@ -276,7 +279,7 @@ const MyOrders = () => {
                           <span className="text-emerald-300">Delivery Charges</span>
                           <span className="font-medium text-emerald-100">₹{(selectedOrder.total * 0.05).toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between pt-4 mt-2 border-t border-emerald-700">
+                          <div className='w-24 h-24 shrink-0 rounded-xl overflow-hidden bg-emerald-900/50 border border-emerald-700/30'>
                           <span className="text-lg font-bold text-emerald-100">Total</span>
                           <span className="text-lg font-bold text-emerald-300">
                             ₹{(selectedOrder.total * 1.05).toFixed(2)}
@@ -315,7 +318,8 @@ const MyOrders = () => {
                     <div className={ordersPageStyles.modalCard}>
                       <div className='flex justify-between mb-3'>
                         <span className='text-emerald-300'>Status:</span>
-                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${selectedOrder.status === 'Delivered' ? 'bg-emerald-500/20 text-emerald-200' :
+                            <span className={`px-4 py-1.5 rounded-full text-xs font-bold shrink-0 shadow-sm ${
+selectedOrder.status === 'Delivered' ? 'bg-emerald-500/20 text-emerald-200' :
                             selectedOrder.status === 'Shipped' ? 'bg-blue-500/20 text-blue-200' :
                               selectedOrder.status === 'Cancelled' ? 'bg-red-500/20 text-red-200' :
                                 'bg-amber-500/20 text-amber-200'

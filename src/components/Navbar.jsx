@@ -24,15 +24,16 @@ export default function Navbar() {
   const [activeTab, setActiveTab] = useState(location.pathname);
   const [scrolled, setScrolled] = useState(false);
   const prevCartCountRef = useRef(cartCount);
+  const mobileMenuRef = useRef(null);
   const [cartBounce, setCartBounce] = useState(false);
 
   // Auth state
   const [isLoggedIn, setIsLoggedIn] = useState(
     Boolean(localStorage.getItem('authToken'))
   );
-
-  // Mobile menu ref
-  const mobileMenuRef = useRef(null);
+  const [isAdmin, setIsAdmin] = useState(
+    localStorage.getItem('userRole') === 'admin'
+  );
 
   // Sync active tab & close mobile menu on route change
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function Navbar() {
   useEffect(() => {
     const handler = () => {
       setIsLoggedIn(Boolean(localStorage.getItem('authToken')));
+      setIsAdmin(localStorage.getItem('userRole') === 'admin');
     };
     window.addEventListener('authStateChanged', handler);
     return () => window.removeEventListener('authStateChanged', handler);
@@ -92,7 +94,16 @@ export default function Navbar() {
   // Updated nav items with conditional "My Orders" link
   const getNavItems = () => {
     const baseItems = [...navItems];
-    
+
+    // Add "Admin Panel" if admin
+    if (isAdmin) {
+      baseItems.push({
+        name: "Admin Panel",
+        path: "/admin",
+        icon: <FiUser />
+      });
+    }
+
     // Add "My Orders" after Shop link for logged-in users
     if (isLoggedIn) {
       const shopIndex = baseItems.findIndex(item => item.name === "Shop");
@@ -104,7 +115,7 @@ export default function Navbar() {
         });
       }
     }
-    
+
     return baseItems;
   };
 
