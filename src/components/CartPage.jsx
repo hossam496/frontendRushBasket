@@ -13,7 +13,7 @@ const CartPage = () => {
     item.name ?? item.product?.name ?? "Unnamed item";
   const getItemImage = (item) => {
     const path = item.image ?? item.product?.imageUrl ?? "";
-    return path ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${path}` : "";
+    return path ? `${import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app/'}${path}` : "";
   };
 
   // subtotal - هذا متغير وليس دالة
@@ -27,9 +27,9 @@ const CartPage = () => {
 
     const newQty = item.quantity + delta;
     if (newQty > 0) {
-     await updateQuantity(id, newQty);
+      await updateQuantity(id, newQty);
     } else {
-     await removeFromCart(id);
+      await removeFromCart(id);
     }
   };
 
@@ -56,7 +56,7 @@ const CartPage = () => {
       </div>
     );
   }
-  
+
   return (
     <div className={cartStyles.pageContainer}>
       <div className={cartStyles.maxContainerLarge}>
@@ -82,12 +82,12 @@ const CartPage = () => {
                     <div className={cartStyles.cartItemImageContainer}>
                       {img ? (
                         <img src={img} alt={name} className={cartStyles.cartItemImage}
-                        onError={e => {
-                          e.target.onerror = null
-                          e.target.src = '/no-image.png'
-                        }}
+                          onError={e => {
+                            e.target.onerror = null
+                            e.target.src = '/no-image.png'
+                          }}
                         />
-                      ): (
+                      ) : (
                         <div className="w-full h-full flex items-center justify-between bg-gray-200 text-gray-600 rounded">
                           No Image
                         </div>
@@ -113,8 +113,8 @@ const CartPage = () => {
 
                     <button onClick={() => removeFromCart(id)}
                       className={cartStyles.cartItemRemoveButton}>
-                        <FiTrash2 className="mr-1" /> Remove
-                      </button>
+                      <FiTrash2 className="mr-1" /> Remove
+                    </button>
                   </div>
                 )
               })}

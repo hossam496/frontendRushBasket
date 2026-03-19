@@ -34,7 +34,7 @@ const Login = () => {
 
   // form handler 
   const handleChange = (e) => {
-    const {name, value, type, checked } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -44,23 +44,23 @@ const Login = () => {
   const handleSubmet = async (e) => {
     e.preventDefault();
     setError('')
-    if(!formData.remember){
+    if (!formData.remember) {
       setError("You must agree to terms and conditions")
       return
     }
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/user/login`,
+        `${import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app/'}/api/user/login`,
         {
           email: formData.email,
           password: formData.password
         },
-        {headers: {'Content-Type' : 'application/json'}}
+        { headers: { 'Content-Type': 'application/json' } }
       )
 
-      if(response.data.success){
-        const {token, user} = response.data
+      if (response.data.success) {
+        const { token, user } = response.data
         localStorage.setItem('authToken', token)
         localStorage.setItem('userData', JSON.stringify(user))
         localStorage.setItem('userRole', user.role || 'user')
@@ -75,14 +75,14 @@ const Login = () => {
             navigate("/")
           }
         }, 1000)
-      }else{
+      } else {
         setError(response.data.message || "Login Failed")
       }
     }
-     catch (err) {
-      if(err.response && err.response.data){
+    catch (err) {
+      if (err.response && err.response.data) {
         setError(err.response.data.message || "Login error")
-      } else{
+      } else {
         setError("Unable to reach server")
       }
     }
@@ -117,39 +117,39 @@ const Login = () => {
 
         <form onSubmit={handleSubmet} className={loginStyles.form}>
           {/* email */}
-          
+
           <div className={loginStyles.inputContainer}>
             <FaUser className={loginStyles.inputIcon} />
             <input type="email" name="email" value={formData.email}
-            onChange={handleChange} placeholder="Email Adress" 
-            required className={loginStyles.input}/>
+              onChange={handleChange} placeholder="Email Adress"
+              required className={loginStyles.input} />
           </div>
 
           <div className={loginStyles.inputContainer}>
             <FaLock className={loginStyles.inputIcon} />
             <input type={showPassword ? 'text' : 'password'}
-             name="password" value={formData.password}
-            onChange={handleChange} placeholder="passwrod" 
-            required className={loginStyles.passwordInput}/>
+              name="password" value={formData.password}
+              onChange={handleChange} placeholder="passwrod"
+              required className={loginStyles.passwordInput} />
 
             <button type="button" onClick={() => setShawPassword((v) => !v)}
               className={loginStyles.toggleButton}
               aria-label={showPassword ? 'Hide password' : 'Show password'}>
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
 
           {/* remember me */}
           <div className={loginStyles.rememberContainer}>
             <label className={loginStyles.rememberLabel}>
               <input type="checkbox" name="remember"
-              checked={formData.remember}
-              onChange={handleChange} className={loginStyles.rememberCheckbox}
-              required />
+                checked={formData.remember}
+                onChange={handleChange} className={loginStyles.rememberCheckbox}
+                required />
               Remember me
             </label>
             <Link to='#' className={loginStyles.forgotLink}>
-            Forgot?
+              Forgot?
             </Link>
           </div>
           {error && <p className={loginStyles.error}>{error}</p>}
@@ -162,7 +162,7 @@ const Login = () => {
         <p className={loginStyles.signupText}>
           Dont’t have an account?{' '}
           <Link to='/signup' className={loginStyles.signupLink}>
-          Sign Up
+            Sign Up
           </Link>
         </p>
       </div>

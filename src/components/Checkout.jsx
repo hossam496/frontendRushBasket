@@ -111,7 +111,7 @@ const Checkout = () => {
 
     try {
       const token = localStorage.getItem("authToken") || localStorage.getItem("token");
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app/';
 
       if (formData.paymentMethod === 'COD') {
         // Handle Cash on Delivery
@@ -411,7 +411,7 @@ const Checkout = () => {
                     <div className={checkoutStyles.cartImage}>
                       {item.imageUrl ? (
                         <img
-                          src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${item.imageUrl.startsWith('/') ? '' : '/'}${item.imageUrl}`}
+                          src={`${import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app/'}${item.imageUrl.startsWith('/') ? '' : '/'}${item.imageUrl}`}
                           alt={item.name}
                           className="w-full h-full object-cover rounded"
                         />

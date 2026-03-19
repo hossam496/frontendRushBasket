@@ -13,7 +13,7 @@ import { data, Link, useLocation, useNavigate } from "react-router-dom";
 import { groceryData } from "../assets/dummyDataItem";
 import axios from "axios";
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app/'
 
 // Product Card Component
 const ProductCard = ({ item }) => {
@@ -33,14 +33,14 @@ const ProductCard = ({ item }) => {
   };
 
   const handleDecrement = () => {
-    if(quantity <= 1) removeFromCart(lineId)
-      else updateQuantity(lineId, quantity -1)
+    if (quantity <= 1) removeFromCart(lineId)
+    else updateQuantity(lineId, quantity - 1)
   };
 
   const rawImage = item.image || item.imageUrl
   let imgSrc = item.image
-  if(rawImage){
-    if(rawImage.startsWith('http')) imgSrc = rawImage
+  if (rawImage) {
+    if (rawImage.startsWith('http')) imgSrc = rawImage
     else if (rawImage.startsWith('/')) imgSrc = `${BACKEND_URL}${rawImage}`
     else imgSrc = `${BACKEND_URL}/uploads/${rawImage}`
   }
@@ -119,28 +119,28 @@ const Items = () => {
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const search = queryParams.get("search");
-    if (search){
-       setSearchTerm (search)
-      }
+    if (search) {
+      setSearchTerm(search)
+    }
   }, [location]);
 
   // featch from backend side
   useEffect(() => {
     axios.get(`${BACKEND_URL}/api/items`)
-    .then(res => {
-      const products = Array.isArray(res.data)
-      ? res.data
-      : res.data.products || []
+      .then(res => {
+        const products = Array.isArray(res.data)
+          ? res.data
+          : res.data.products || []
 
-      const grouped = products.reduce((acc, item) => {
-        const cat = item.category || "Uncategorized"
-        if(!acc[cat]) acc[cat] = {id: cat, name: cat, items: []}
-        acc[cat].items.push(item)
-        return acc
-      }, {})
-      setData(Object.values(grouped))
-    })
-    .catch(err => console.error('Fetching error:', err))
+        const grouped = products.reduce((acc, item) => {
+          const cat = item.category || "Uncategorized"
+          if (!acc[cat]) acc[cat] = { id: cat, name: cat, items: [] }
+          acc[cat].items.push(item)
+          return acc
+        }, {})
+        setData(Object.values(grouped))
+      })
+      .catch(err => console.error('Fetching error:', err))
   }, [])
 
   const itemMatchesSearch = (item, term) => {
@@ -150,8 +150,8 @@ const Items = () => {
     return searchWords.every((word) => item.name.toLowerCase().includes(word));
   };
 
- const filteredData = searchTerm
-  ? data
+  const filteredData = searchTerm
+    ? data
       .map((category) => ({
         ...category,
         items: category.items.filter((item) =>
@@ -159,7 +159,7 @@ const Items = () => {
         ),
       }))
       .filter((category) => category.items.length > 0)
-  : data; 
+    : data;
 
   const clearSearch = () => {
     setSearchTerm("");

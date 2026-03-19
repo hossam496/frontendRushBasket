@@ -58,14 +58,14 @@ const Signup = () => {
 
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/user/register`,
+        `${import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app/'}/api/user/register`,
         {
           name: formData.name,
           email: formData.email,
           password: formData.password
         }
       );
-      
+
       if (res.data.success) {
         setShowToast(true);
       } else {
@@ -124,13 +124,13 @@ const Signup = () => {
 
           <div className={signupStyles.inputContainer}>
             <FaLock className={signupStyles.inputIcon} />
-            <input 
+            <input
               type={showPassword ? 'text' : 'password'} // تعديل: مسحنا .password
               name="password"
-              value={formData.password} 
+              value={formData.password}
               onChange={handleChange}
-              placeholder="Password" 
-              className={signupStyles.passwordInput} 
+              placeholder="Password"
+              className={signupStyles.passwordInput}
             />
             <button type="button" onClick={togglePasswordVisibility}
               className={signupStyles.toggleButton}>
