@@ -15,7 +15,7 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     const newSocket = io(SOCKET_URL, {
       withCredentials: true,
-      transports: ['websocket', 'polling']
+      transports: ['polling'] // Forced polling for Vercel serverless compatibility
     });
 
     newSocket.on('connect', () => {
