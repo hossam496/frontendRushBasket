@@ -59,8 +59,8 @@ const Signup = () => {
       );
 
       if (res.data.success) {
-        const { accessToken, refreshToken, user } = res.data;
-        saveAuthTokens(accessToken, refreshToken);
+        const { token, user } = res.data;
+        saveAuthTokens(token);
         localStorage.setItem('userData', JSON.stringify(user));
         localStorage.setItem('userRole', user.role || 'user');
         

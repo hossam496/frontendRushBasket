@@ -59,8 +59,8 @@ const Login = () => {
       )
 
       if (response.data.success) {
-        const { accessToken, refreshToken, user } = response.data
-        saveAuthTokens(accessToken, refreshToken)
+        const { token, user } = response.data
+        saveAuthTokens(token)
         localStorage.setItem('userData', JSON.stringify(user))
         localStorage.setItem('userRole', user.role || 'user')
 
