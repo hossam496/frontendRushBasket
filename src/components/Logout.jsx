@@ -1,4 +1,6 @@
 import api, { setAccessToken } from '../services/api';
+import { FaSignOutAlt } from 'react-icons/fa';
+import { FaSignOutAlt } from 'react-icons/fa';
 
 const Logout = () => {
 
