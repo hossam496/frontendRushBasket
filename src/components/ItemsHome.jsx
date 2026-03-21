@@ -6,6 +6,7 @@ import { useCart } from "../CartContext";
 import { FaChevronRight, FaMinus, FaPlus, FaShoppingCart, FaThList } from "react-icons/fa";
 import { categories } from "../assets/dummyData";
 import axios from 'axios'
+import { API_BASE_URL } from '../services/api';
 
 const ItemsHome = () => {
   const [products, setProducts] = useState([])

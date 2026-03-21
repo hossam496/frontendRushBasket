@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { ordersPageStyles } from '../assets/dummyStyles'
 import axios from 'axios'
 import {FiArrowLeft, FiCreditCard, FiMail, FiMapPin, FiPackage, FiPhone, FiSearch, FiUser, FiX} from 'react-icons/fi'
+import { API_BASE_URL } from '../services/api';
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);

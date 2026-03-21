@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FiCheckCircle, FiLoader, FiAlertCircle, FiArrowRight } from 'react-icons/fi';
 import Swal from 'sweetalert2';
+import { API_BASE_URL } from '../services/api';
 
 /**
  * Payment Success Page
@@ -34,7 +35,7 @@ const PaymentSuccessPage = () => {
         
         // Verify the session with the backend
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payment/session/${sessionId}`,
+          `${API_BASE_URL}/api/payment/session/${sessionId}`,
           {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           }

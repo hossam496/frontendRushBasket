@@ -224,7 +224,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       await axios.put(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart/${lineId}`,
+        `${API_BASE_URL}/api/cart/${lineId}`,
         { quantity },
         getAuthHeader()
       );
@@ -245,7 +245,7 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart/${lineId}`, getAuthHeader());
+      await axios.delete(`${API_BASE_URL}/api/cart/${lineId}`, getAuthHeader());
     } catch (err) {
       console.error('Error removing from cart:', err);
       fetchCart(true);
@@ -259,7 +259,7 @@ export const CartProvider = ({ children }) => {
     if (!isAuthenticated()) return;
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart/clear`, {}, getAuthHeader());
+      await axios.post(`${API_BASE_URL}/api/cart/clear`, {}, getAuthHeader());
     } catch (err) {
       console.error('Error clearing cart:', err);
     }
