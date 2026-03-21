@@ -40,6 +40,19 @@ api.interceptors.request.use(
 );
 
 const REFRESH_TOKEN_KEY = 'rush_basket_refresh_token';
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 // Response interceptor to handle token refresh
 api.interceptors.response.use(
@@ -49,12 +62,25 @@ api.interceptors.response.use(
 
     // If error is 401 and not already retrying
     if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/api/auth/refresh')) {
+      
+      if (isRefreshing) {
+        // Queue this request and wait for the refresh to complete
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
         
-        // Try refresh with both cookie (automatic) and body (localStorage fallback)
         const response = await axios.post(
           `${API_BASE_URL}/api/auth/refresh`, 
           { refreshToken: storedRefreshToken }, 
@@ -62,20 +88,21 @@ api.interceptors.response.use(
         );
 
         if (response.data.success) {
-          accessToken = response.data.accessToken;
+          const newToken = response.data.accessToken;
+          saveAuthTokens(newToken, response.data.refreshToken);
           
-          // Update refresh token if rotated
-          if (response.data.refreshToken) {
-            localStorage.setItem(REFRESH_TOKEN_KEY, response.data.refreshToken);
-          }
+          processQueue(null, newToken);
+          isRefreshing = false;
 
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return api(originalRequest);
         }
       } catch (refreshError) {
+        processQueue(refreshError, null);
+        isRefreshing = false;
+        
         // Refresh failed, clear tokens
-        accessToken = null;
-        localStorage.removeItem(REFRESH_TOKEN_KEY);
+        clearAuthTokens();
         window.dispatchEvent(new Event('authFailed'));
         return Promise.reject(refreshError);
       }
