@@ -207,7 +207,11 @@ const ItemsHome = () => {
                   <div key={product.id} className={itemsHomeStyles.productCard}>
                     <div className={itemsHomeStyles.imageContainer}>
                       <img
-                        src={product.imageUrl?.startsWith('http') ? product.imageUrl : `${API_BASE_URL}${product.imageUrl?.startsWith('/') ? '' : '/'}${product.imageUrl}`}
+                        src={
+                          product.imageUrl?.startsWith('http') || product.imageUrl?.startsWith('data:')
+                            ? product.imageUrl
+                            : `${API_BASE_URL}${product.imageUrl?.startsWith('/') ? '' : '/'}${product.imageUrl}`
+                        }
                         alt={product.name}
                         className={itemsHomeStyles.productImage}
                         onError={(e) => {

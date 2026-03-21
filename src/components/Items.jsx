@@ -39,9 +39,9 @@ const ProductCard = ({ item }) => {
   };
 
   const rawImage = item.image || item.imageUrl
-  let imgSrc = item.image
+  let imgSrc = null
   if (rawImage) {
-    if (rawImage.startsWith('http')) imgSrc = rawImage
+    if (rawImage.startsWith('http') || rawImage.startsWith('data:')) imgSrc = rawImage
     else if (rawImage.startsWith('/')) imgSrc = `${BACKEND_URL}${rawImage}`
     else imgSrc = `${BACKEND_URL}/uploads/${rawImage}`
   }
