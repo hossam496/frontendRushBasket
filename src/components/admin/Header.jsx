@@ -1,8 +1,24 @@
 import React, { useState } from 'react';
 import { FiSearch, FiBell, FiUser, FiSettings } from 'react-icons/fi';
 
+// Helper to read admin info from localStorage
+const getAdminInfo = () => {
+  try {
+    const raw = localStorage.getItem('userData');
+    if (raw) {
+      const user = JSON.parse(raw);
+      return {
+        name: user.name || user.username || 'Admin User',
+        email: user.email || 'admin@company.com',
+      };
+    }
+  } catch (_) {}
+  return { name: 'Admin User', email: 'admin@company.com' };
+};
+
 const Header = ({ title, onSidebarToggle, isSidebarCollapsed }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const admin = getAdminInfo();
   const [notifications] = useState([
     { id: 1, text: 'New order received', time: '2 min ago', unread: true },
     { id: 2, text: 'Product stock low', time: '1 hour ago', unread: true },
@@ -82,11 +98,11 @@ const Header = ({ title, onSidebarToggle, isSidebarCollapsed }) => {
             </button>
             <div className="flex items-center space-x-3">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-900">Admin User</p>
-                <p className="text-xs text-gray-500">admin@company.com</p>
+                <p className="text-sm font-medium text-gray-900">{admin.name}</p>
+                <p className="text-xs text-gray-500">{admin.email}</p>
               </div>
               <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-medium">
-                A
+                {admin.name.charAt(0).toUpperCase()}
               </div>
             </div>
           </div>
