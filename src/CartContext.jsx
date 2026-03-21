@@ -1,23 +1,10 @@
-// CartContext.jsx - نسخة محسنة
-import axios from 'axios';
-import { API_BASE_URL } from './services/api';
+import api from './services/api';
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 
 const CartContext = createContext();
 
-const getAuthHeader = () => {
-  const token =
-    localStorage.getItem("authToken") ||
-    localStorage.getItem("token") ||
-    sessionStorage.getItem("token");
-
-  return token
-    ? { headers: { Authorization: `Bearer ${token}` } }
-    : null;
-};
-
 const isAuthenticated = () => {
-  return Boolean(localStorage.getItem("authToken") || localStorage.getItem("token"));
+  return Boolean(localStorage.getItem("userData"));
 };
 
 const GUEST_CART_KEY = 'guestCart';
@@ -61,10 +48,10 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = () => setAuthStatus(isAuthenticated());
     window.addEventListener('authStateChanged', checkAuth);
-    window.addEventListener('storage', checkAuth);
+    window.addEventListener('authFailed', checkAuth);
     return () => {
       window.removeEventListener('authStateChanged', checkAuth);
-      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('authFailed', checkAuth);
     };
   }, []);
 
@@ -75,7 +62,7 @@ export const CartProvider = ({ children }) => {
     }
 
     // If not authenticated, load from localStorage
-    if (!isAuthenticated()) {
+    if (!authStatus) {
       setCart(getGuestCart());
       setLoading(false);
       return;
@@ -83,10 +70,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       setLoading(true);
-      const res = await axios.get(
-        `${API_BASE_URL}/api/cart`,
-        getAuthHeader()
-      );
+      const res = await api.get('/api/cart');
       
       const items = Array.isArray(res.data) ? res.data : [];
       const normalized = normalizeItems(items);
@@ -100,7 +84,7 @@ export const CartProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [lastFetch]);
+  }, [lastFetch, authStatus]);
 
   // Sync guest cart to backend after login
   const syncGuestCartToBackend = useCallback(async () => {
@@ -110,10 +94,9 @@ export const CartProvider = ({ children }) => {
     try {
       // Add each guest item to backend
       for (const item of guestItems) {
-        await axios.post(
-          `${API_BASE_URL}/api/cart`,
-          { productId: item.productId, quantity: item.quantity },
-          getAuthHeader()
+        await api.post(
+          '/api/cart',
+          { productId: item.productId, quantity: item.quantity }
         );
       }
       // Clear guest cart after sync
@@ -190,19 +173,14 @@ export const CartProvider = ({ children }) => {
     }
     
     try {
-      await axios.post(
-        `${API_BASE_URL}/api/cart`,
-        { productId, quantity },
-        getAuthHeader()
+      await api.post(
+        '/api/cart',
+        { productId, quantity }
       );
       // جلب التحديثات من السيرفر في الخلفية
       fetchCart(true);
     } catch (err) {
       console.error('Error adding to cart:', err);
-      if (err.response?.status === 401) {
-        // Token expired - save to guest cart instead
-        saveGuestCart(cart);
-      }
     }
   };
 
@@ -223,10 +201,9 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      await axios.put(
-        `${API_BASE_URL}/api/cart/${lineId}`,
-        { quantity },
-        getAuthHeader()
+      await api.put(
+        `/api/cart/${lineId}`,
+        { quantity }
       );
     } catch (err) {
       console.error('Error updating the cart:', err);
@@ -245,7 +222,7 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      await axios.delete(`${API_BASE_URL}/api/cart/${lineId}`, getAuthHeader());
+      await api.delete(`/api/cart/${lineId}`);
     } catch (err) {
       console.error('Error removing from cart:', err);
       fetchCart(true);
@@ -259,7 +236,7 @@ export const CartProvider = ({ children }) => {
     if (!isAuthenticated()) return;
 
     try {
-      await axios.post(`${API_BASE_URL}/api/cart/clear`, {}, getAuthHeader());
+      await api.post('/api/cart/clear', {});
     } catch (err) {
       console.error('Error clearing cart:', err);
     }

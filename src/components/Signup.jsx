@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signupStyles } from "../assets/dummyStyles";
 import { FaArrowLeft, FaCheck, FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
-import axios from 'axios';
-import { API_BASE_URL } from '../services/api';
+import api from '../services/api';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -58,10 +57,8 @@ const Signup = () => {
     if (!validate()) return;
 
     try {
-      const url = `${API_BASE_URL}/api/auth/register`;
-      console.log("Attempting signup at URL:", url);
-      const res = await axios.post(
-        url,
+      const res = await api.post(
+        '/api/auth/register',
         {
           name: formData.name,
           email: formData.email,

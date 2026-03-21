@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useCart } from '../CartContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import { FiCheckCircle, FiLoader, FiAlertCircle, FiArrowRight } from 'react-icons/fi';
 import Swal from 'sweetalert2';
-import { API_BASE_URL } from '../services/api';
+
 
 /**
  * Payment Success Page
@@ -31,15 +31,8 @@ const PaymentSuccessPage = () => {
       }
 
       try {
-        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-        
         // Verify the session with the backend
-        const response = await axios.get(
-          `${API_BASE_URL}/api/payment/session/${sessionId}`,
-          {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
-        );
+        const response = await api.get(`/api/payment/session/${sessionId}`);
 
         if (response.data.success) {
           const { data } = response.data;

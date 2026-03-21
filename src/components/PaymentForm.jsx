@@ -5,11 +5,10 @@ import {
   useElements 
 } from '@stripe/react-stripe-js';
 import { FiLock, FiCheck } from 'react-icons/fi';
-import axios from 'axios';
+import api from '../services/api';
 import Swal from 'sweetalert2';
-import { API_BASE_URL } from '../services/api';
 
-const API_URL = API_BASE_URL;
+
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -46,11 +45,9 @@ const PaymentForm = ({ formData, cart, grandTotal, onSuccess, onLoading }) => {
     onLoading(true);
 
     try {
-      const token = localStorage.getItem("authToken");
-
       // 1. Create Payment Intent on our server
-      const { data } = await axios.post(
-        `${API_URL}/api/payment/create-payment-intent`,
+      const { data } = await api.post(
+        '/api/payment/create-payment-intent',
         {
           items: cart.map(item => ({
             id: item.productId || item.id,
@@ -63,11 +60,6 @@ const PaymentForm = ({ formData, cart, grandTotal, onSuccess, onLoading }) => {
             address: formData.address
           },
           notes: formData.notes
-        },
-        {
-          headers: {
-            ...(token && { Authorization: `Bearer ${token}` })
-          }
         }
       );
 

@@ -3,12 +3,11 @@ import { loginStyles } from "../assets/dummyStyles";
 import { Link, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaCheck, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
 import Logout from "./Logout";
-import axios from 'axios'
-import { API_BASE_URL } from '../services/api';
+import api, { setAccessToken } from '../services/api';
 
 const Login = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
-    Boolean(localStorage.getItem("authToken")),
+    Boolean(localStorage.getItem("userData")),
   );
 
   const [formData, setFormData] = useState({
@@ -24,7 +23,7 @@ const Login = () => {
 
   useEffect(() => {
     const handler = () => {
-      setIsAuthenticated(Boolean(localStorage.getItem("authToken")));
+      setIsAuthenticated(Boolean(localStorage.getItem("userData")));
     };
     window.addEventListener("authStateChanged", handler);
     return () => window.removeEventListener("authStateChanged", handler);
@@ -51,20 +50,17 @@ const Login = () => {
     }
 
     try {
-      const url = `${API_BASE_URL}/api/auth/login`;
-      console.log("Attempting login at URL:", url);
-      const response = await axios.post(
-        url,
+      const response = await api.post(
+        '/api/auth/login',
         {
           email: formData.email,
           password: formData.password
-        },
-        { headers: { 'Content-Type': 'application/json' } }
+        }
       )
 
       if (response.data.success) {
-        const { token, user } = response.data
-        localStorage.setItem('authToken', token)
+        const { accessToken, user } = response.data
+        setAccessToken(accessToken)
         localStorage.setItem('userData', JSON.stringify(user))
         localStorage.setItem('userRole', user.role || 'user')
 

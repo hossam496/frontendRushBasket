@@ -29,20 +29,54 @@ const ScrollToTop = () => {
   return null
 }
 
+import api, { setAccessToken } from './services/api'
+
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
-    Boolean(localStorage.getItem('authToken'))
+    Boolean(localStorage.getItem('userData'))
   )
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || 'user')
+  const [isRefreshing, setIsRefreshing] = useState(true)
   const location = useLocation()
 
   useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const response = await api.post('/api/auth/refresh');
+        if (response.data.success) {
+          setAccessToken(response.data.accessToken);
+          setIsAuthenticated(true);
+        }
+      } catch (err) {
+        console.log('No active session or refresh failed');
+        // If refresh fails, and we had userData, we might want to clear it
+        if (!location.pathname.includes('/login') && !location.pathname.includes('/signup')) {
+          // Keep userData for now to avoid flickering, or clear if strict
+        }
+      } finally {
+        setIsRefreshing(false);
+      }
+    };
+
+    initAuth();
+
     const handler = () => {
-      setIsAuthenticated(Boolean(localStorage.getItem('authToken')))
+      setIsAuthenticated(Boolean(localStorage.getItem('userData')))
       setUserRole(localStorage.getItem('userRole') || 'user')
     }
+    const authFailedHandler = () => {
+      setIsAuthenticated(false);
+      localStorage.removeItem('userData');
+      localStorage.removeItem('userRole');
+      window.dispatchEvent(new Event('authStateChanged'));
+    };
+
     window.addEventListener('authStateChanged', handler)
-    return () => window.removeEventListener('authStateChanged', handler)
+    window.addEventListener('authFailed', authFailedHandler)
+    return () => {
+      window.removeEventListener('authStateChanged', handler)
+      window.removeEventListener('authFailed', authFailedHandler)
+    }
   }, [])
 
   const isAdmin = isAuthenticated && userRole === 'admin'

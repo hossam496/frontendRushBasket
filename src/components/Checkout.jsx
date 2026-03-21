@@ -4,14 +4,7 @@ import PaymentForm from "./PaymentForm";
 import React, { useState } from 'react'; // للتحكم في حالة الفورم والتحميل
 import { Link, useNavigate } from 'react-router-dom'; // للتنقل بين الصفحات
 import { useCart } from '../CartContext'; // استيراد الـ Hook الخاص بالسلة (تأكد من المسار الصحيح)
-import axios from 'axios'; // لعمل الطلبات للـ API
-import Swal from 'sweetalert2'; // لإظهار التنبيهات الاحترافية
-import {
-  FiArrowLeft, FiUser, FiCreditCard,
-  FiPackage, FiTruck, FiLock, FiCheck
-} from 'react-icons/fi'; // للأيقونات المستخدمة في التصميم
-import { checkoutStyles } from '../assets/dummyStyles'; // لتنسيقات الصفحة
-import { API_BASE_URL } from '../services/api';
+import api from '../services/api';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_your_key_here');
 
@@ -111,13 +104,9 @@ const Checkout = () => {
     });
 
     try {
-      const token = localStorage.getItem("authToken") || localStorage.getItem("token");
-      const apiUrl = API_BASE_URL;
-
       if (formData.paymentMethod === 'COD') {
-        // Handle Cash on Delivery
-        const res = await axios.post(
-          `${apiUrl}/api/payment/create-cod-order`,
+        const res = await api.post(
+          '/api/payment/create-cod-order',
           {
             items: cart.map((item) => ({
               id: item.productId || item.id,
@@ -133,12 +122,6 @@ const Checkout = () => {
               address: formData.address,
             },
             notes: formData.notes,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              ...(token && { Authorization: `Bearer ${token}` }),
-            },
           }
         );
 
@@ -150,9 +133,8 @@ const Checkout = () => {
           throw new Error(res.data.message || 'Order failed');
         }
       } else {
-        // Handle Online Payment - Stripe Checkout
-        const res = await axios.post(
-          `${apiUrl}/api/payment/create-checkout-session`,
+        const res = await api.post(
+          '/api/payment/create-checkout-session',
           {
             items: cart.map((item) => ({
               id: item.productId || item.id,
@@ -168,18 +150,11 @@ const Checkout = () => {
               address: formData.address,
             },
             notes: formData.notes,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              ...(token && { Authorization: `Bearer ${token}` }),
-            },
           }
         );
 
         if (res.data.success && res.data.data?.checkoutUrl) {
           Swal.close();
-          // Redirect to Stripe Checkout
           window.location.href = res.data.data.checkoutUrl;
         } else {
           throw new Error(res.data.message || 'Failed to create checkout session');

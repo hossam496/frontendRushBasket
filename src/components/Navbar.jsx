@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import api, { setAccessToken } from '../services/api';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   FiHome,
@@ -29,7 +30,7 @@ export default function Navbar() {
 
   // Auth state
   const [isLoggedIn, setIsLoggedIn] = useState(
-    Boolean(localStorage.getItem('authToken'))
+    Boolean(localStorage.getItem("userData"))
   );
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem('userRole') === 'admin'
@@ -61,7 +62,7 @@ export default function Navbar() {
   // Listen for auth changes
   useEffect(() => {
     const handler = () => {
-      setIsLoggedIn(Boolean(localStorage.getItem('authToken')));
+      setIsLoggedIn(Boolean(localStorage.getItem("userData")));
       setIsAdmin(localStorage.getItem('userRole') === 'admin');
     };
     window.addEventListener('authStateChanged', handler);
@@ -84,9 +85,15 @@ export default function Navbar() {
   }, [isOpen]);
 
   // Logout handler
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
+  const handleLogout = async () => {
+    try {
+      await api.post('/api/auth/logout');
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+    setAccessToken(null);
     localStorage.removeItem('userData');
+    localStorage.removeItem('userRole');
     window.dispatchEvent(new Event('authStateChanged'));
     navigate('/login');
   };

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api, { setAccessToken } from '../../services/api';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   FiHome,
@@ -26,8 +27,14 @@ const Sidebar = ({ isCollapsed, isMobileOpen, onMobileClose }) => {
     { name: 'Analytics', path: '/admin/analytics', icon: <FiPieChart /> },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
+  const handleLogout = async () => {
+    try {
+      await api.post('/api/auth/logout');
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+    setAccessToken(null);
+    localStorage.removeItem('userData');
     localStorage.removeItem('userRole');
     window.dispatchEvent(new Event('authStateChanged'));
     navigate('/login');

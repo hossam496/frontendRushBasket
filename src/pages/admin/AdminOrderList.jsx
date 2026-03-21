@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import {
   FiEye,
   FiPackage,
@@ -22,9 +22,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import DataTable from '../../components/admin/DataTable';
 import StatCard from '../../components/admin/StatCard';
 import { useSocket } from '../../context/SocketContext';
-import { API_BASE_URL } from '../../services/api';
 
-const BACKEND_URL = API_BASE_URL;
 
 const AdminOrderList = () => {
   const { socket } = useSocket();
@@ -58,11 +56,7 @@ const AdminOrderList = () => {
 
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (localStorage.getItem('token')) localStorage.removeItem('token');
-      const res = await axios.get(`${BACKEND_URL}/api/orders`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get('/api/orders');
       // Sort by date descending
       const sorted = (res.data.data || res.data || []).sort((a, b) => new Date(b.date) - new Date(a.date));
       setOrders(sorted);
@@ -75,11 +69,7 @@ const AdminOrderList = () => {
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (localStorage.getItem('token')) localStorage.removeItem('token');
-      await axios.put(`${BACKEND_URL}/api/orders/${orderId}`, { status: newStatus }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.put(`/api/orders/${orderId}`, { status: newStatus });
 
       setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
       if (selectedOrder && selectedOrder._id === orderId) {
@@ -392,7 +382,7 @@ const AdminOrderList = () => {
                     <div key={idx} className={`flex items-center p-4 ${idx !== selectedOrder.items.length - 1 ? 'border-b border-gray-200' : ''}`}>
                       <div className="w-16 h-16 bg-gray-100 rounded-lg mr-4 overflow-hidden flex-shrink-0">
                         {item.imageUrl ? (
-                          <img src={`${BACKEND_URL}${item.imageUrl}`} className="w-full h-full object-cover" alt={item.name} />
+                          <img src={`${api.defaults.baseURL}${item.imageUrl}`} className="w-full h-full object-cover" alt={item.name} />
                         ) : (
                           <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                             <FiPackage className="text-gray-400" />

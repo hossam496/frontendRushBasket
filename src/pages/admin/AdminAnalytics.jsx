@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { 
   FiTrendingUp, 
   FiShoppingCart, 
@@ -13,9 +13,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import StatCard from '../../components/admin/StatCard';
 import ChartCard from '../../components/admin/ChartCard';
 import DataTable from '../../components/admin/DataTable';
-import { API_BASE_URL } from '../../services/api';
 
-const BACKEND_URL = API_BASE_URL;
 
 const AdminAnalytics = () => {
   const [analyticsData, setAnalyticsData] = useState({
@@ -34,11 +32,7 @@ const AdminAnalytics = () => {
 
   const fetchAnalyticsData = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (localStorage.getItem('token')) localStorage.removeItem('token');
-      const res = await axios.get(`${BACKEND_URL}/api/stats`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get('/api/stats');
 
       setAnalyticsData(res.data);
       setLoading(false);

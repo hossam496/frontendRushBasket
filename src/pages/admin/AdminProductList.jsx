@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { 
   FiPlus, 
   FiTrash2, 
@@ -17,9 +17,7 @@ import Swal from 'sweetalert2';
 import AdminLayout from '../../components/admin/AdminLayout';
 import DataTable from '../../components/admin/DataTable';
 import StatCard from '../../components/admin/StatCard';
-import { API_BASE_URL } from '../../services/api';
 
-const BACKEND_URL = API_BASE_URL;
 
 const AdminProductList = () => {
   const [products, setProducts] = useState([]);
@@ -54,7 +52,7 @@ const AdminProductList = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${BACKEND_URL}/api/items`);
+      const res = await api.get('/api/items');
       setProducts(res.data);
       setLoading(false);
     } catch (err) {
@@ -76,10 +74,7 @@ const AdminProductList = () => {
 
     if (result.isConfirmed) {
       try {
-        const token = localStorage.getItem('authToken');
-        await axios.delete(`${BACKEND_URL}/api/items/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.delete(`/api/items/${id}`);
         setProducts(products.filter(p => p._id !== id));
         Swal.fire('Deleted!', 'Product has been deleted.', 'success');
       } catch (err) {
@@ -115,12 +110,9 @@ const AdminProductList = () => {
     }
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (localStorage.getItem('token')) localStorage.removeItem('token');
-      const res = await axios.put(`${BACKEND_URL}/api/items/${editingProduct._id}`, formData, {
+      const res = await api.put(`/api/items/${editingProduct._id}`, formData, {
         headers: { 
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}` 
+          'Content-Type': 'multipart/form-data'
         }
       });
       
@@ -131,25 +123,7 @@ const AdminProductList = () => {
       Swal.fire('Success', 'Product updated successfully', 'success');
     } catch (err) {
       console.error('Error updating product:', err);
-      const errorData = err.response?.data;
-      
-      // Check if reauthentication is required
-      if (errorData?.requiresReauth) {
-        Swal.fire({
-          title: 'Session Expired',
-          text: 'Your authentication session has expired. Please log out and log back in.',
-          icon: 'warning',
-          confirmButtonText: 'OK'
-        }).then(() => {
-          // Clear local storage tokens
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('token');
-          // Optionally redirect to login page
-          window.location.href = '/login';
-        });
-      } else {
-        Swal.fire('Error', `Failed to update product: ${errorData?.message || err.message}`, 'error');
-      }
+      Swal.fire('Error', `Failed to update product: ${err.response?.data?.message || err.message}`, 'error');
     }
   };
 
@@ -166,12 +140,9 @@ const AdminProductList = () => {
     }
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (localStorage.getItem('token')) localStorage.removeItem('token');
-      const res = await axios.post(`${BACKEND_URL}/api/items`, formData, {
+      const res = await api.post('/api/items', formData, {
         headers: { 
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}` 
+          'Content-Type': 'multipart/form-data'
         }
       });
       setProducts([...products, res.data]);
@@ -180,25 +151,7 @@ const AdminProductList = () => {
       Swal.fire('Success', 'Product added successfully', 'success');
     } catch (err) {
       console.error('Error adding product:', err);
-      const errorData = err.response?.data;
-      
-      // Check if reauthentication is required
-      if (errorData?.requiresReauth) {
-        Swal.fire({
-          title: 'Session Expired',
-          text: 'Your authentication session has expired. Please log out and log back in.',
-          icon: 'warning',
-          confirmButtonText: 'OK'
-        }).then(() => {
-          // Clear local storage tokens
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('token');
-          // Optionally redirect to login page
-          window.location.href = '/login';
-        });
-      } else {
-        Swal.fire('Error', `Failed to add product: ${errorData?.message || err.message}`, 'error');
-      }
+      Swal.fire('Error', `Failed to add product: ${err.response?.data?.message || err.message}`, 'error');
     }
   };
 
@@ -206,7 +159,7 @@ const AdminProductList = () => {
     const rawImage = product.imageUrl || product.image;
     if (!rawImage) return null;
     if (rawImage.startsWith('http')) return rawImage;
-    return `${BACKEND_URL}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
+    return `${api.defaults.baseURL}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
   };
 
   const filteredProducts = products.filter(product =>
@@ -585,7 +538,7 @@ const AdminProductList = () => {
                     </div>
                   ) : editingProduct?.imageUrl ? (
                     <div className="relative">
-                      <img src={`${BACKEND_URL}${editingProduct.imageUrl}`} className="h-32 mx-auto rounded-lg object-contain" />
+                      <img src={`${api.defaults.baseURL}${editingProduct.imageUrl}`} className="h-32 mx-auto rounded-lg object-contain" />
                       <p className="text-sm text-gray-500 mt-2">Click to change image</p>
                     </div>
                   ) : (

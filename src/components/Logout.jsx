@@ -1,11 +1,16 @@
-import React from 'react'
-import { FaSignOutAlt } from 'react-icons/fa'
+import api, { setAccessToken } from '../services/api';
 
 const Logout = () => {
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken')
+  const handleLogout = async () => {
+    try {
+      await api.post('/api/auth/logout');
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+    setAccessToken(null);
     localStorage.removeItem('userData')
+    localStorage.removeItem('userRole')
 
     window.dispatchEvent(new Event('authStateChanged'))
   }

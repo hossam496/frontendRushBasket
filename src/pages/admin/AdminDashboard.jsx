@@ -14,10 +14,9 @@ import {
   FiClock,
 } from "react-icons/fi";
 import { useSocket } from "../../context/SocketContext";
-import axios from "axios";
-import { API_BASE_URL } from "../../services/api";
+import api from "../../services/api";
 
-const BACKEND_URL = API_BASE_URL;
+
 
 const AdminDashboard = () => {
   const { socket, joinAdminRoom } = useSocket();
@@ -135,10 +134,7 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
-      const res = await axios.get(`${BACKEND_URL}/api/stats`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get('/api/stats');
 
       const data = res.data;
       
@@ -159,9 +155,7 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error("Error fetching stats:", err);
       // Fallback to original method if stats endpoint fails
-      const fallbackRes = await axios.get(`${BACKEND_URL}/api/orders`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const fallbackRes = await api.get('/api/orders');
       const orders = fallbackRes.data.data || fallbackRes.data || [];
       const total = orders.reduce((sum, o) => sum + (o.total || 0), 0);
 
@@ -176,10 +170,7 @@ const AdminDashboard = () => {
 
   const fetchRecentOrders = async () => {
     try {
-      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
-      const res = await axios.get(`${BACKEND_URL}/api/orders`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get('/api/orders');
       const orders = res.data.data || res.data || [];
       setRecentOrders(orders.slice(0, 5));
     } catch (err) {

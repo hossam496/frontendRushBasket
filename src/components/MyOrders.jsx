@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ordersPageStyles } from '../assets/dummyStyles'
-import axios from 'axios'
-import {FiArrowLeft, FiCreditCard, FiMail, FiMapPin, FiPackage, FiPhone, FiSearch, FiUser, FiX} from 'react-icons/fi'
-import { API_BASE_URL } from '../services/api';
+import api from '../services/api';
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -15,16 +13,9 @@ const MyOrders = () => {
   const userEmail = userData.email || ''
 
   // fetching orders
-  // fetching orders
   const fetchAndFilterOrders = async () => {
     try {
-      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-      const resp = await axios.get(
-        `${API_BASE_URL}/api/orders/my/orders`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      )
+      const resp = await api.get('/api/orders/my/orders');
       
       if (resp.data.success) {
         setOrders(resp.data.orders || [])
