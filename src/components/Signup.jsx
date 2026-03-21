@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { signupStyles } from "../assets/dummyStyles";
 import { FaArrowLeft, FaCheck, FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
 import axios from 'axios';
+import { API_BASE_URL } from '../services/api';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -57,8 +58,7 @@ const Signup = () => {
     if (!validate()) return;
 
     try {
-      const apiBase = (import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app').replace(/\/$/, '');
-      const url = `${apiBase}/api/auth/register`;
+      const url = `${API_BASE_URL}/api/auth/register`;
       console.log("Attempting signup at URL:", url);
       const res = await axios.post(
         url,

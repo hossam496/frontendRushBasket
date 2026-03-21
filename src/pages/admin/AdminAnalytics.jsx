@@ -13,8 +13,9 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import StatCard from '../../components/admin/StatCard';
 import ChartCard from '../../components/admin/ChartCard';
 import DataTable from '../../components/admin/DataTable';
+import { API_BASE_URL } from '../../services/api';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const BACKEND_URL = API_BASE_URL;
 
 const AdminAnalytics = () => {
   const [analyticsData, setAnalyticsData] = useState({

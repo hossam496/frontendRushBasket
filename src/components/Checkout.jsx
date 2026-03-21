@@ -11,6 +11,7 @@ import {
   FiPackage, FiTruck, FiLock, FiCheck
 } from 'react-icons/fi'; // للأيقونات المستخدمة في التصميم
 import { checkoutStyles } from '../assets/dummyStyles'; // لتنسيقات الصفحة
+import { API_BASE_URL } from '../services/api';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_your_key_here');
 
@@ -111,7 +112,7 @@ const Checkout = () => {
 
     try {
       const token = localStorage.getItem("authToken") || localStorage.getItem("token");
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = API_BASE_URL;
 
       if (formData.paymentMethod === 'COD') {
         // Handle Cash on Delivery
@@ -411,7 +412,7 @@ const Checkout = () => {
                     <div className={checkoutStyles.cartImage}>
                       {item.imageUrl ? (
                         <img
-                          src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${item.imageUrl.startsWith('/') ? '' : '/'}${item.imageUrl}`}
+                          src={`${API_BASE_URL}${item.imageUrl.startsWith('/') ? '' : '/'}${item.imageUrl}`}
                           alt={item.name}
                           className="w-full h-full object-cover rounded"
                         />

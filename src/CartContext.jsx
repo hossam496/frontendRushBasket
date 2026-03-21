@@ -1,5 +1,6 @@
 // CartContext.jsx - نسخة محسنة
 import axios from 'axios';
+import { API_BASE_URL } from './services/api';
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 
 const CartContext = createContext();
@@ -83,7 +84,7 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart`,
+        `${API_BASE_URL}/api/cart`,
         getAuthHeader()
       );
       
@@ -110,7 +111,7 @@ export const CartProvider = ({ children }) => {
       // Add each guest item to backend
       for (const item of guestItems) {
         await axios.post(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart`,
+          `${API_BASE_URL}/api/cart`,
           { productId: item.productId, quantity: item.quantity },
           getAuthHeader()
         );
@@ -190,7 +191,7 @@ export const CartProvider = ({ children }) => {
     
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cart`,
+        `${API_BASE_URL}/api/cart`,
         { productId, quantity },
         getAuthHeader()
       );

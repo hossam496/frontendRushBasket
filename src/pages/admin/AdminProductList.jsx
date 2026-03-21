@@ -17,8 +17,9 @@ import Swal from 'sweetalert2';
 import AdminLayout from '../../components/admin/AdminLayout';
 import DataTable from '../../components/admin/DataTable';
 import StatCard from '../../components/admin/StatCard';
+import { API_BASE_URL } from '../../services/api';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const BACKEND_URL = API_BASE_URL;
 
 const AdminProductList = () => {
   const [products, setProducts] = useState([]);
@@ -167,8 +168,7 @@ const AdminProductList = () => {
     const rawImage = product.imageUrl || product.image;
     if (!rawImage) return null;
     if (rawImage.startsWith('http')) return rawImage;
-    if (rawImage.startsWith('/')) return `${BACKEND_URL}${rawImage}`;
-    return `${BACKEND_URL}/uploads/${rawImage}`;
+    return `${BACKEND_URL}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
   };
 
   const filteredProducts = products.filter(product =>

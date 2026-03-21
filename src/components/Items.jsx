@@ -12,8 +12,9 @@ import {
 import { data, Link, useLocation, useNavigate } from "react-router-dom";
 import { groceryData } from "../assets/dummyDataItem";
 import axios from "axios";
+import { API_BASE_URL } from '../services/api';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const BACKEND_URL = API_BASE_URL;
 
 // Product Card Component
 const ProductCard = ({ item }) => {

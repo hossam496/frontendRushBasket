@@ -7,8 +7,9 @@ import {
 import { FiLock, FiCheck } from 'react-icons/fi';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { API_BASE_URL } from '../services/api';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = API_BASE_URL;
 
 const CARD_ELEMENT_OPTIONS = {
   style: {

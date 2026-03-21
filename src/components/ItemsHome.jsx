@@ -21,7 +21,7 @@ const ItemsHome = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/items`)
+        const res = await axios.get(`${API_BASE_URL}/api/items`)
         const normalized = res.data.map((p) => ({
           ...p,
           id: p._id,
@@ -206,12 +206,12 @@ const ItemsHome = () => {
                   <div key={product.id} className={itemsHomeStyles.productCard}>
                     <div className={itemsHomeStyles.imageContainer}>
                       <img
-                        src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${product.imageUrl}`}
+                        src={product.imageUrl?.startsWith('http') ? product.imageUrl : `${API_BASE_URL}${product.imageUrl?.startsWith('/') ? '' : '/'}${product.imageUrl}`}
                         alt={product.name}
                         className={itemsHomeStyles.productImage}
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = "/placeholder.png"; // أو رسالة No Image
+                          e.target.src = "https://placehold.co/600x400?text=No+Image";
                         }}
                       />
                     </div>
