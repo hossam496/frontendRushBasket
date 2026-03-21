@@ -57,8 +57,10 @@ const Signup = () => {
     if (!validate()) return;
 
     try {
+      const url = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/register`;
+      console.log("Attempting signup at URL:", url);
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/register`,
+        url,
         {
           name: formData.name,
           email: formData.email,
@@ -72,9 +74,18 @@ const Signup = () => {
         setApiError(res.data.message || "Registration failed");
       }
     } catch (err) {
-      // تعديل هنا للتعامل مع أخطاء السيرفر بشكل أدق
-      const errorMsg = err.response?.data?.message || err.response?.data || "Server error";
-      setApiError(typeof errorMsg === 'string' ? errorMsg : "Connection failed");
+      console.error("Signup full error:", err);
+      if (err.response) {
+        console.error("Response data:", err.response.data);
+        const errorMsg = err.response.data.message || err.response.data || "Server error";
+        setApiError(typeof errorMsg === 'string' ? errorMsg : "Registration failed");
+      } else if (err.request) {
+        console.error("Request made but no response received:", err.request);
+        setApiError("Unable to reach server - please check your connection");
+      } else {
+        console.error("Error setting up request:", err.message);
+        setApiError("Signup setup error");
+      }
     }
   };
 

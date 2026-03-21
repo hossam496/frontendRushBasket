@@ -50,8 +50,10 @@ const Login = () => {
     }
 
     try {
+      const url = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/login`;
+      console.log("Attempting login at URL:", url);
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/login`,
+        url,
         {
           email: formData.email,
           password: formData.password
@@ -80,10 +82,16 @@ const Login = () => {
       }
     }
     catch (err) {
-      if (err.response && err.response.data) {
+      console.error("Login full error:", err);
+      if (err.response) {
+        console.error("Response data:", err.response.data);
         setError(err.response.data.message || "Login error")
+      } else if (err.request) {
+        console.error("Request made but no response received:", err.request);
+        setError("Unable to reach server - please check your connection")
       } else {
-        setError("Unable to reach server")
+        console.error("Error setting up request:", err.message);
+        setError("Login setup error")
       }
     }
   }
