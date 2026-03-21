@@ -1,25 +1,38 @@
-import React, { Suspense, useEffect, useState, lazy } from 'react'
+import React, { Suspense, useEffect, useState, lazy, useMemo, useCallback } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { SocketProvider } from './context/SocketContext'
 import { CartProvider } from './CartContext'
 import { Toaster } from 'react-hot-toast'
-import Navbar from './components/Navbar'
-import Home from './pages/Home'
-import Contact from './pages/Contact'
-import Item from './pages/Item'
-import Cart from './pages/Cart'
-import MyOrders from './components/MyOrders'
-import PaymentSuccessPage from './pages/PaymentSuccessPage'
-import Checkout from './components/Checkout'
-import Login from './components/Login'
-import Signup from './components/Signup'
-import Logout from './components/Logout'
-import Footer from './components/Footer'
 
+// Lazy loaded components for better code splitting
+const Navbar = lazy(() => import('./components/Navbar'))
+const Footer = lazy(() => import('./components/Footer'))
+const Home = lazy(() => import('./pages/Home'))
+const Contact = lazy(() => import('./pages/Contact'))
+const Item = lazy(() => import('./pages/Item'))
+const Cart = lazy(() => import('./pages/Cart'))
+const MyOrders = lazy(() => import('./components/MyOrders'))
+const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage'))
+const Checkout = lazy(() => import('./components/Checkout'))
+const Login = lazy(() => import('./components/Login'))
+const Signup = lazy(() => import('./components/Signup'))
+const Logout = lazy(() => import('./components/Logout'))
+
+// Admin components - already lazy loaded
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const AdminProductList = lazy(() => import('./pages/admin/AdminProductList'))
 const AdminOrderList = lazy(() => import('./pages/admin/AdminOrderList'))
 const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'))
+
+// Skeleton loader component
+const SkeletonLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-green-50">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-emerald-500 mx-auto mb-4"></div>
+      <div className="text-emerald-600 font-medium animate-pulse">Loading...</div>
+    </div>
+  </div>
+)
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -38,39 +51,44 @@ const App = () => {
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || 'user')
   const location = useLocation()
 
-  useEffect(() => {
-    const handler = () => {
-      setIsAuthenticated(Boolean(localStorage.getItem('userData')))
-      setUserRole(localStorage.getItem('userRole') || 'user')
-    }
-    const authFailedHandler = () => {
-      setIsAuthenticated(false);
-      clearAuthTokens();
-      localStorage.removeItem('userData');
-      localStorage.removeItem('userRole');
-      window.dispatchEvent(new Event('authStateChanged'));
-    };
-
-    window.addEventListener('authStateChanged', handler)
-    window.addEventListener('authFailed', authFailedHandler)
-    return () => {
-      window.removeEventListener('authStateChanged', handler)
-      window.removeEventListener('authFailed', authFailedHandler)
-    }
+  // Memoized auth state handlers
+  const handleAuthStateChange = useCallback(() => {
+    setIsAuthenticated(Boolean(localStorage.getItem('userData')))
+    setUserRole(localStorage.getItem('userRole') || 'user')
   }, [])
 
-  const isAdmin = isAuthenticated && userRole === 'admin'
-  const isAdminPath = location.pathname.startsWith('/admin')
+  const handleAuthFailed = useCallback(() => {
+    setIsAuthenticated(false);
+    clearAuthTokens();
+    localStorage.removeItem('userData');
+    localStorage.removeItem('userRole');
+    window.dispatchEvent(new Event('authStateChanged'));
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener('authStateChanged', handleAuthStateChange)
+    window.addEventListener('authFailed', handleAuthFailed)
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthStateChange)
+      window.removeEventListener('authFailed', handleAuthFailed)
+    }
+  }, [handleAuthStateChange, handleAuthFailed])
+
+  // Memoized computed values
+  const isAdmin = useMemo(() => isAuthenticated && userRole === 'admin', [isAuthenticated, userRole])
+  const isAdminPath = useMemo(() => location.pathname.startsWith('/admin'), [location.pathname])
 
   return (
     <SocketProvider>
       <CartProvider>
         <Toaster position="top-right" reverseOrder={false} />
         <ScrollToTop />
-        {!isAdminPath && <Navbar isAuthenticated={isAuthenticated} isAdmin={isAdmin} />}
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-emerald-500">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
-        </div>}>
+        {!isAdminPath && (
+          <Suspense fallback={<SkeletonLoader />}>
+            <Navbar isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
+          </Suspense>
+        )}
+        <Suspense fallback={<SkeletonLoader />}>
           <Routes>
             <Route path='/' element={<Home />} />
             <Route path='/contact' element={<Contact />} />
@@ -97,7 +115,11 @@ const App = () => {
             <Route path='*' element={<Navigate replace to='/' />} />
           </Routes>
         </Suspense>
-        {!isAdminPath && <Footer />}
+        {!isAdminPath && (
+          <Suspense fallback={<SkeletonLoader />}>
+            <Footer />
+          </Suspense>
+        )}
       </CartProvider>
     </SocketProvider>
   )

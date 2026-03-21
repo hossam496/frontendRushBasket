@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://frontend-rush-basket.vercel.app/sitemap.xml
+
+# Block common bot paths
+Disallow: /api/
+Disallow: /admin/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /login
+Disallow: /signup
+Disallow: /logout
+
+# Allow specific resource paths
+Allow: /static/js/
+Allow: /static/css/
+Allow: /images/
+
+Crawl-delay: 1

@@ -3,14 +3,65 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="../frontend/src/assets/logo.png" />
+  <link rel="icon" type="image/png" href="/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basket E-Commerce</title>
+  <meta name="theme-color" content="#10b981" />
+  <meta name="description" content="RushBasket - Premium e-commerce experience with quality products, fast delivery, and exceptional service." />
+  <meta name="keywords" content="ecommerce, shopping, premium products, online store, rushbasket" />
+  <meta name="author" content="RushBasket" />
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="/logo.png" />
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://api.stripe.com" />
+  
+  <!-- DNS Prefetch -->
+  <link rel="dns-prefetch" href="//backend1-eight-lovat.vercel.app" />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="RushBasket - Premium E-commerce" />
+  <meta property="og:description" content="Premium shopping experience with quality products and fast delivery." />
+  <meta property="og:image" content="/logo.png" />
+  <meta property="og:url" content="https://frontend-rush-basket.vercel.app" />
+  <meta property="og:type" content="website" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="RushBasket - Premium E-commerce" />
+  <meta name="twitter:description" content="Premium shopping experience with quality products." />
+  <meta name="twitter:image" content="/logo.png" />
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+  
+  <title>RushBasket - Premium E-commerce</title>
 </head>
 
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
+  
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+  </script>
 </body>
 
 </html>

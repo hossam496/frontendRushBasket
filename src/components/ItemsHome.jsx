@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { itemsHomeStyles } from "../assets/dummyStyles";
 import BannerHome from "./BannerHome";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,71 @@ import { FaChevronRight, FaMinus, FaPlus, FaShoppingCart, FaThList } from "react
 import { categories } from "../assets/dummyData";
 import axios from 'axios'
 import { API_BASE_URL } from '../services/api';
+
+// Memoized Product Card component
+const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) => {
+  const handleImageError = (e) => {
+    e.target.onerror = null;
+    e.target.src = "https://placehold.co/600x400?text=No+Image";
+  };
+
+  return (
+    <div className={itemsHomeStyles.productCard}>
+      <div className={itemsHomeStyles.imageContainer}>
+        <img
+          src={
+            product.imageUrl?.startsWith('http') || product.imageUrl?.startsWith('data:')
+              ? product.imageUrl
+              : `${API_BASE_URL}${product.imageUrl?.startsWith('/') ? '' : '/'}${product.imageUrl}`
+          }
+          alt={product.name}
+          className={itemsHomeStyles.productImage}
+          loading="lazy"
+          onError={handleImageError}
+        />
+      </div>
+      <div className={itemsHomeStyles.productContent}>
+        <h3 className={itemsHomeStyles.productTitle}>{product.name}</h3>
+        <div className={itemsHomeStyles.priceContainer}>
+          <div>
+            <p className={itemsHomeStyles.currentPrice}>
+              {product.price.toFixed(2)}
+            </p>
+            <span className={itemsHomeStyles.oldPrice}>
+              {(product.price * 1.2).toFixed(2)}
+            </span>
+          </div>
+
+          {quantity === 0 ? (
+            <button
+              onClick={() => onIncrease(product)}
+              className={itemsHomeStyles.addButton}
+            >
+              <FaShoppingCart className="mr-2" />
+              Add
+            </button>
+          ) : (
+            <div className={itemsHomeStyles.quantityControls}>
+              <button
+                onClick={() => onDecrease(product)}
+                className={itemsHomeStyles.quantityButton}
+              >
+                <FaMinus />
+              </button>
+              <span className="font-bold">{quantity}</span>
+              <button
+                onClick={() => onIncrease(product)}
+                className={itemsHomeStyles.quantityButton}
+              >
+                <FaPlus />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+});
 
 const ItemsHome = () => {
   const [products, setProducts] = useState([])
@@ -39,32 +104,44 @@ const ItemsHome = () => {
   const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const isSearching = searchTerm.trim() !== "";
+  const isSearching = useMemo(() => searchTerm.trim() !== "", [searchTerm]);
+  
+  const searchedProducts = useMemo(() => {
+    const productMatchesSearch = (product, term) => {
+      if (!term) return true;
+      const cleanTerm = term.trim().toLowerCase();
+      const searchWords = cleanTerm.split(/\s+/);
+      return searchWords.every((word) => product.name.toLowerCase().includes(word));
+    };
 
-  const productMatchesSearch = (product, term) => {
-    if (!term) return true;
-    const cleanTerm = term.trim().toLowerCase();
-    const searchWords = cleanTerm.split(/\s+/);
-    return searchWords.every((word) => product.name.toLowerCase().includes(word));
-  };
+    return isSearching
+      ? products.filter((product) => productMatchesSearch(product, searchTerm))
+      : activeCategory === "All"
+      ? products
+      : products.filter((product) => product.category === activeCategory);
+  }, [products, isSearching, searchTerm, activeCategory]);
 
-  const searchedProducts = isSearching
-    ? products.filter((product) => productMatchesSearch(product, searchTerm))
-    : activeCategory === "All"
-    ? products
-    : products.filter((product) => product.category === activeCategory);
+  const sidebarCategories = useMemo(() => [
+    {
+      name: "All Items",
+      icon: <FaThList className="text-lg" />,
+      value: "All",
+    },
+    ...categories,
+  ], []);
 
-  const getQuantity = (productId) => {
+  const getQuantity = useCallback((productId) => {
     const item = cart.find((ci) => ci.productId === productId);
     return item ? item.quantity : 0;
-  };
+  }, [cart]);
 
-  const getLineItemId = (productId) => {
+  const getLineItemId = useCallback((productId) => {
     const item = cart.find((ci) => ci.productId === productId)
     return item ? item.id : null
-  }
+  }, [cart]);
 
-  const handleIncrease = (product) => {
+  // Memoized handlers
+  const handleIncrease = useCallback((product) => {
     const lineId = getLineItemId(product._id)
     if(lineId) {
       updateQuantity(lineId, getQuantity(product._id) + 1)
@@ -72,32 +149,22 @@ const ItemsHome = () => {
     else{
       addToCart(product._id, 1, { name: product.name, price: product.price, imageUrl: product.imageUrl })
     }
-  }
+  }, [addToCart, updateQuantity, getQuantity, getLineItemId])
 
-  const handleDecrease = (product) => {
+  const handleDecrease = useCallback((product) => {
     const qty = getQuantity(product._id);
     const lineId = getLineItemId(product._id)
     if (qty > 1 && lineId) updateQuantity(lineId, qty - 1);
     else if (lineId) removeFromCart(lineId);
-  };
+  }, [updateQuantity, removeFromCart, getQuantity, getLineItemId])
 
-  const redirectToItemsPage = () => {
+  const redirectToItemsPage = useCallback(() => {
     navigate("/items", { state: { category: activeCategory } });
-  };
+  }, [navigate, activeCategory]);
 
-  const handleSearch = (term) => {
+  const handleSearch = useCallback((term) => {
     setSearchTerm(term);
-  };
-
-  // sidebar categories
-  const sidebarCategories = [
-    {
-      name: "All Items",
-      icon: <FaThList className="text-lg" />,
-      value: "All",
-    },
-    ...categories,
-  ];
+  }, []);
 
   return (
     <div className={itemsHomeStyles.page}>
@@ -201,68 +268,15 @@ const ItemsHome = () => {
           {/* product grid */}
           <div className={itemsHomeStyles.productsGrid}>
             {searchedProducts.length > 0 ? (
-              searchedProducts.map((product) => {
-                const qty = getQuantity(product.id);
-                return (
-                  <div key={product.id} className={itemsHomeStyles.productCard}>
-                    <div className={itemsHomeStyles.imageContainer}>
-                      <img
-                        src={
-                          product.imageUrl?.startsWith('http') || product.imageUrl?.startsWith('data:')
-                            ? product.imageUrl
-                            : `${API_BASE_URL}${product.imageUrl?.startsWith('/') ? '' : '/'}${product.imageUrl}`
-                        }
-                        alt={product.name}
-                        className={itemsHomeStyles.productImage}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "https://placehold.co/600x400?text=No+Image";
-                        }}
-                      />
-                    </div>
-                    <div className={itemsHomeStyles.productContent}>
-                      <h3 className={itemsHomeStyles.productTitle}>{product.name}</h3>
-                      <div className={itemsHomeStyles.priceContainer}>
-                        <div>
-                          <p className={itemsHomeStyles.currentPrice}>
-                            {product.price.toFixed(2)}
-                          </p>
-                          <span className={itemsHomeStyles.oldPrice}>
-                            {(product.price * 1.2).toFixed(2)}
-                          </span>
-                        </div>
-
-                        {/* هنا الجزء المهم: الكنترولز بتظهر دلوقتي */}
-                        {qty === 0 ? (
-                          <button
-                            onClick={() => handleIncrease(product)}
-                            className={itemsHomeStyles.addButton}
-                          >
-                            <FaShoppingCart className="mr-2" />
-                            Add
-                          </button>
-                        ) : (
-                          <div className={itemsHomeStyles.quantityControls}>
-                            <button
-                              onClick={() => handleDecrease(product)}
-                              className={itemsHomeStyles.quantityButton}
-                            >
-                              <FaMinus />
-                            </button>
-                            <span className="font-bold">{qty}</span>
-                            <button
-                              onClick={() => handleIncrease(product)}
-                              className={itemsHomeStyles.quantityButton}
-                            >
-                              <FaPlus />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
+              searchedProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  quantity={getQuantity(product.id)}
+                  onIncrease={handleIncrease}
+                  onDecrease={handleDecrease}
+                />
+              ))
             ) : (
               <div className={itemsHomeStyles.noProducts}>
                 <div className={itemsHomeStyles.noProductsText}>No Products Found</div>

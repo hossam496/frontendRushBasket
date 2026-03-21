@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { FiSearch, FiBell, FiSettings } from 'react-icons/fi';
 
 const getAdminInfo = () => {
@@ -15,13 +15,27 @@ const getAdminInfo = () => {
   return { name: 'Admin User', email: 'admin@company.com' };
 };
 
-const Header = ({ title, onSidebarToggle }) => {
+const Header = React.memo(({ title, onSidebarToggle }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const admin = getAdminInfo();
-  const [notifications] = useState([
+  const admin = useMemo(() => getAdminInfo(), []);
+  
+  const notifications = useMemo(() => [
     { id: 1, text: 'New order received', time: '2 min ago', unread: true },
     { id: 2, text: 'Product stock low', time: '1 hour ago', unread: true },
-  ]);
+  ], []);
+
+  const handleSearchChange = useCallback((e) => {
+    setSearchQuery(e.target.value);
+  }, []);
+
+  const handleSidebarToggle = useCallback(() => {
+    onSidebarToggle?.();
+  }, [onSidebarToggle]);
+
+  const unreadCount = useMemo(() => 
+    notifications.filter(n => n.unread).length, 
+    [notifications]
+  );
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 fixed top-0 right-0 left-0 z-30 transition-all duration-300">
@@ -30,8 +44,9 @@ const Header = ({ title, onSidebarToggle }) => {
         {/* Left Section: Menu Toggle & Title */}
         <div className="flex items-center min-w-0 flex-shrink-1">
           <button
-            onClick={onSidebarToggle}
+            onClick={handleSidebarToggle}
             className="p-1.5 sm:p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors lg:hidden mr-2"
+            aria-label="Toggle sidebar"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -51,9 +66,10 @@ const Header = ({ title, onSidebarToggle }) => {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               placeholder="Search..."
               className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              aria-label="Search"
             />
           </div>
         </div>
@@ -61,33 +77,53 @@ const Header = ({ title, onSidebarToggle }) => {
         {/* Right Section: Actions & Profile */}
         <div className="flex items-center space-x-1 sm:space-x-3 ml-2 flex-shrink-0">
           
-          {/* Mobile Search Icon (Optional for small screens) */}
-          <button className="p-2 text-gray-500 md:hidden hover:bg-gray-100 rounded-lg">
+          {/* Mobile Search Icon */}
+          <button 
+            className="p-2 text-gray-500 md:hidden hover:bg-gray-100 rounded-lg"
+            aria-label="Search"
+          >
              <FiSearch className="w-5 h-5" />
           </button>
 
           {/* Notifications */}
           <div className="relative group">
-            <button className="relative p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+            <button 
+              className="relative p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ''}`}
+            >
               <FiBell className="w-5 h-5" />
-              {notifications.filter(n => n.unread).length > 0 && (
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              {unreadCount > 0 && (
+                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" aria-hidden="true"></span>
               )}
             </button>
             
-            {/* Dropdown - Hidden on very small screens or adjusted position */}
+            {/* Notification Dropdown */}
             <div className="absolute right-[-50px] sm:right-0 mt-2 w-64 sm:w-80 bg-white rounded-xl shadow-xl border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-               {/* ... نفس محتوى الـ notifications dropdown ... */}
+              <div className="p-4 border-b border-gray-200">
+                <h3 className="font-semibold text-gray-900">Notifications</h3>
+                <p className="text-sm text-gray-500">{unreadCount} unread</p>
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {notifications.map(notification => (
+                  <div key={notification.id} className="p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
+                    <p className="text-sm text-gray-900">{notification.text}</p>
+                    <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          <button className="hidden sm:block p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+          <button 
+            className="hidden sm:block p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            aria-label="Settings"
+          >
             <FiSettings className="w-5 h-5" />
           </button>
 
           {/* Profile Section */}
           <div className="flex items-center pl-2 sm:pl-3 border-l border-gray-200">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-medium text-sm sm:text-base shadow-sm">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-medium text-sm sm:text-base shadow-sm" aria-label={`User: ${admin.name}`}>
               {admin.name.charAt(0).toUpperCase()}
             </div>
           </div>
@@ -96,6 +132,8 @@ const Header = ({ title, onSidebarToggle }) => {
       </div>
     </header>
   );
-};
+});
+
+Header.displayName = 'Header';
 
 export default Header;
