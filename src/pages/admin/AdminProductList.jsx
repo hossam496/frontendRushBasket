@@ -158,7 +158,7 @@ const AdminProductList = () => {
   const getImageSrc = (product) => {
     const rawImage = product.imageUrl || product.image;
     if (!rawImage) return null;
-    if (rawImage.startsWith('http')) return rawImage;
+    if (rawImage.startsWith('http') || rawImage.startsWith('data:')) return rawImage;
     return `${api.defaults.baseURL}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
   };
 
