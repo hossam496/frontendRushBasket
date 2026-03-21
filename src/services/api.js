@@ -11,6 +11,18 @@ export const setAccessToken = (token) => {
 
 export const getAccessToken = () => accessToken;
 
+export const saveAuthTokens = (newAccessToken, newRefreshToken) => {
+  accessToken = newAccessToken;
+  if (newRefreshToken) {
+    localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken);
+  }
+};
+
+export const clearAuthTokens = () => {
+  accessToken = null;
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+};
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true, // Required for cookies
@@ -27,6 +39,8 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+const REFRESH_TOKEN_KEY = 'rush_basket_refresh_token';
+
 // Response interceptor to handle token refresh
 api.interceptors.response.use(
   (response) => response,
@@ -38,15 +52,30 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {}, { withCredentials: true });
+        const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+        
+        // Try refresh with both cookie (automatic) and body (localStorage fallback)
+        const response = await axios.post(
+          `${API_BASE_URL}/api/auth/refresh`, 
+          { refreshToken: storedRefreshToken }, 
+          { withCredentials: true }
+        );
+
         if (response.data.success) {
           accessToken = response.data.accessToken;
+          
+          // Update refresh token if rotated
+          if (response.data.refreshToken) {
+            localStorage.setItem(REFRESH_TOKEN_KEY, response.data.refreshToken);
+          }
+
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return api(originalRequest);
         }
       } catch (refreshError) {
-        // Refresh failed, clear token and redirect to login if necessary
+        // Refresh failed, clear tokens
         accessToken = null;
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
         window.dispatchEvent(new Event('authFailed'));
         return Promise.reject(refreshError);
       }

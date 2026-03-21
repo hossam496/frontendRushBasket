@@ -29,7 +29,7 @@ const ScrollToTop = () => {
   return null
 }
 
-import api, { setAccessToken } from './services/api'
+import api, { saveAuthTokens, clearAuthTokens } from './services/api'
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -44,7 +44,7 @@ const App = () => {
       try {
         const response = await api.post('/api/auth/refresh');
         if (response.data.success) {
-          setAccessToken(response.data.accessToken);
+          saveAuthTokens(response.data.accessToken, response.data.refreshToken);
           setIsAuthenticated(true);
         }
       } catch (err) {
@@ -66,6 +66,7 @@ const App = () => {
     }
     const authFailedHandler = () => {
       setIsAuthenticated(false);
+      clearAuthTokens();
       localStorage.removeItem('userData');
       localStorage.removeItem('userRole');
       window.dispatchEvent(new Event('authStateChanged'));

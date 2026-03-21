@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signupStyles } from "../assets/dummyStyles";
 import { FaArrowLeft, FaCheck, FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
-import api from '../services/api';
+import api, { saveAuthTokens } from '../services/api';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -17,15 +17,7 @@ const Signup = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => {
-        setShowToast(false);
-        navigate("/login");
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [showToast, navigate]);
+  // Redirect logic now handled in handleSubmit for better control
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -67,7 +59,21 @@ const Signup = () => {
       );
 
       if (res.data.success) {
+        const { accessToken, refreshToken, user } = res.data;
+        saveAuthTokens(accessToken, refreshToken);
+        localStorage.setItem('userData', JSON.stringify(user));
+        localStorage.setItem('userRole', user.role || 'user');
+        
         setShowToast(true);
+        window.dispatchEvent(new Event('authStateChanged'));
+        
+        setTimeout(() => {
+          if (user.role === 'admin') {
+            navigate("/admin");
+          } else {
+            navigate("/");
+          }
+        }, 1500);
       } else {
         setApiError(res.data.message || "Registration failed");
       }

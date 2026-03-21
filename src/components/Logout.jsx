@@ -1,5 +1,4 @@
-import api, { setAccessToken } from '../services/api';
-import { FaSignOutAlt } from 'react-icons/fa';
+import api, { clearAuthTokens } from '../services/api';
 import { FaSignOutAlt } from 'react-icons/fa';
 
 const Logout = () => {
@@ -10,7 +9,7 @@ const Logout = () => {
     } catch (err) {
       console.error('Logout failed:', err);
     }
-    setAccessToken(null);
+    clearAuthTokens();
     localStorage.removeItem('userData')
     localStorage.removeItem('userRole')
 

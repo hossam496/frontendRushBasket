@@ -3,7 +3,7 @@ import { loginStyles } from "../assets/dummyStyles";
 import { Link, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaCheck, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
 import Logout from "./Logout";
-import api, { setAccessToken } from '../services/api';
+import api, { saveAuthTokens } from '../services/api';
 
 const Login = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -59,8 +59,8 @@ const Login = () => {
       )
 
       if (response.data.success) {
-        const { accessToken, user } = response.data
-        setAccessToken(accessToken)
+        const { accessToken, refreshToken, user } = response.data
+        saveAuthTokens(accessToken, refreshToken)
         localStorage.setItem('userData', JSON.stringify(user))
         localStorage.setItem('userRole', user.role || 'user')
 
