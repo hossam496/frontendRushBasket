@@ -131,7 +131,25 @@ const AdminProductList = () => {
       Swal.fire('Success', 'Product updated successfully', 'success');
     } catch (err) {
       console.error('Error updating product:', err);
-      Swal.fire('Error', `Failed to update product: ${err.response?.data?.message || err.message}`, 'error');
+      const errorData = err.response?.data;
+      
+      // Check if reauthentication is required
+      if (errorData?.requiresReauth) {
+        Swal.fire({
+          title: 'Session Expired',
+          text: 'Your authentication session has expired. Please log out and log back in.',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          // Clear local storage tokens
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('token');
+          // Optionally redirect to login page
+          window.location.href = '/login';
+        });
+      } else {
+        Swal.fire('Error', `Failed to update product: ${errorData?.message || err.message}`, 'error');
+      }
     }
   };
 
@@ -162,7 +180,25 @@ const AdminProductList = () => {
       Swal.fire('Success', 'Product added successfully', 'success');
     } catch (err) {
       console.error('Error adding product:', err);
-      Swal.fire('Error', `Failed to add product: ${err.response?.data?.message || err.message}`, 'error');
+      const errorData = err.response?.data;
+      
+      // Check if reauthentication is required
+      if (errorData?.requiresReauth) {
+        Swal.fire({
+          title: 'Session Expired',
+          text: 'Your authentication session has expired. Please log out and log back in.',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          // Clear local storage tokens
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('token');
+          // Optionally redirect to login page
+          window.location.href = '/login';
+        });
+      } else {
+        Swal.fire('Error', `Failed to add product: ${errorData?.message || err.message}`, 'error');
+      }
     }
   };
 
