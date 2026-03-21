@@ -177,7 +177,7 @@ const AdminProductList = () => {
   return (
     <AdminLayout title="Product Management">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
           title="Total Products"
           value={productStats.total}
@@ -207,32 +207,32 @@ const AdminProductList = () => {
       {/* Products Table */}
       <div className="bg-white rounded-2xl border border-gray-200">
         <div className="p-6 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col gap-4 sm:gap-0 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-lg font-bold text-gray-900">All Products</h3>
               <p className="text-sm text-gray-500 mt-1">Manage your product inventory</p>
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-3">
+              <div className="relative flex-1 sm:flex-initial">
                 <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search products..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                 />
               </div>
-              <button className="flex items-center px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <FiFilter className="mr-2" />
-                Filter
+              <button className="flex items-center justify-center px-3 py-2 sm:px-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                <FiFilter className="mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Filter</span>
               </button>
               <button 
                 onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                className="flex items-center justify-center px-3 py-2 sm:px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
               >
-                <FiPlus className="mr-2" />
-                Add Product
+                <FiPlus className="mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Add Product</span>
               </button>
             </div>
           </div>
@@ -316,8 +316,8 @@ const AdminProductList = () => {
 
       {/* Add Product Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-900">Add New Product</h2>
               <button 
@@ -327,8 +327,8 @@ const AdminProductList = () => {
                 <FiX size={20} />
               </button>
             </div>
-            <form onSubmit={handleAddProduct} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleAddProduct} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
                   <input 
@@ -352,7 +352,7 @@ const AdminProductList = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Old Price ($)</label>
                   <input 
@@ -427,7 +427,7 @@ const AdminProductList = () => {
 
               <button 
                 type="submit" 
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition-colors"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 sm:py-3 px-4 rounded-lg font-medium transition-colors text-sm sm:text-base"
               >
                 Add Product
               </button>
@@ -438,8 +438,8 @@ const AdminProductList = () => {
 
       {/* Edit Product Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-900">Edit Product</h2>
               <button 
@@ -453,8 +453,8 @@ const AdminProductList = () => {
                 <FiX size={20} />
               </button>
             </div>
-            <form onSubmit={handleUpdateProduct} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleUpdateProduct} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
                   <input 
@@ -478,7 +478,7 @@ const AdminProductList = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Old Price ($)</label>
                   <input 
