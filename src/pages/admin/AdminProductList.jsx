@@ -130,7 +130,7 @@ const AdminProductList = () => {
       Swal.fire('Success', 'Product updated successfully', 'success');
     } catch (err) {
       console.error('Error updating product:', err);
-      Swal.fire('Error', 'Failed to update product', 'error');
+      Swal.fire('Error', `Failed to update product: ${err.response?.data?.message || err.message}`, 'error');
     }
   };
 
@@ -160,7 +160,7 @@ const AdminProductList = () => {
       Swal.fire('Success', 'Product added successfully', 'success');
     } catch (err) {
       console.error('Error adding product:', err);
-      Swal.fire('Error', 'Failed to add product', 'error');
+      Swal.fire('Error', `Failed to add product: ${err.response?.data?.message || err.message}`, 'error');
     }
   };
 
