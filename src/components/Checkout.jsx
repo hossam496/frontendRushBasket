@@ -2,9 +2,22 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import PaymentForm from "./PaymentForm";
 import React, { useState } from 'react'; // للتحكم في حالة الفورم والتحميل
-import { Link, useNavigate } from 'react-router-dom'; // للتنقل بين الصفحات
-import { useCart } from '../CartContext'; // استيراد الـ Hook الخاص بالسلة (تأكد من المسار الصحيح)
+import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../CartContext';
 import api from '../services/api';
+import { checkoutStyles } from '../assets/dummyStyles';
+import Swal from 'sweetalert2';
+import { 
+  FiArrowLeft, 
+  FiUser, 
+  FiPackage, 
+  FiCreditCard, 
+  FiLock, 
+  FiTruck, 
+  FiCheck 
+} from 'react-icons/fi';
+
+const API_BASE_URL = api.defaults.baseURL;
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_your_key_here');
 

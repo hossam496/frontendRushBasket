@@ -1,6 +1,19 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ordersPageStyles } from '../assets/dummyStyles'
 import api from '../services/api';
+import { 
+  FiArrowLeft, 
+  FiSearch, 
+  FiPackage, 
+  FiX, 
+  FiUser, 
+  FiMail, 
+  FiPhone, 
+  FiMapPin, 
+  FiCreditCard,
+  FiShoppingBag
+} from 'react-icons/fi';
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -60,9 +73,9 @@ const MyOrders = () => {
       <div className={ordersPageStyles.container}>
         {/* headers */}
         <div className={ordersPageStyles.header}>
-          <a href="#" className={ordersPageStyles.backLink}>
+          <Link to="/" className={ordersPageStyles.backLink}>
             <FiArrowLeft className='mr-2' /> Back to Account
-          </a>
+          </Link>
           <h1 className={ordersPageStyles.mainTitle}>
             My <span className={ordersPageStyles.titleSpan}>Orders</span>
           </h1>
