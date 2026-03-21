@@ -50,7 +50,8 @@ const Login = () => {
     }
 
     try {
-      const url = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/login`;
+      const apiBase = (import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app').replace(/\/$/, '');
+      const url = `${apiBase}/api/auth/login`;
       console.log("Attempting login at URL:", url);
       const response = await axios.post(
         url,

@@ -57,7 +57,8 @@ const Signup = () => {
     if (!validate()) return;
 
     try {
-      const url = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/register`;
+      const apiBase = (import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app').replace(/\/$/, '');
+      const url = `${apiBase}/api/auth/register`;
       console.log("Attempting signup at URL:", url);
       const res = await axios.post(
         url,
