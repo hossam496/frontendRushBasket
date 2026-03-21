@@ -115,7 +115,7 @@ const AdminProductList = () => {
     }
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       const res = await axios.put(`${BACKEND_URL}/api/items/${editingProduct._id}`, formData, {
         headers: { 
           'Content-Type': 'multipart/form-data',
@@ -147,7 +147,7 @@ const AdminProductList = () => {
     }
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       const res = await axios.post(`${BACKEND_URL}/api/items`, formData, {
         headers: { 
           'Content-Type': 'multipart/form-data',

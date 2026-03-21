@@ -34,7 +34,7 @@ const AdminAnalytics = () => {
 
   const fetchAnalyticsData = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       const res = await axios.get(`${BACKEND_URL}/api/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       });

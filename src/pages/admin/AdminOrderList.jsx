@@ -58,7 +58,7 @@ const AdminOrderList = () => {
 
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       const res = await axios.get(`${BACKEND_URL}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -74,7 +74,7 @@ const AdminOrderList = () => {
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       await axios.put(`${BACKEND_URL}/api/orders/${orderId}`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${token}` }
       });

@@ -135,7 +135,7 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
       const res = await axios.get(`${BACKEND_URL}/api/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -176,7 +176,7 @@ const AdminDashboard = () => {
 
   const fetchRecentOrders = async () => {
     try {
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
       const res = await axios.get(`${BACKEND_URL}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
