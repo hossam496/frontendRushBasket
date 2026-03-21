@@ -13,7 +13,7 @@ import { data, Link, useLocation, useNavigate } from "react-router-dom";
 import { groceryData } from "../assets/dummyDataItem";
 import axios from "axios";
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app/'
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 // Product Card Component
 const ProductCard = ({ item }) => {

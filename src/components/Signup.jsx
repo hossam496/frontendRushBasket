@@ -58,7 +58,7 @@ const Signup = () => {
 
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app/'}/api/user/register`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/register`,
         {
           name: formData.name,
           email: formData.email,

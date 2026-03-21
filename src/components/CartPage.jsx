@@ -13,7 +13,7 @@ const CartPage = () => {
     item.name ?? item.product?.name ?? "Unnamed item";
   const getItemImage = (item) => {
     const path = item.image ?? item.product?.imageUrl ?? "";
-    return path ? `${import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app/'}${path}` : "";
+    return path ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${path}` : "";
   };
 
   // subtotal - هذا متغير وليس دالة
