@@ -23,6 +23,7 @@ const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const AdminProductList = lazy(() => import('./pages/admin/AdminProductList'))
 const AdminOrderList = lazy(() => import('./pages/admin/AdminOrderList'))
 const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'))
+const AdminUserList = lazy(() => import('./pages/admin/AdminUserList'))
 
 // Skeleton loader component
 const SkeletonLoader = () => (
@@ -105,6 +106,7 @@ const App = () => {
             <Route path='/admin/products' element={isAdmin ? <AdminProductList /> : <Navigate to="/" />} />
             <Route path='/admin/orders' element={isAdmin ? <AdminOrderList /> : <Navigate to="/" />} />
             <Route path='/admin/analytics' element={isAdmin ? <AdminAnalytics /> : <Navigate to="/" />} />
+            <Route path='/admin/users' element={isAdmin ? <AdminUserList /> : <Navigate to="/" />} />
 
             {/* auth routes */}
             <Route path='/login' element={<Login />} />

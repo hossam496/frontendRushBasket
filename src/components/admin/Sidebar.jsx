@@ -13,6 +13,7 @@ import {
   FiSearch,
   FiBell,
   FiUser,
+  FiUsers,
   FiSettings
 } from 'react-icons/fi';
 
@@ -24,6 +25,7 @@ const Sidebar = ({ isCollapsed, isMobileOpen, onMobileClose }) => {
     { name: 'Dashboard', path: '/admin', icon: <FiHome /> },
     { name: 'Products', path: '/admin/products', icon: <FiPackage /> },
     { name: 'Orders', path: '/admin/orders', icon: <FiShoppingBag /> },
+    { name: 'Users', path: '/admin/users', icon: <FiUsers /> },
     { name: 'Analytics', path: '/admin/analytics', icon: <FiPieChart /> },
   ];
 

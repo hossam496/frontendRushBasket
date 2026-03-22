@@ -39,7 +39,15 @@ const normalizeItems = (rawItems = []) => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    if (!isAuthenticated()) return getGuestCart();
+    try {
+      const backup = localStorage.getItem('userCartBackup');
+      return backup ? JSON.parse(backup) : [];
+    } catch {
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [lastFetch, setLastFetch] = useState(0);
   const [authStatus, setAuthStatus] = useState(isAuthenticated());
@@ -75,11 +83,19 @@ export const CartProvider = ({ children }) => {
       const items = Array.isArray(res.data) ? res.data : [];
       const normalized = normalizeItems(items);
       setCart(normalized);
+      localStorage.setItem('userCartBackup', JSON.stringify(normalized));
       setLastFetch(now);
     } catch (err) {
       console.error('Error fetching cart:', err);
       if (err.response?.status === 401) {
         setCart(getGuestCart());
+      } else {
+        try {
+          const backup = localStorage.getItem('userCartBackup');
+          if (backup) setCart(JSON.parse(backup));
+        } catch (e) {
+          // ignore parsing error
+        }
       }
     } finally {
       setLoading(false);
