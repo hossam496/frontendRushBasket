@@ -15,7 +15,11 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     const newSocket = io(SOCKET_URL, {
       withCredentials: true,
-      transports: ['polling'] // Forced polling for Vercel serverless compatibility
+      transports: ['polling'], // Forced polling for Vercel serverless compatibility
+      reconnectionAttempts: 2, // Stop trying after 2 failures to prevent console spam and crashing
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 10000,
     });
 
     newSocket.on('connect', () => {
