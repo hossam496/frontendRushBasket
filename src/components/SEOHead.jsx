@@ -54,6 +54,8 @@ const SEOHead = ({
       <meta name="keywords" content={finalKeywords} />
       <meta name="author" content="RushBasket" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta httpEquiv="X-Frame-Options" content="DENY" />
+      <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.googleapis.com; connect-src 'self' https://api.stripe.com" />
       
       {/* Robots */}
       {noIndex && <meta name="robots" content="noindex, nofollow" />}

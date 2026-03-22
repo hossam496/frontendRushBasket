@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo, useEffect } from 'react'
+import React, { Suspense, useMemo, useEffect, lazy } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { SocketProvider } from './context/SocketContext'
 import { CartProvider } from './CartContext'
