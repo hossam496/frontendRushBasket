@@ -13,10 +13,13 @@ export const SocketProvider = ({ children }) => {
   const [onlineUsers, setOnlineUsers] = useState(0);
 
   useEffect(() => {
+    // Skip Socket.io in production if it's not available
+    const isProduction = import.meta.env.PROD;
+    
     const newSocket = io(SOCKET_URL, {
       withCredentials: true,
       transports: ['polling'], // Forced polling for Vercel serverless compatibility
-      reconnectionAttempts: 2, // Stop trying after 2 failures to prevent console spam and crashing
+      reconnectionAttempts: isProduction ? 0 : 2, // Don't retry in production
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       timeout: 10000,
@@ -24,6 +27,14 @@ export const SocketProvider = ({ children }) => {
 
     newSocket.on('connect', () => {
       console.log('⚡ Connected to socket server');
+    });
+
+    newSocket.on('connect_error', (error) => {
+      if (isProduction) {
+        console.log('🔌 Socket.io not available in production (expected for Vercel)');
+      } else {
+        console.error('Socket.io connection error:', error.message);
+      }
     });
 
     newSocket.on('order_updated', (data) => {
