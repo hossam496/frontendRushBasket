@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { SocketProvider } from './context/SocketContext'
 import { CartProvider } from './CartContext'
 import { Toaster } from 'react-hot-toast'
+import api, { saveAuthTokens, clearAuthTokens } from './services/api'
 
 // Lazy loaded components for better code splitting
 const Navbar = lazy(() => import('./components/Navbar'))
@@ -42,8 +43,6 @@ const ScrollToTop = () => {
   }, [pathname]);
   return null
 }
-
-import api, { saveAuthTokens, clearAuthTokens } from './services/api'
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
