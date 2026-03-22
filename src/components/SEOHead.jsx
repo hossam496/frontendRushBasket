@@ -13,7 +13,7 @@ const SEOHead = ({
 }) => {
   const siteTitle = 'RushBasket - Premium E-commerce';
   const siteDescription = 'Discover premium products at RushBasket. Quality items, fast delivery, and exceptional service.';
-  const baseUrl = 'https://rushbasket-nine.vercel.app/';
+  const baseUrl = 'https://frontend-rush-basket.vercel.app/';
   
   const finalTitle = title ? `${title} | ${siteTitle}` : siteTitle;
   const finalDescription = description || siteDescription;
@@ -54,7 +54,7 @@ const SEOHead = ({
       <meta name="keywords" content={finalKeywords} />
       <meta name="author" content="RushBasket" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.googleapis.com; connect-src 'self' https://api.stripe.com https://backend1-eight-lovat.vercel.app wss://backend1-eight-lovat.vercel.app" />
+      <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.googleapis.com; connect-src 'self' https://api.stripe.com https://backend1-eight-lovat.vercel.app" />
       
       {/* Robots */}
       {noIndex && <meta name="robots" content="noindex, nofollow" />}

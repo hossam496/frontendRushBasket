@@ -1,6 +1,5 @@
 import React, { Suspense, useMemo, useEffect, lazy } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { SocketProvider } from './context/SocketContext'
 import { CartProvider } from './CartContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { Toaster } from 'react-hot-toast'
@@ -57,8 +56,7 @@ const AppContent = () => {
   }
 
   return (
-    <SocketProvider>
-      <CartProvider>
+    <CartProvider>
         <Toaster position="top-right" reverseOrder={false} />
         <ScrollToTop />
         {!isAdminPath && (
@@ -100,7 +98,6 @@ const AppContent = () => {
           </Suspense>
         )}
       </CartProvider>
-    </SocketProvider>
   );
 };
 
