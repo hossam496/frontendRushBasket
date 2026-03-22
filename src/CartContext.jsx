@@ -1,5 +1,5 @@
 import api from './services/api';
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 
 const CartContext = createContext();
 
@@ -49,7 +49,7 @@ export const CartProvider = ({ children }) => {
     }
   });
   const [loading, setLoading] = useState(true);
-  const [lastFetch, setLastFetch] = useState(0);
+  const lastFetchRef = useRef(0);
   const [authStatus, setAuthStatus] = useState(isAuthenticated());
 
   // Sync auth status
@@ -65,7 +65,7 @@ export const CartProvider = ({ children }) => {
 
   const fetchCart = useCallback(async (force = false) => {
     const now = Date.now();
-    if (!force && now - lastFetch < 2000) {
+    if (!force && now - lastFetchRef.current < 2000) {
       return;
     }
 
@@ -84,7 +84,7 @@ export const CartProvider = ({ children }) => {
       const normalized = normalizeItems(items);
       setCart(normalized);
       localStorage.setItem('userCartBackup', JSON.stringify(normalized));
-      setLastFetch(now);
+      lastFetchRef.current = now;
     } catch (err) {
       console.error('Error fetching cart:', err);
       if (err.response?.status === 401) {
@@ -100,7 +100,7 @@ export const CartProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [lastFetch, authStatus]);
+  }, [authStatus]);
 
   // Sync guest cart to backend after login
   const syncGuestCartToBackend = useCallback(async () => {

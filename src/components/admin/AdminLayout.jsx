@@ -1,32 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import { useSocket } from '../../context/SocketContext';
-import toast from 'react-hot-toast';
 
 const AdminLayout = ({ children, title }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { socket, joinAdminRoom } = useSocket();
-
-  useEffect(() => {
-    joinAdminRoom();
-
-    if (socket) {
-      const handleNewOrder = (order) => {
-        toast.success(
-          `New Order #${order.orderId} from ${typeof order.customer === 'string' ? order.customer : order.customer?.name || 'Customer'}\nTotal: $${order.total.toFixed(2)}`,
-          { duration: 5000, position: 'top-right' }
-        );
-      };
-
-      socket.on('new_order', handleNewOrder);
-
-      return () => {
-        socket.off('new_order', handleNewOrder);
-      };
-    }
-  }, [socket, joinAdminRoom]);
 
   const handleSidebarToggle = () => {
     if (window.innerWidth >= 1024) {

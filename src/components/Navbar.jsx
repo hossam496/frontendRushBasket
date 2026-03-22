@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import api, { setAccessToken } from '../services/api';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -17,7 +17,7 @@ import logo from '../assets/logo.png';
 import { navbarStyles } from '../assets/dummyStyles';
 import { navItems } from '../assets/Dummy'
 
-export default function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) {
+function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) {
   const { isAuthenticated, isAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -78,7 +78,6 @@ export default function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: 
     setAccessToken(null);
     localStorage.removeItem('userData');
     localStorage.removeItem('userRole');
-    window.dispatchEvent(new Event('authStateChanged'));
     navigate('/login');
   };
 
@@ -319,4 +318,6 @@ export default function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: 
       <style>{navbarStyles.customCSS}</style>
     </nav>
   );
-}
+};
+
+export default memo(Navbar);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import StatCard from "../../components/admin/StatCard";
 import ChartCard from "../../components/admin/ChartCard";
@@ -13,13 +13,12 @@ import {
   FiPackage,
   FiClock,
 } from "react-icons/fi";
-import { useSocket } from "../../context/SocketContext";
 import api from "../../services/api";
 
 
 
 const AdminDashboard = () => {
-  const { socket, joinAdminRoom } = useSocket();
+  const pollingIntervalRef = useRef(null);
   const [stats, setStats] = useState({
     totalSales: 0,
     totalOrders: 0,
@@ -53,51 +52,15 @@ const AdminDashboard = () => {
   const [recentOrders, setRecentOrders] = useState([]);
 
   useEffect(() => {
-    joinAdminRoom();
+    // Initial data fetch
     fetchStats();
     fetchRecentOrders();
 
-    if (socket) {
-      socket.on("new_order", (order) => {
-        setStats((prev) => ({
-          ...prev,
-          totalOrders: prev.totalOrders + 1,
-          totalSales: prev.totalSales + order.total,
-        }));
-        setRecentOrders((prev) => [
-          {
-            orderId: order.orderId,
-            customer: order.customer,
-            total: order.total,
-            status: "Processing",
-            date: new Date().toISOString(),
-          },
-          ...prev.slice(0, 4),
-        ]);
-
-        // Update Chart
-        const today = new Date().toLocaleDateString("en-US", {
-          weekday: "short",
-        });
-        setSalesData((prev) =>
-          prev.map((item) =>
-            item.name === today
-              ? { ...item, value: item.value + order.total }
-              : item,
-          ),
-        );
-      });
-
-      socket.on("new_user", () => {
-        setStats((prev) => ({ ...prev, newCustomers: prev.newCustomers + 1 }));
-      });
-
-      socket.on("stats_updated", (data) => {
-        if (data.type === "sale") {
-          // Handled by new_order usually, but good for other types
-        }
-      });
-    }
+    // Set up polling for real-time updates (every 30 seconds)
+    pollingIntervalRef.current = setInterval(() => {
+      fetchStats();
+      fetchRecentOrders();
+    }, 30000);
 
     const handleOrderUpdate = () => {
       fetchStats();
@@ -105,7 +68,6 @@ const AdminDashboard = () => {
     };
 
     const handleProductUpdate = () => {
-      // Products don't directly affect dashboard stats usually, but good to refresh if they do
       fetchStats();
     };
 
@@ -121,16 +83,15 @@ const AdminDashboard = () => {
     window.addEventListener("statsUpdate", handleStatsUpdate);
 
     return () => {
-      if (socket) {
-        socket.off("new_order");
-        socket.off("new_user");
-        socket.off("stats_updated");
+      // Clean up polling
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
       }
       window.removeEventListener("orderUpdate", handleOrderUpdate);
       window.removeEventListener("productUpdate", handleProductUpdate);
       window.removeEventListener("statsUpdate", handleStatsUpdate);
     };
-  }, [socket]);
+  }, []);
 
   const fetchStats = async () => {
     try {

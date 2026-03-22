@@ -56,7 +56,6 @@ const Login = () => {
         login(user, token, formData.remember)
 
         setShowToast(true)
-        window.dispatchEvent(new Event('authStateChanged'))
 
         setTimeout(() => {
           if (user.role === 'admin') {

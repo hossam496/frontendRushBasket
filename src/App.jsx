@@ -3,6 +3,8 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { CartProvider } from './CartContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { Toaster } from 'react-hot-toast'
+import { ErrorBoundary } from 'react-error-boundary'
+import { ErrorFallback, PageLoading } from './components/UI/LoadingStates'
 
 // Lazy loaded components for better code splitting
 const Navbar = lazy(() => import('./components/Navbar'))
@@ -26,14 +28,7 @@ const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'))
 const AdminUserList = lazy(() => import('./pages/admin/AdminUserList'))
 
 // Skeleton loader component
-const SkeletonLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-green-50">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-emerald-500 mx-auto mb-4"></div>
-      <div className="text-emerald-600 font-medium animate-pulse">Loading...</div>
-    </div>
-  </div>
-)
+const SkeletonLoader = () => <PageLoading />;
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -103,9 +98,16 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onError={(error, errorInfo) => {
+        console.error('Global error caught:', error, errorInfo);
+      }}
+    >
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };
 

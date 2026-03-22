@@ -1,4 +1,5 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app';
 export const API_BASE_URL = VITE_API_URL.replace(/\/$/, '');
@@ -88,14 +89,23 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    toast.error('Request failed');
+    return Promise.reject(error);
+  }
 );
 
-// Enhanced response interceptor with retry logic
+// Enhanced response interceptor with retry logic and better error handling
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    // Handle network errors
+    if (!error.response) {
+      toast.error('Network error - please check your connection');
+      return Promise.reject(error);
+    }
 
     // Handle 401 errors
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -121,15 +131,37 @@ api.interceptors.response.use(
         } catch (refreshError) {
           // Refresh failed, clear tokens and redirect to login
           clearAuthTokens();
-          // Use React Router navigation instead of hard redirect
-          window.location.href = '/login';
+          // Clear user data from localStorage
+          localStorage.removeItem('userData');
+          localStorage.removeItem('userRole');
+          toast.error('Session expired - please login again');
+          // Use a more reliable redirect method
+          if (window.location.pathname !== '/login') {
+            window.location.replace('/login');
+          }
           return Promise.reject(refreshError);
         }
       } else {
         // No refresh token, clear and redirect
         clearAuthTokens();
-        window.location.href = '/login';
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userRole');
+        toast.error('Please login to continue');
+        if (window.location.pathname !== '/login') {
+          window.location.replace('/login');
+        }
       }
+    }
+
+    // Handle other HTTP errors
+    if (error.response?.status >= 500) {
+      toast.error('Server error - please try again later');
+    } else if (error.response?.status === 429) {
+      toast.error('Too many requests - please wait');
+    } else if (error.response?.status === 403) {
+      toast.error('Access denied');
+    } else if (error.response?.status === 404) {
+      toast.error('Resource not found');
     }
 
     return Promise.reject(error);

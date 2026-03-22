@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
 import {
   FiEye,
@@ -21,11 +21,10 @@ import Swal from 'sweetalert2';
 import AdminLayout from '../../components/admin/AdminLayout';
 import DataTable from '../../components/admin/DataTable';
 import StatCard from '../../components/admin/StatCard';
-import { useSocket } from '../../context/SocketContext';
 
 
 const AdminOrderList = () => {
-  const { socket } = useSocket();
+  const pollingIntervalRef = useRef(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -35,6 +34,11 @@ const AdminOrderList = () => {
   useEffect(() => {
     fetchOrders();
 
+    // Set up polling for real-time updates (every 30 seconds)
+    pollingIntervalRef.current = setInterval(() => {
+      fetchOrders();
+    }, 30000);
+
     const handleOrderUpdate = (e) => {
       console.log('Real-time order update received:', e.detail);
       fetchOrders();
@@ -42,17 +46,14 @@ const AdminOrderList = () => {
 
     window.addEventListener('orderUpdate', handleOrderUpdate);
 
-    if (socket) {
-      socket.on('new_order', (data) => {
-        fetchOrders();
-      });
-    }
-
     return () => {
-      if (socket) socket.off('new_order');
+      // Clean up polling
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
       window.removeEventListener('orderUpdate', handleOrderUpdate);
     };
-  }, [socket]);
+  }, []);
 
   const fetchOrders = async () => {
     try {

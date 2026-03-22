@@ -39,26 +39,6 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
-
-    // Listen for auth state changes
-    const handleAuthChange = () => {
-      const userData = localStorage.getItem('userData');
-      const userRole = localStorage.getItem('userRole');
-      
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-        setIsAdmin(userRole === 'admin');
-      } else {
-        setUser(null);
-        setIsAuthenticated(false);
-        setIsAdmin(false);
-      }
-    };
-
-    window.addEventListener('authStateChanged', handleAuthChange);
-    return () => window.removeEventListener('authStateChanged', handleAuthChange);
   }, []);
 
   const login = useCallback((userData, token, rememberMe = false) => {
@@ -68,7 +48,6 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     setIsAuthenticated(true);
     setIsAdmin(userData.role === 'admin');
-    window.dispatchEvent(new Event('authStateChanged'));
   }, []);
 
   const logout = useCallback(() => {
@@ -78,7 +57,6 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     setIsAdmin(false);
-    window.dispatchEvent(new Event('authStateChanged'));
   }, []);
 
   const value = {
