@@ -1,11 +1,8 @@
 import api from './services/api';
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useAuth } from './context/AuthContext';
 
 const CartContext = createContext();
-
-const isAuthenticated = () => {
-  return Boolean(localStorage.getItem("userData"));
-};
 
 const GUEST_CART_KEY = 'guestCart';
 
@@ -39,8 +36,9 @@ const normalizeItems = (rawItems = []) => {
 };
 
 export const CartProvider = ({ children }) => {
+  const { isAuthenticated } = useAuth();
   const [cart, setCart] = useState(() => {
-    if (!isAuthenticated()) return getGuestCart();
+    if (!isAuthenticated) return getGuestCart();
     try {
       const backup = localStorage.getItem('userCartBackup');
       return backup ? JSON.parse(backup) : [];
@@ -50,18 +48,6 @@ export const CartProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
   const lastFetchRef = useRef(0);
-  const [authStatus, setAuthStatus] = useState(isAuthenticated());
-
-  // Sync auth status
-  useEffect(() => {
-    const checkAuth = () => setAuthStatus(isAuthenticated());
-    window.addEventListener('authStateChanged', checkAuth);
-    window.addEventListener('authFailed', checkAuth);
-    return () => {
-      window.removeEventListener('authStateChanged', checkAuth);
-      window.removeEventListener('authFailed', checkAuth);
-    };
-  }, []);
 
   const fetchCart = useCallback(async (force = false) => {
     const now = Date.now();
@@ -70,7 +56,7 @@ export const CartProvider = ({ children }) => {
     }
 
     // If not authenticated, load from localStorage
-    if (!authStatus) {
+    if (!isAuthenticated) {
       setCart(getGuestCart());
       setLoading(false);
       return;
@@ -100,7 +86,7 @@ export const CartProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [authStatus]);
+  }, [isAuthenticated]);
 
   // Sync guest cart to backend after login
   const syncGuestCartToBackend = useCallback(async () => {
@@ -123,18 +109,6 @@ export const CartProvider = ({ children }) => {
       console.error('Error syncing guest cart:', err);
     }
   }, [fetchCart]);
-
-  // Watch for login and sync cart
-  useEffect(() => {
-    const wasAuth = authStatus;
-    const nowAuth = isAuthenticated();
-    
-    if (!wasAuth && nowAuth) {
-      // User just logged in - sync guest cart
-      syncGuestCartToBackend();
-    }
-    setAuthStatus(nowAuth);
-  }, [authStatus, syncGuestCartToBackend]);
 
   useEffect(() => {
     fetchCart();
@@ -172,7 +146,7 @@ export const CartProvider = ({ children }) => {
       }
 
       // Save to localStorage if not authenticated
-      if (!isAuthenticated()) {
+      if (!isAuthenticated) {
         saveGuestCart(newCart);
       }
       
@@ -184,7 +158,7 @@ export const CartProvider = ({ children }) => {
     // تحديث محلي فوري
     updateLocalCart(productId, quantity, productData);
     
-    if (!isAuthenticated()) {
+    if (!isAuthenticated) {
       return; // Guest cart - no API call needed
     }
     
@@ -208,7 +182,7 @@ export const CartProvider = ({ children }) => {
       )
     );
 
-    if (!isAuthenticated()) {
+    if (!isAuthenticated) {
       const updatedCart = cart.map(item =>
         item.id === lineId ? { ...item, quantity } : item
       );
@@ -231,7 +205,7 @@ export const CartProvider = ({ children }) => {
     // تحديث محلي فوري
     setCart(prevCart => prevCart.filter(item => item.id !== lineId));
 
-    if (!isAuthenticated()) {
+    if (!isAuthenticated) {
       const updatedCart = cart.filter(item => item.id !== lineId);
       saveGuestCart(updatedCart);
       return;
@@ -249,7 +223,7 @@ export const CartProvider = ({ children }) => {
     setCart([]);
     localStorage.removeItem(GUEST_CART_KEY);
     
-    if (!isAuthenticated()) return;
+    if (!isAuthenticated) return;
 
     try {
       await api.post('/api/cart/clear', {});
@@ -280,7 +254,7 @@ export const CartProvider = ({ children }) => {
         getCartTotal,
         cartCount,
         refreshCart: () => fetchCart(true),
-        isAuthenticated: () => isAuthenticated(),
+        isAuthenticated: () => isAuthenticated,
       }}
     >
       {children}
