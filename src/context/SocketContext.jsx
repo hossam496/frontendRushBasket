@@ -6,7 +6,7 @@ const SocketContext = createContext();
 
 export const useSocket = () => useContext(SocketContext);
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app';
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);

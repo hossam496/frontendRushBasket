@@ -250,7 +250,7 @@ const MyOrders = () => {
                           : ""
                         }`}>
                           {item.imageUrl ? (
-                            <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${item.imageUrl}`} alt={item.name} 
+                            <img src={`${import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app'}${item.imageUrl}`} alt={item.name} 
                             className='w-16 h-16 object-cover rounded-lg mr-4'/>
                           ): (
                             <div className='bg-emerald-800 border-2 border-dashed border-emerald-700 rounded-xl
