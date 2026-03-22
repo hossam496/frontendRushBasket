@@ -1,9 +1,9 @@
-import React, { Suspense, useEffect, useState, lazy, useMemo, useCallback } from 'react'
+import React, { Suspense, useMemo, useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { SocketProvider } from './context/SocketContext'
 import { CartProvider } from './CartContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import { Toaster } from 'react-hot-toast'
-import api, { saveAuthTokens, clearAuthTokens } from './services/api'
 
 // Lazy loaded components for better code splitting
 const Navbar = lazy(() => import('./components/Navbar'))
@@ -44,39 +44,17 @@ const ScrollToTop = () => {
   return null
 }
 
-const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    Boolean(localStorage.getItem('userData'))
-  )
-  const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || 'user')
-  const location = useLocation()
-
-  // Memoized auth state handlers
-  const handleAuthStateChange = useCallback(() => {
-    setIsAuthenticated(Boolean(localStorage.getItem('userData')))
-    setUserRole(localStorage.getItem('userRole') || 'user')
-  }, [])
-
-  const handleAuthFailed = useCallback(() => {
-    setIsAuthenticated(false);
-    clearAuthTokens();
-    localStorage.removeItem('userData');
-    localStorage.removeItem('userRole');
-    window.dispatchEvent(new Event('authStateChanged'));
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener('authStateChanged', handleAuthStateChange)
-    window.addEventListener('authFailed', handleAuthFailed)
-    return () => {
-      window.removeEventListener('authStateChanged', handleAuthStateChange)
-      window.removeEventListener('authFailed', handleAuthFailed)
-    }
-  }, [handleAuthStateChange, handleAuthFailed])
+// App content component with auth logic
+const AppContent = () => {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const location = useLocation();
 
   // Memoized computed values
-  const isAdmin = useMemo(() => isAuthenticated && userRole === 'admin', [isAuthenticated, userRole])
-  const isAdminPath = useMemo(() => location.pathname.startsWith('/admin'), [location.pathname])
+  const isAdminPath = useMemo(() => location.pathname.startsWith('/admin'), [location.pathname]);
+
+  if (loading) {
+    return <SkeletonLoader />;
+  }
 
   return (
     <SocketProvider>
@@ -123,7 +101,15 @@ const App = () => {
         )}
       </CartProvider>
     </SocketProvider>
-  )
-}
+  );
+};
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+};
 
 export default App

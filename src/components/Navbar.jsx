@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import api, { setAccessToken } from '../services/api';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -8,15 +8,17 @@ import {
   FiUser,
   FiX,
   FiMenu,
-  FiPackage // Added for My Orders icon
+  FiPackage
 } from 'react-icons/fi';
 import { FaOpencart } from 'react-icons/fa';
 import { useCart } from '../CartContext';
+import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.png';
 import { navbarStyles } from '../assets/dummyStyles';
 import { navItems } from '../assets/Dummy'
 
-export default function Navbar() {
+export default function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) {
+  const { isAuthenticated, isAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { cartCount } = useCart();
@@ -28,19 +30,11 @@ export default function Navbar() {
   const mobileMenuRef = useRef(null);
   const [cartBounce, setCartBounce] = useState(false);
 
-  // Auth state
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    Boolean(localStorage.getItem("userData"))
-  );
-  const [isAdmin, setIsAdmin] = useState(
-    localStorage.getItem('userRole') === 'admin'
-  );
-
   // Sync active tab & close mobile menu on route change
   useEffect(() => {
     setActiveTab(location.pathname);
     setIsOpen(false);
-  }, [location]);
+  }, [location.pathname]);
 
   // Scroll effect
   useEffect(() => {
@@ -58,16 +52,6 @@ export default function Navbar() {
     }
     prevCartCountRef.current = cartCount;
   }, [cartCount]);
-
-  // Listen for auth changes
-  useEffect(() => {
-    const handler = () => {
-      setIsLoggedIn(Boolean(localStorage.getItem("userData")));
-      setIsAdmin(localStorage.getItem('userRole') === 'admin');
-    };
-    window.addEventListener('authStateChanged', handler);
-    return () => window.removeEventListener('authStateChanged', handler);
-  }, []);
 
   // Close mobile menu when clicking outside
   useEffect(() => {
@@ -98,8 +82,8 @@ export default function Navbar() {
     navigate('/login');
   };
 
-  // Updated nav items with conditional "My Orders" link
-  const getNavItems = () => {
+  // Updated nav items with conditional "My Orders" link - MEMOIZED
+  const getNavItems = useCallback(() => {
     const baseItems = [...navItems];
 
     // Add "Admin Panel" if admin
@@ -112,7 +96,7 @@ export default function Navbar() {
     }
 
     // Add "My Orders" after Shop link for logged-in users
-    if (isLoggedIn) {
+    if (isAuthenticated) {
       const shopIndex = baseItems.findIndex(item => item.name === "Shop");
       if (shopIndex !== -1) {
         baseItems.splice(shopIndex + 1, 0, {
@@ -124,7 +108,7 @@ export default function Navbar() {
     }
 
     return baseItems;
-  };
+  }, [isAdmin, isAuthenticated]);
 
   const updatedNavItems = getNavItems();
 

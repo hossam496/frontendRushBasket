@@ -3,31 +3,22 @@ import { loginStyles } from "../assets/dummyStyles";
 import { Link, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaCheck, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
 import Logout from "./Logout";
-import api, { saveAuthTokens } from '../services/api';
+import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    Boolean(localStorage.getItem("userData")),
-  );
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     remember: false,
   });
-  const [showPassword, setShawPassword] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const handler = () => {
-      setIsAuthenticated(Boolean(localStorage.getItem("userData")));
-    };
-    window.addEventListener("authStateChanged", handler);
-    return () => window.removeEventListener("authStateChanged", handler);
-  }, []);
   if (isAuthenticated) {
     return <Logout />;
   }
@@ -44,8 +35,10 @@ const Login = () => {
   const handleSubmet = async (e) => {
     e.preventDefault();
     setError('')
-    if (!formData.remember) {
-      setError("You must agree to terms and conditions")
+    
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      setError("Email and password are required")
       return
     }
 
@@ -60,9 +53,7 @@ const Login = () => {
 
       if (response.data.success) {
         const { token, user } = response.data
-        saveAuthTokens(token)
-        localStorage.setItem('userData', JSON.stringify(user))
-        localStorage.setItem('userRole', user.role || 'user')
+        login(user, token, formData.remember)
 
         setShowToast(true)
         window.dispatchEvent(new Event('authStateChanged'))
@@ -137,7 +128,7 @@ const Login = () => {
               onChange={handleChange} placeholder="passwrod"
               required className={loginStyles.passwordInput} />
 
-            <button type="button" onClick={() => setShawPassword((v) => !v)}
+            <button type="button" onClick={() => setShowPassword((v) => !v)}
               className={loginStyles.toggleButton}
               aria-label={showPassword ? 'Hide password' : 'Show password'}>
               {showPassword ? <FaEyeSlash /> : <FaEye />}

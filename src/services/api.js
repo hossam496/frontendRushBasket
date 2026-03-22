@@ -121,6 +121,7 @@ api.interceptors.response.use(
         } catch (refreshError) {
           // Refresh failed, clear tokens and redirect to login
           clearAuthTokens();
+          // Use React Router navigation instead of hard redirect
           window.location.href = '/login';
           return Promise.reject(refreshError);
         }
