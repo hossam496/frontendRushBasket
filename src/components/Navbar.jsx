@@ -187,7 +187,7 @@ export default function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: 
 
           {/* Icons & Hamburger */}
           <div className={navbarStyles.iconsContainer}>
-            {isLoggedIn ? (
+            {isAuthenticated ? (
               // Logout button when logged in
               <button
                 onClick={handleLogout}
@@ -289,7 +289,7 @@ export default function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: 
             ))}
 
             <div className={navbarStyles.mobileButtons}>
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <button
                   onClick={() => {
                     handleLogout();
