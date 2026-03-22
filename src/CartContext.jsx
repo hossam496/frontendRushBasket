@@ -131,12 +131,12 @@ export const CartProvider = ({ children }) => {
       let newCart;
       
       if (existingItem) {
-        if (quantity <= 0) {
+        if (existingItem.quantity + quantity <= 0) {
           newCart = prevCart.filter(item => item.productId !== productId);
         } else {
           newCart = prevCart.map(item =>
             item.productId === productId
-              ? { ...item, quantity }
+              ? { ...item, quantity: item.quantity + quantity }
               : item
           );
         }
