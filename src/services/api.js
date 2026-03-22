@@ -1,7 +1,7 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app';
+const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 export const API_BASE_URL = VITE_API_URL.replace(/\/$/, '');
 
 // More secure token handling
