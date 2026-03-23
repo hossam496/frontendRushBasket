@@ -34,7 +34,7 @@ const Login = () => {
     }))
   }
 
-  const handleSubmet = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('')
     
@@ -114,13 +114,13 @@ const Login = () => {
 
         <h2 className={loginStyles.title}>Welcome Back</h2>
 
-        <form onSubmit={handleSubmet} className={loginStyles.form}>
+        <form onSubmit={handleSubmit} className={loginStyles.form}>
           {/* email */}
 
           <div className={loginStyles.inputContainer}>
             <FaUser className={loginStyles.inputIcon} />
             <input type="email" name="email" value={formData.email}
-              onChange={handleChange} placeholder="Email Adress"
+              onChange={handleChange} placeholder="Email Address"
               required className={loginStyles.input} />
           </div>
 
@@ -128,7 +128,7 @@ const Login = () => {
             <FaLock className={loginStyles.inputIcon} />
             <input type={showPassword ? 'text' : 'password'}
               name="password" value={formData.password}
-              onChange={handleChange} placeholder="passwrod"
+              onChange={handleChange} placeholder="password"
               required className={loginStyles.passwordInput} />
 
             <button type="button" onClick={() => setShowPassword((v) => !v)}
