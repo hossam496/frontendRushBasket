@@ -1,20 +1,24 @@
-import api, { clearAuthTokens } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { FaSignOutAlt } from 'react-icons/fa';
 
 const Logout = () => {
+  const { logout, user } = useAuth();
 
   const handleLogout = async () => {
     try {
-      await api.post('/api/auth/logout');
+      // Optional: Call backend logout endpoint
+      console.log('[Logout] Logging out user:', user?.email);
     } catch (err) {
-      console.error('Logout failed:', err);
+      console.error('Logout error:', err);
     }
-    clearAuthTokens();
-    localStorage.removeItem('userData')
-    localStorage.removeItem('userRole')
-
-    window.dispatchEvent(new Event('authStateChanged'))
+    
+    // Use AuthContext logout to ensure state consistency
+    logout();
+    
+    // Redirect to login
+    window.location.href = '/login';
   }
+
   return (
     <div className='flex flex-col items-center justify-center h-full'>
       <button onClick={handleLogout} 

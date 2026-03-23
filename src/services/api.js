@@ -59,6 +59,9 @@ api.interceptors.request.use(
     const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log(`[API] Added auth header to ${config.method?.toUpperCase()} ${config.url}`);
+    } else {
+      console.log(`[API] No token found for ${config.method?.toUpperCase()} ${config.url}`);
     }
     return config;
   },
@@ -83,6 +86,8 @@ api.interceptors.response.use(
     // Handle 401 errors - no refresh token mechanism available
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+      
+      console.log('[API] 401 error received, clearing auth state and redirecting to login');
       
       // Clear tokens and redirect to login
       clearAuthTokens();

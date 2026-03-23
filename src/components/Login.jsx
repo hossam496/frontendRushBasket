@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { loginStyles } from "../assets/dummyStyles";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { FaArrowLeft, FaCheck, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
-import Logout from "./Logout";
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const targetPath = user.role === 'admin' ? '/admin' : '/';
+      navigate(targetPath, { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -19,11 +26,6 @@ const Login = () => {
   const [showToast, setShowToast] = useState(false);
   const [error, setError] = useState("");
 
-  if (isAuthenticated) {
-    return <Logout />;
-  }
-
-  // form handler 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -57,13 +59,9 @@ const Login = () => {
 
         setShowToast(true)
 
-        setTimeout(() => {
-          if (user.role === 'admin') {
-            navigate("/admin")
-          } else {
-            navigate("/")
-          }
-        }, 1000)
+        // Immediate redirect without setTimeout
+        const targetPath = user.role === 'admin' ? '/admin' : '/';
+        navigate(targetPath, { replace: true });
       } else {
         setError(response.data.message || "Login Failed")
       }

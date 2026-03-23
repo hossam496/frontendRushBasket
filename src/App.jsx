@@ -65,18 +65,36 @@ const AppContent = () => {
             <Route path='/contact' element={<Contact />} />
             <Route path='/items' element={<Item />} />
 
-            <Route path='/cart' element={isAuthenticated ? <Cart /> : <Navigate replace to='/login' />} />
+            <Route path='/cart' element={
+              loading ? <SkeletonLoader /> : 
+              (isAuthenticated ? <Cart /> : <Navigate replace to='/login' />)
+            } />
 
             <Route path='/myorders' element={<MyOrders />} />
             <Route path='/payment-success' element={<PaymentSuccessPage />} />
             <Route path='/checkout' element={<Checkout />} />
 
-            {/* Admin Routes */}
-            <Route path='/admin' element={isAdmin ? <AdminDashboard /> : <Navigate to="/" />} />
-            <Route path='/admin/products' element={isAdmin ? <AdminProductList /> : <Navigate to="/" />} />
-            <Route path='/admin/orders' element={isAdmin ? <AdminOrderList /> : <Navigate to="/" />} />
-            <Route path='/admin/analytics' element={isAdmin ? <AdminAnalytics /> : <Navigate to="/" />} />
-            <Route path='/admin/users' element={isAdmin ? <AdminUserList /> : <Navigate to="/" />} />
+            {/* Admin Routes - check isAuthenticated AND isAdmin */}
+            <Route path='/admin' element={
+              loading ? <SkeletonLoader /> : 
+              (isAuthenticated && isAdmin ? <AdminDashboard /> : <Navigate to="/login" replace />)
+            } />
+            <Route path='/admin/products' element={
+              loading ? <SkeletonLoader /> : 
+              (isAuthenticated && isAdmin ? <AdminProductList /> : <Navigate to="/login" replace />)
+            } />
+            <Route path='/admin/orders' element={
+              loading ? <SkeletonLoader /> : 
+              (isAuthenticated && isAdmin ? <AdminOrderList /> : <Navigate to="/login" replace />)
+            } />
+            <Route path='/admin/analytics' element={
+              loading ? <SkeletonLoader /> : 
+              (isAuthenticated && isAdmin ? <AdminAnalytics /> : <Navigate to="/login" replace />)
+            } />
+            <Route path='/admin/users' element={
+              loading ? <SkeletonLoader /> : 
+              (isAuthenticated && isAdmin ? <AdminUserList /> : <Navigate to="/login" replace />)
+            } />
 
             {/* auth routes */}
             <Route path='/login' element={<Login />} />

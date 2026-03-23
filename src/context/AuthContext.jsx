@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { saveAuthTokens, clearAuthTokens } from '../services/api';
+import { saveAuthTokens, clearAuthTokens, getAccessToken } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -17,22 +17,48 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from localStorage on app load
   useEffect(() => {
     const initializeAuth = () => {
       try {
+        const token = getAccessToken();
         const userData = localStorage.getItem('userData');
         const userRole = localStorage.getItem('userRole');
         
-        if (userData) {
-          const parsedUser = JSON.parse(userData);
-          setUser(parsedUser);
-          setIsAuthenticated(true);
-          setIsAdmin(userRole === 'admin');
+        console.log('[AuthContext] Initializing auth state:', { 
+          hasToken: !!token, 
+          hasUserData: !!userData,
+          userRole 
+        });
+        
+        // Only restore session if BOTH token AND user data exist
+        if (token && userData) {
+          try {
+            const parsedUser = JSON.parse(userData);
+            setUser(parsedUser);
+            setIsAuthenticated(true);
+            setIsAdmin(userRole === 'admin' || parsedUser.role === 'admin');
+            console.log('[AuthContext] Session restored for user:', parsedUser.email);
+          } catch (parseError) {
+            console.error('[AuthContext] Error parsing user data:', parseError);
+            clearAuthTokens();
+            localStorage.removeItem('userData');
+            localStorage.removeItem('userRole');
+          }
+        } else {
+          console.log('[AuthContext] No valid session found');
+          // Clean up any partial data
+          if (!token) {
+            clearAuthTokens();
+            localStorage.removeItem('userData');
+            localStorage.removeItem('userRole');
+          }
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('[AuthContext] Error initializing auth:', error);
         clearAuthTokens();
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userRole');
       } finally {
         setLoading(false);
       }
@@ -42,18 +68,30 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = useCallback((userData, token, rememberMe = false) => {
+    console.log('[AuthContext] Login called for:', userData.email);
+    
+    // Save token first
     saveAuthTokens(token, rememberMe);
+    
+    // Then save user data
     localStorage.setItem('userData', JSON.stringify(userData));
     localStorage.setItem('userRole', userData.role || 'user');
+    
+    // Update state
     setUser(userData);
     setIsAuthenticated(true);
     setIsAdmin(userData.role === 'admin');
+    
+    console.log('[AuthContext] Login complete - isAdmin:', userData.role === 'admin');
   }, []);
 
   const logout = useCallback(() => {
+    console.log('[AuthContext] Logout called');
+    
     clearAuthTokens();
     localStorage.removeItem('userData');
     localStorage.removeItem('userRole');
+    
     setUser(null);
     setIsAuthenticated(false);
     setIsAdmin(false);
