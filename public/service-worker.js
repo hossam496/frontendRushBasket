@@ -37,16 +37,38 @@ self.addEventListener('activate', (event) => {
 // Fetch Event - Network First for API, Cache First for Static Assets
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  const url = new URL(request.url);
   
   // Exclude API requests and extensions from cache
   if (request.url.includes('/api/') || request.url.startsWith('chrome-extension')) {
     event.respondWith(
       fetch(request).catch(() => {
-        // Fallback for API offline (optional)
         return new Response(JSON.stringify({ error: 'Offline', success: false }), {
           headers: { 'Content-Type': 'application/json' }
         });
       })
+    );
+    return;
+  }
+
+  // Network-first for JS/CSS files (to prevent MIME type errors on new builds)
+  if (url.pathname.match(/\.(js|css)$/)) {
+    event.respondWith(
+      fetch(request)
+        .then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(DYNAMIC_CACHE_NAME).then(cache => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          return caches.match(request).then(cachedResponse => {
+            return cachedResponse || new Response('Not found', { status: 404 });
+          });
+        })
     );
     return;
   }
