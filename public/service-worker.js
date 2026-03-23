@@ -1,5 +1,5 @@
-const CACHE_NAME = 'rushbasket-cache-v1';
-const DYNAMIC_CACHE_NAME = 'rushbasket-dynamic-v1';
+const CACHE_NAME = 'rushbasket-cache-v2';
+const DYNAMIC_CACHE_NAME = 'rushbasket-dynamic-v2';
 
 const STATIC_ASSETS = [
   '/',
