@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { FiSearch, FiBell, FiSettings } from 'react-icons/fi';
+import { FiSearch, FiSettings } from 'react-icons/fi';
+import NotificationBell from './NotificationBell';
 
 const getAdminInfo = () => {
   try {
@@ -18,11 +19,6 @@ const getAdminInfo = () => {
 const Header = React.memo(({ title, onSidebarToggle }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const admin = useMemo(() => getAdminInfo(), []);
-  
-  const notifications = useMemo(() => [
-    { id: 1, text: 'New order received', time: '2 min ago', unread: true },
-    { id: 2, text: 'Product stock low', time: '1 hour ago', unread: true },
-  ], []);
 
   const handleSearchChange = useCallback((e) => {
     setSearchQuery(e.target.value);
@@ -31,11 +27,6 @@ const Header = React.memo(({ title, onSidebarToggle }) => {
   const handleSidebarToggle = useCallback(() => {
     onSidebarToggle?.();
   }, [onSidebarToggle]);
-
-  const unreadCount = useMemo(() => 
-    notifications.filter(n => n.unread).length, 
-    [notifications]
-  );
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 fixed top-0 right-0 left-0 z-30 transition-all duration-300">
@@ -86,33 +77,7 @@ const Header = React.memo(({ title, onSidebarToggle }) => {
           </button>
 
           {/* Notifications */}
-          <div className="relative group">
-            <button 
-              className="relative p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-              aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ''}`}
-            >
-              <FiBell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" aria-hidden="true"></span>
-              )}
-            </button>
-            
-            {/* Notification Dropdown */}
-            <div className="absolute right-[-50px] sm:right-0 mt-2 w-64 sm:w-80 bg-white rounded-xl shadow-xl border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-              <div className="p-4 border-b border-gray-200">
-                <h3 className="font-semibold text-gray-900">Notifications</h3>
-                <p className="text-sm text-gray-500">{unreadCount} unread</p>
-              </div>
-              <div className="max-h-64 overflow-y-auto">
-                {notifications.map(notification => (
-                  <div key={notification.id} className="p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
-                    <p className="text-sm text-gray-900">{notification.text}</p>
-                    <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <NotificationBell />
 
           <button 
             className="hidden sm:block p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"

@@ -2,6 +2,7 @@ import React, { Suspense, useMemo, useEffect, lazy } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { CartProvider } from './CartContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { NotificationProvider } from './context/NotificationContext'
 import { Toaster } from 'react-hot-toast'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ErrorFallback, PageLoading } from './components/UI/LoadingStates'
@@ -123,7 +124,9 @@ const App = () => {
       }}
     >
       <AuthProvider>
-        <AppContent />
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
       </AuthProvider>
     </ErrorBoundary>
   );
