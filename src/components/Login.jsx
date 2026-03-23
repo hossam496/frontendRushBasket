@@ -68,15 +68,21 @@ const Login = () => {
     }
     catch (err) {
       console.error("Login full error:", err);
-      if (err.response) {
-        console.error("Response data:", err.response.data);
-        setError(err.response.data.message || "Login error")
+      
+      // Show detailed error message from server
+      if (err.response?.data?.message) {
+        console.error("Server error:", err.response.data);
+        setError(err.response.data.message)
+      } else if (err.response?.status === 500) {
+        setError("Server error - please try again later")
+      } else if (err.response?.status === 401) {
+        setError("Invalid email or password")
       } else if (err.request) {
-        console.error("Request made but no response received:", err.request);
-        setError("Unable to reach server - please check your connection")
+        console.error("No response from server:", err.request);
+        setError("Cannot connect to server - check your internet connection")
       } else {
-        console.error("Error setting up request:", err.message);
-        setError("Login setup error")
+        console.error("Error:", err.message);
+        setError("Login failed - please try again")
       }
     }
   }
