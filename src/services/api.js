@@ -6,7 +6,6 @@ export const API_BASE_URL = VITE_API_URL.replace(/\/$/, '');
 
 // More secure token handling
 const TOKEN_KEY = 'rush_basket_token';
-const REFRESH_TOKEN_KEY = 'rush_basket_refresh_token';
 
 // Get tokens from secure storage
 export const getAccessToken = () => {
@@ -14,14 +13,6 @@ export const getAccessToken = () => {
     return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
   } catch {
     return localStorage.getItem(TOKEN_KEY);
-  }
-};
-
-export const getRefreshToken = () => {
-  try {
-    return sessionStorage.getItem(REFRESH_TOKEN_KEY) || localStorage.getItem(REFRESH_TOKEN_KEY);
-  } catch {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
   }
 };
 
@@ -39,37 +30,19 @@ export const setAccessToken = (token, rememberMe = false) => {
   }
 };
 
-export const setRefreshToken = (token, rememberMe = false) => {
-  try {
-    if (rememberMe) {
-      localStorage.setItem(REFRESH_TOKEN_KEY, token);
-    } else {
-      sessionStorage.setItem(REFRESH_TOKEN_KEY, token);
-    }
-  } catch (error) {
-    console.warn('Failed to store refresh token:', error);
-    localStorage.setItem(REFRESH_TOKEN_KEY, token);
-  }
-};
-
 // Clear all tokens
 export const clearAuthTokens = () => {
   try {
     sessionStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
   } catch (error) {
     console.warn('Failed to clear tokens:', error);
   }
 };
 
 // For backward compatibility
-export const saveAuthTokens = (accessToken, refreshToken = null, rememberMe = false) => {
+export const saveAuthTokens = (accessToken, rememberMe = false) => {
   setAccessToken(accessToken, rememberMe);
-  if (refreshToken) {
-    setRefreshToken(refreshToken, rememberMe);
-  }
 };
 
 const api = axios.create({
@@ -95,7 +68,7 @@ api.interceptors.request.use(
   }
 );
 
-// Enhanced response interceptor with retry logic and better error handling
+// Enhanced response interceptor with better error handling
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -107,50 +80,20 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Handle 401 errors
+    // Handle 401 errors - no refresh token mechanism available
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
-      // Try to refresh token
-      const refreshToken = getRefreshToken();
-      if (refreshToken) {
-        try {
-          const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
-            refreshToken
-          });
-          
-          const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
-          setAccessToken(newAccessToken);
-          if (newRefreshToken) {
-            setRefreshToken(newRefreshToken);
-          }
-          
-          // Retry original request
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          return api(originalRequest);
-        } catch (refreshError) {
-          // Refresh failed, clear tokens and redirect to login
-          clearAuthTokens();
-          // Clear user data from localStorage
-          localStorage.removeItem('userData');
-          localStorage.removeItem('userRole');
-          toast.error('Session expired - please login again');
-          // Use a more reliable redirect method
-          if (window.location.pathname !== '/login') {
-            window.location.replace('/login');
-          }
-          return Promise.reject(refreshError);
-        }
-      } else {
-        // No refresh token, clear and redirect
-        clearAuthTokens();
-        localStorage.removeItem('userData');
-        localStorage.removeItem('userRole');
-        toast.error('Please login to continue');
-        if (window.location.pathname !== '/login') {
-          window.location.replace('/login');
-        }
+      // Clear tokens and redirect to login
+      clearAuthTokens();
+      localStorage.removeItem('userData');
+      localStorage.removeItem('userRole');
+      toast.error('Session expired - please login again');
+      // Use a more reliable redirect method
+      if (window.location.pathname !== '/login') {
+        window.location.replace('/login');
       }
+      return Promise.reject(error);
     }
 
     // Handle other HTTP errors
