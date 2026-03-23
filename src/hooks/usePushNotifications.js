@@ -220,6 +220,11 @@ export const usePushNotifications = () => {
     }
   };
 
+  // Refresh subscription count
+  const refreshSubscriptions = useCallback(async () => {
+    await fetchSubscriptionCount();
+  }, []);
+
   // Manual permission check
   const checkPermission = useCallback(() => {
     if (!isPushSupported()) return 'unsupported';
@@ -238,6 +243,7 @@ export const usePushNotifications = () => {
     requestPermission,
     testNotification,
     checkPermission,
+    refreshSubscriptions,
     hasSubscription: !!subscription
   };
 };
