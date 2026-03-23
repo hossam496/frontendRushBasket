@@ -196,21 +196,13 @@ export const usePushNotifications = () => {
       } else {
         throw new Error(response.data.message || 'Failed to save subscription');
       }
-    } catch (err) {
       console.error('[Push] ❌ Subscribe error:', err);
       
-      // Handle specific error types
-      let errorMessage = 'Registration failed - push service error';
-      
-      if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
+      let errorMessage = err.response?.data?.message || err.message || 'Unknown push service error';
       
       // Check for specific error conditions
       if (errorMessage.includes('VAPID') || errorMessage.includes('configured')) {
-        errorMessage = 'Push service not configured. Please contact administrator.';
+        errorMessage = 'Push service not configured on server. Please check Vercel environment variables.';
       } else if (errorMessage.includes('Only admin')) {
         errorMessage = 'Push notifications are only available for admin users.';
       } else if (errorMessage.includes('permission')) {
@@ -219,10 +211,11 @@ export const usePushNotifications = () => {
         errorMessage = 'Connection timeout. Please check your network and try again.';
       }
       
+      console.log('[DEBUG] Final errorMessage set to state:', errorMessage);
       setError(errorMessage);
       
       // Update permission state if needed
-      if (err.message?.includes('permission') || err.message?.includes('denied')) {
+      if (errorMessage.includes('permission') || errorMessage.includes('denied')) {
         setPermission('denied');
       }
       
