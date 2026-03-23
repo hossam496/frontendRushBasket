@@ -138,7 +138,7 @@ const Login = () => {
               <input type="checkbox" name="remember"
                 checked={formData.remember}
                 onChange={handleChange} className={loginStyles.rememberCheckbox}
-                required />
+              />
               Remember me
             </label>
             <Link to='#' className={loginStyles.forgotLink}>
