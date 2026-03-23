@@ -53,7 +53,7 @@ const Login = () => {
         }
       )
 
-      if (response.data.success) {
+      if (response?.data?.success) {
         const { token, user } = response.data
         login(user, token, formData.remember)
 
@@ -63,7 +63,7 @@ const Login = () => {
         const targetPath = user.role === 'admin' ? '/admin' : '/';
         navigate(targetPath, { replace: true });
       } else {
-        setError(response.data.message || "Login Failed")
+        setError(response?.data?.message || "Invalid response from server. Please try again.")
       }
     }
     catch (err) {
