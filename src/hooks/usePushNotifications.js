@@ -36,20 +36,29 @@ export const usePushNotifications = () => {
   // Check if user already has a push subscription
   const checkExistingSubscription = async () => {
     try {
-      if (!navigator.serviceWorker.ready) return;
+      console.log('[Push] Checking existing subscription...');
+      if (!navigator.serviceWorker.ready) {
+        console.log('[Push] Service worker not ready');
+        return;
+      }
       
       const registration = await navigator.serviceWorker.ready;
+      console.log('[Push] Service worker registration:', registration.scope);
+      
       const existingSub = await registration.pushManager.getSubscription();
       
       if (existingSub) {
         setSubscription(existingSub);
         console.log('[Push] Existing subscription found:', existingSub.endpoint);
+      } else {
+        console.log('[Push] No existing subscription found');
       }
       
       // Get server-side subscription count
       await fetchSubscriptionCount();
     } catch (err) {
       console.error('[Push] Error checking subscription:', err);
+      setError('Failed to check subscription: ' + err.message);
     }
   };
 
@@ -96,31 +105,37 @@ export const usePushNotifications = () => {
   // Subscribe to push notifications
   const subscribe = async () => {
     try {
+      console.log('[Push] Starting subscription process...');
       setLoading(true);
       setError(null);
       
       // Check permission first
       if (Notification.permission !== 'granted') {
+        console.log('[Push] Requesting notification permission...');
         const granted = await requestPermission();
         if (!granted) {
           throw new Error('Notification permission not granted');
         }
       }
       
+      console.log('[Push] Getting VAPID public key from server...');
       // Get VAPID public key from server
       const vapidResponse = await api.get('/api/notifications/vapid-public-key');
       
       if (!vapidResponse.data.success || !vapidResponse.data.publicKey) {
+        console.error('[Push] VAPID response:', vapidResponse.data);
         throw new Error('Push notifications not configured on server');
       }
       
       const vapidPublicKey = vapidResponse.data.publicKey;
-      console.log('[Push] Got VAPID public key');
+      console.log('[Push] Got VAPID public key:', vapidPublicKey.substring(0, 30) + '...');
       
+      console.log('[Push] Waiting for service worker...');
       // Wait for service worker
       const registration = await navigator.serviceWorker.ready;
-      console.log('[Push] Service worker ready');
+      console.log('[Push] Service worker ready:', registration.scope);
       
+      console.log('[Push] Creating push subscription...');
       // Subscribe
       const pushSubscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -129,6 +144,7 @@ export const usePushNotifications = () => {
       
       console.log('[Push] Push subscription created:', pushSubscription.endpoint);
       
+      console.log('[Push] Sending subscription to server...');
       // Send subscription to server
       const response = await api.post('/api/notifications/subscribe', {
         subscription: {
@@ -141,18 +157,20 @@ export const usePushNotifications = () => {
         }
       });
       
+      console.log('[Push] Server response:', response.data);
+      
       if (response.data.success) {
         setSubscription(pushSubscription);
         await fetchSubscriptionCount();
-        console.log('[Push] Subscription saved to server');
+        console.log('[Push] ✅ Subscription saved to server');
         return true;
       } else {
         throw new Error(response.data.message || 'Failed to save subscription');
       }
     } catch (err) {
+      console.error('[Push] ❌ Subscribe error:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Subscription failed';
       setError(errorMessage);
-      console.error('[Push] Subscribe error:', err);
       
       // If permission denied, update permission state
       if (err.message.includes('permission') || err.message.includes('denied')) {

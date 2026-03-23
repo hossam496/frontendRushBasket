@@ -4,13 +4,17 @@ import App from './App.jsx'
 import { HelmetProvider } from 'react-helmet-async'
 import { BrowserRouter } from 'react-router-dom'
 
-// Disable service worker in development to prevent auto-refresh
-if (import.meta.env.DEV) {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-      registrations.forEach(registration => registration.unregister());
-    });
-  }
+// Register service worker for push notifications
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+        console.log('[SW] Service Worker registered successfully:', registration.scope);
+      })
+      .catch(error => {
+        console.error('[SW] Service Worker registration failed:', error);
+      });
+  });
 }
 
 createRoot(document.getElementById('root')).render(
