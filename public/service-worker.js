@@ -80,3 +80,90 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+
+// ============================================
+// PUSH NOTIFICATION EVENT HANDLERS
+// ============================================
+
+// Handle push events (received from server)
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push event received:', event);
+
+  let notificationData;
+  
+  try {
+    notificationData = event.data.json();
+  } catch (e) {
+    notificationData = {
+      title: 'New Notification',
+      body: event.data.text() || 'You have a new notification',
+      icon: '/icon-192x192.png'
+    };
+  }
+
+  const options = {
+    body: notificationData.body || '',
+    icon: notificationData.icon || '/icon-192x192.png',
+    badge: notificationData.badge || '/badge-72x72.png',
+    tag: notificationData.tag || `notification-${Date.now()}`,
+    requireInteraction: notificationData.requireInteraction !== false,
+    actions: notificationData.actions || [],
+    data: notificationData.data || {},
+    timestamp: notificationData.timestamp || Date.now(),
+    vibrate: [200, 100, 200],
+    renotify: true,
+    silent: false
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(notificationData.title, options)
+  );
+});
+
+// Handle notification click
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notification clicked:', event.notification.tag);
+  
+  event.notification.close();
+
+  const notificationData = event.notification.data;
+  let targetUrl = notificationData.url || '/admin/orders';
+  
+  // Handle action buttons
+  if (event.action === 'view-order' && notificationData.orderId) {
+    targetUrl = `/admin/orders`;
+  } else if (event.action === 'dismiss') {
+    return;
+  }
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If a window is already open, focus it and navigate
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus().then(() => {
+            return client.navigate(targetUrl);
+          });
+        }
+      }
+      
+      // Otherwise, open a new window
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
+
+// Handle notification close (dismissed by user)
+self.addEventListener('notificationclose', (event) => {
+  console.log('[SW] Notification closed:', event.notification.tag);
+});
+
+// Sync event for background sync (optional)
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-orders') {
+    console.log('[SW] Background sync triggered');
+    // Handle background sync if needed
+  }
+});

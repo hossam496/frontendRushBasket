@@ -3,6 +3,7 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import StatCard from "../../components/admin/StatCard";
 import ChartCard from "../../components/admin/ChartCard";
 import DataTable from "../../components/admin/DataTable";
+import PushNotificationToggle from "../../components/PushNotificationToggle";
 import {
   FiTrendingUp,
   FiShoppingBag,
@@ -12,6 +13,7 @@ import {
   FiEye,
   FiPackage,
   FiClock,
+  FiBell,
 } from "react-icons/fi";
 import api from "../../services/api";
 
@@ -141,6 +143,11 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout title="Dashboard Overview">
+      {/* Push Notifications Card - Only for admins */}
+      <div className="mb-8">
+        <PushNotificationToggle />
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard

@@ -45,6 +45,21 @@
   <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
   
   <title>RushBasket - Premium E-commerce</title>
+  
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('[SW] Registered:', registration.scope);
+          })
+          .catch(error => {
+            console.error('[SW] Registration failed:', error);
+          });
+      });
+    }
+  </script>
 </head>
 
 <body>
