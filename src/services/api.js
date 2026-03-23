@@ -4,36 +4,33 @@ import toast from 'react-hot-toast';
 const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 export const API_BASE_URL = VITE_API_URL.replace(/\/$/, '');
 
+const isDevelopment = import.meta.env.DEV;
+
 // More secure token handling
 const TOKEN_KEY = 'rush_basket_token';
 
 // Get tokens from secure storage
 export const getAccessToken = () => {
   try {
-    return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
-  } catch {
     return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
   }
 };
 
 // Set tokens with security considerations
-export const setAccessToken = (token, rememberMe = false) => {
+export const setAccessToken = (token, rememberMe = true) => {
   try {
-    if (rememberMe) {
-      localStorage.setItem(TOKEN_KEY, token);
-    } else {
-      sessionStorage.setItem(TOKEN_KEY, token);
-    }
+    // Always use localStorage for persistence across sessions
+    localStorage.setItem(TOKEN_KEY, token);
   } catch (error) {
     console.warn('Failed to store access token:', error);
-    localStorage.setItem(TOKEN_KEY, token);
   }
 };
 
 // Clear all tokens
 export const clearAuthTokens = () => {
   try {
-    sessionStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(TOKEN_KEY);
   } catch (error) {
     console.warn('Failed to clear tokens:', error);
@@ -79,37 +76,51 @@ api.interceptors.response.use(
 
     // Handle network errors
     if (!error.response) {
-      toast.error('Network error - please check your connection');
+      console.error('[API] Network error:', error.message);
       return Promise.reject(error);
     }
 
-    // Handle 401 errors - no refresh token mechanism available
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const status = error.response?.status;
+    const errorMessage = error.response?.data?.message || '';
+
+    // Handle 401 errors - only logout if it's a true auth failure
+    if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
-      console.log('[API] 401 error received, clearing auth state and redirecting to login');
+      console.log('[API] 401 error received:', errorMessage);
       
-      // Clear tokens and redirect to login
-      clearAuthTokens();
-      localStorage.removeItem('userData');
-      localStorage.removeItem('userRole');
-      toast.error('Session expired - please login again');
-      // Use a more reliable redirect method
-      if (window.location.pathname !== '/login') {
-        window.location.replace('/login');
+      // Don't logout on specific errors that might be temporary
+      const isPermanentAuthFailure = 
+        errorMessage.includes('expired') || 
+        errorMessage.includes('invalid') ||
+        errorMessage.includes('User not found');
+      
+      if (isPermanentAuthFailure) {
+        console.log('[API] Permanent auth failure, clearing session');
+        clearAuthTokens();
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userRole');
+        
+        if (window.location.pathname !== '/login') {
+          toast.error('Session expired - please login again');
+          window.location.replace('/login');
+        }
+      } else {
+        console.log('[API] Temporary auth issue, not logging out');
       }
+      
       return Promise.reject(error);
     }
 
     // Handle other HTTP errors
-    if (error.response?.status >= 500) {
-      toast.error('Server error - please try again later');
-    } else if (error.response?.status === 429) {
+    if (status >= 500) {
+      console.error('[API] Server error:', status);
+    } else if (status === 429) {
       toast.error('Too many requests - please wait');
-    } else if (error.response?.status === 403) {
-      toast.error('Access denied');
-    } else if (error.response?.status === 404) {
-      toast.error('Resource not found');
+    } else if (status === 403) {
+      console.error('[API] Access denied');
+    } else if (status === 404) {
+      console.error('[API] Resource not found');
     }
 
     return Promise.reject(error);

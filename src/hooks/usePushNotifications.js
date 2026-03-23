@@ -37,12 +37,15 @@ export const usePushNotifications = () => {
   const checkExistingSubscription = async () => {
     try {
       console.log('[Push] Checking existing subscription...');
-      if (!navigator.serviceWorker.ready) {
-        console.log('[Push] Service worker not ready');
-        return;
-      }
       
-      const registration = await navigator.serviceWorker.ready;
+      // Wait for service worker to be ready with timeout
+      const registration = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Service worker registration timeout')), 5000)
+        )
+      ]);
+      
       console.log('[Push] Service worker registration:', registration.scope);
       
       const existingSub = await registration.pushManager.getSubscription();
@@ -57,8 +60,11 @@ export const usePushNotifications = () => {
       // Get server-side subscription count
       await fetchSubscriptionCount();
     } catch (err) {
-      console.error('[Push] Error checking subscription:', err);
-      setError('Failed to check subscription: ' + err.message);
+      console.error('[Push] Error checking subscription:', err.message);
+      // Don't set error state here - this is just an initialization check
+      if (err.message.includes('Service worker')) {
+        console.log('[Push] Service worker not ready yet, will retry');
+      }
     }
   };
 
@@ -119,8 +125,20 @@ export const usePushNotifications = () => {
       }
       
       console.log('[Push] Getting VAPID public key from server...');
-      // Get VAPID public key from server
-      const vapidResponse = await api.get('/api/notifications/vapid-public-key');
+      
+      // Get VAPID public key from server with timeout
+      let vapidResponse;
+      try {
+        vapidResponse = await Promise.race([
+          api.get('/api/notifications/vapid-public-key'),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('VAPID key fetch timeout')), 10000)
+          )
+        ]);
+      } catch (err) {
+        console.error('[Push] VAPID fetch error:', err.message);
+        throw new Error('Unable to get VAPID key - service may be unavailable');
+      }
       
       if (!vapidResponse.data.success || !vapidResponse.data.publicKey) {
         console.error('[Push] VAPID response:', vapidResponse.data);
@@ -131,8 +149,14 @@ export const usePushNotifications = () => {
       console.log('[Push] Got VAPID public key:', vapidPublicKey.substring(0, 30) + '...');
       
       console.log('[Push] Waiting for service worker...');
-      // Wait for service worker
-      const registration = await navigator.serviceWorker.ready;
+      // Wait for service worker with timeout
+      const registration = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Service worker timeout')), 10000)
+        )
+      ]);
+      
       console.log('[Push] Service worker ready:', registration.scope);
       
       console.log('[Push] Creating push subscription...');
@@ -145,17 +169,22 @@ export const usePushNotifications = () => {
       console.log('[Push] Push subscription created:', pushSubscription.endpoint);
       
       console.log('[Push] Sending subscription to server...');
-      // Send subscription to server
-      const response = await api.post('/api/notifications/subscribe', {
-        subscription: {
-          endpoint: pushSubscription.endpoint,
-          keys: {
-            p256dh: pushSubscription.toJSON().keys.p256dh,
-            auth: pushSubscription.toJSON().keys.auth
-          },
-          expirationTime: pushSubscription.expirationTime
-        }
-      });
+      // Send subscription to server with timeout
+      const response = await Promise.race([
+        api.post('/api/notifications/subscribe', {
+          subscription: {
+            endpoint: pushSubscription.endpoint,
+            keys: {
+              p256dh: pushSubscription.toJSON().keys.p256dh,
+              auth: pushSubscription.toJSON().keys.auth
+            },
+            expirationTime: pushSubscription.expirationTime
+          }
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Subscription save timeout')), 15000)
+        )
+      ]);
       
       console.log('[Push] Server response:', response.data);
       
@@ -169,11 +198,31 @@ export const usePushNotifications = () => {
       }
     } catch (err) {
       console.error('[Push] ❌ Subscribe error:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Subscription failed';
+      
+      // Handle specific error types
+      let errorMessage = 'Registration failed - push service error';
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      // Check for specific error conditions
+      if (errorMessage.includes('VAPID') || errorMessage.includes('configured')) {
+        errorMessage = 'Push service not configured. Please contact administrator.';
+      } else if (errorMessage.includes('Only admin')) {
+        errorMessage = 'Push notifications are only available for admin users.';
+      } else if (errorMessage.includes('permission')) {
+        errorMessage = 'Notification permission denied. Please enable in browser settings.';
+      } else if (errorMessage.includes('timeout')) {
+        errorMessage = 'Connection timeout. Please check your network and try again.';
+      }
+      
       setError(errorMessage);
       
-      // If permission denied, update permission state
-      if (err.message.includes('permission') || err.message.includes('denied')) {
+      // Update permission state if needed
+      if (err.message?.includes('permission') || err.message?.includes('denied')) {
         setPermission('denied');
       }
       

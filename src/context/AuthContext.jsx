@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { saveAuthTokens, clearAuthTokens, getAccessToken } from '../services/api';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import api, { getAccessToken, clearAuthTokens } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -16,10 +16,14 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const initRef = useRef(false);
 
   // Initialize auth state from localStorage on app load
   useEffect(() => {
-    const initializeAuth = () => {
+    if (initRef.current) return;
+    initRef.current = true;
+
+    const initializeAuth = async () => {
       try {
         const token = getAccessToken();
         const userData = localStorage.getItem('userData');
@@ -39,26 +43,22 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(true);
             setIsAdmin(userRole === 'admin' || parsedUser.role === 'admin');
             console.log('[AuthContext] Session restored for user:', parsedUser.email);
+            
+            // Validate token with backend (optional, async)
+            validateTokenWithBackend(token);
           } catch (parseError) {
             console.error('[AuthContext] Error parsing user data:', parseError);
-            clearAuthTokens();
-            localStorage.removeItem('userData');
-            localStorage.removeItem('userRole');
+            clearAuthState();
           }
         } else {
           console.log('[AuthContext] No valid session found');
-          // Clean up any partial data
           if (!token) {
-            clearAuthTokens();
-            localStorage.removeItem('userData');
-            localStorage.removeItem('userRole');
+            clearAuthState();
           }
         }
       } catch (error) {
         console.error('[AuthContext] Error initializing auth:', error);
-        clearAuthTokens();
-        localStorage.removeItem('userData');
-        localStorage.removeItem('userRole');
+        clearAuthState();
       } finally {
         setLoading(false);
       }
@@ -67,13 +67,40 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = useCallback((userData, token, rememberMe = false) => {
+  // Async token validation (doesn't block UI)
+  const validateTokenWithBackend = async (token) => {
+    try {
+      const response = await api.get('/api/auth/validate', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (!response.data.success) {
+        console.log('[AuthContext] Token validation failed, clearing session');
+        clearAuthState();
+      }
+    } catch (error) {
+      // Only logout on definite auth failures, not network errors
+      if (error.response?.status === 401) {
+        console.log('[AuthContext] Token invalid, clearing session');
+        clearAuthState();
+      }
+    }
+  };
+
+  const clearAuthState = () => {
+    clearAuthTokens();
+    localStorage.removeItem('userData');
+    localStorage.removeItem('userRole');
+    setUser(null);
+    setIsAuthenticated(false);
+    setIsAdmin(false);
+  };
+
+  const login = useCallback((userData, token, rememberMe = true) => {
     console.log('[AuthContext] Login called for:', userData.email);
     
-    // Save token first
-    saveAuthTokens(token, rememberMe);
-    
-    // Then save user data
+    // Save token and user data
+    localStorage.setItem('rush_basket_token', token);
     localStorage.setItem('userData', JSON.stringify(userData));
     localStorage.setItem('userRole', userData.role || 'user');
     
@@ -87,14 +114,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = useCallback(() => {
     console.log('[AuthContext] Logout called');
-    
-    clearAuthTokens();
-    localStorage.removeItem('userData');
-    localStorage.removeItem('userRole');
-    
-    setUser(null);
-    setIsAuthenticated(false);
-    setIsAdmin(false);
+    clearAuthState();
   }, []);
 
   const value = {

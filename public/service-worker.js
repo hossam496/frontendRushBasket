@@ -1,36 +1,48 @@
-const CACHE_NAME = 'rushbasket-cache-v3';
-const DYNAMIC_CACHE_NAME = 'rushbasket-dynamic-v3';
+const CACHE_NAME = 'rushbasket-cache-v4';
+const DYNAMIC_CACHE_NAME = 'rushbasket-dynamic-v4';
+const STATIC_CACHE_NAME = 'rushbasket-static-v4';
 
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/vite.svg'
+  '/manifest.json'
 ];
 
 // Install Event - Cache Static Assets
 self.addEventListener('install', (event) => {
+  console.log('[SW] Installing service worker...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        return cache.addAll(STATIC_ASSETS);
+        console.log('[SW] Caching static assets');
+        return cache.addAll(STATIC_ASSETS).catch(err => {
+          console.warn('[SW] Failed to cache some assets:', err);
+        });
       })
       .then(() => self.skipWaiting())
   );
 });
 
-// Activate Event - Clean up ALL old caches aggressively
+// Activate Event - Clean up old caches
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating service worker...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          // Delete ALL old caches, not just ones with different names
-          console.log('[SW] Deleting old cache:', cacheName);
-          return caches.delete(cacheName);
+          // Delete old caches that don't match current version
+          if (cacheName !== CACHE_NAME && 
+              cacheName !== DYNAMIC_CACHE_NAME && 
+              cacheName !== STATIC_CACHE_NAME) {
+            console.log('[SW] Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => {
+      console.log('[SW] Claiming clients');
+      return self.clients.claim();
+    })
   );
 });
 
@@ -111,11 +123,18 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   console.log('[SW] Push event received:', event);
 
+  if (!event.data) {
+    console.warn('[SW] Push event has no data');
+    return;
+  }
+
   let notificationData;
   
   try {
     notificationData = event.data.json();
+    console.log('[SW] Push data:', notificationData);
   } catch (e) {
+    console.warn('[SW] Failed to parse push data as JSON:', e);
     notificationData = {
       title: 'New Notification',
       body: event.data.text() || 'You have a new notification',
@@ -134,11 +153,16 @@ self.addEventListener('push', (event) => {
     timestamp: notificationData.timestamp || Date.now(),
     vibrate: [200, 100, 200],
     renotify: true,
-    silent: false
+    silent: false,
+    // Ensure notification shows even when tab is not active
+    requireInteraction: true
   };
 
   event.waitUntil(
-    self.registration.showNotification(notificationData.title, options)
+    self.registration.showNotification(notificationData.title || 'New Notification', options)
+      .catch(err => {
+        console.error('[SW] Failed to show notification:', err);
+      })
   );
 });
 
@@ -148,31 +172,46 @@ self.addEventListener('notificationclick', (event) => {
   
   event.notification.close();
 
-  const notificationData = event.notification.data;
-  let targetUrl = notificationData.url || '/admin/orders';
+  const notificationData = event.notification.data || {};
+  let targetUrl = notificationData.url || '/';
   
   // Handle action buttons
-  if (event.action === 'view-order' && notificationData.orderId) {
-    targetUrl = `/admin/orders`;
+  if (event.action === 'view-order') {
+    targetUrl = '/admin/orders';
   } else if (event.action === 'dismiss') {
     return;
+  }
+
+  // Ensure target URL is absolute
+  if (!targetUrl.startsWith('http')) {
+    targetUrl = self.location.origin + (targetUrl.startsWith('/') ? targetUrl : '/' + targetUrl);
   }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       // If a window is already open, focus it and navigate
       for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
+        if (client.url && client.url.includes(self.location.origin)) {
+          console.log('[SW] Focusing existing client:', client.url);
           return client.focus().then(() => {
             return client.navigate(targetUrl);
+          }).catch(err => {
+            console.warn('[SW] Failed to focus/navigate client:', err);
+            // Open new window if navigation fails
+            if (clients.openWindow) {
+              return clients.openWindow(targetUrl);
+            }
           });
         }
       }
       
       // Otherwise, open a new window
+      console.log('[SW] Opening new window:', targetUrl);
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
+    }).catch(err => {
+      console.error('[SW] Error handling notification click:', err);
     })
   );
 });
