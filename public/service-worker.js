@@ -1,6 +1,6 @@
-const CACHE_NAME = 'rushbasket-cache-v4';
-const DYNAMIC_CACHE_NAME = 'rushbasket-dynamic-v4';
-const STATIC_CACHE_NAME = 'rushbasket-static-v4';
+const CACHE_NAME = 'rushbasket-cache-v5';
+const DYNAMIC_CACHE_NAME = 'rushbasket-dynamic-v5';
+const STATIC_CACHE_NAME = 'rushbasket-static-v5';
 
 const STATIC_ASSETS = [
   '/',
@@ -68,6 +68,13 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then(networkResponse => {
+          // If the server returns HTML instead of JS/CSS, it means the Vercel rewrite caught it
+          // This happens when an old JS chunk is requested after a new deployment.
+          const contentType = networkResponse.headers.get('content-type') || '';
+          if (contentType.includes('text/html')) {
+            throw new Error('Server returned HTML fallback for a static asset');
+          }
+
           if (networkResponse && networkResponse.status === 200) {
             const responseToCache = networkResponse.clone();
             caches.open(DYNAMIC_CACHE_NAME).then(cache => {
@@ -77,8 +84,19 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => {
+          // Fallback to cache if network fails or returned HTML
           return caches.match(request).then(cachedResponse => {
-            return cachedResponse || new Response('Not found', { status: 404 });
+            if (cachedResponse) return cachedResponse;
+            
+            // If it's a JS file and it's missing from BOTH network and cache, the app is fundamentally broken
+            // Return a script that clears caches and forces a hard reload to get the new index.html
+            if (url.pathname.endsWith('.js')) {
+               return new Response(
+                 "caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => window.location.reload(true));",
+                 { headers: { 'Content-Type': 'application/javascript' } }
+               );
+            }
+            return new Response('Not found', { status: 404 });
           });
         })
     );
