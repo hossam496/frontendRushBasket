@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePushNotifications } from '../hooks/usePushNotifications';
-import { FaBell, FaBellSlash, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
+import { FaBell, FaBellSlash, FaCheck, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
 
 const PushNotificationToggle = () => {
   const {
@@ -12,17 +12,28 @@ const PushNotificationToggle = () => {
     subscribe,
     unsubscribe,
     testNotification,
-    hasSubscription
+    hasSubscription,
+    refreshSubscriptions
   } = usePushNotifications();
 
   const [showTestSuccess, setShowTestSuccess] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
+
+  useEffect(() => {
+    refreshSubscriptions();
+  }, [refreshSubscriptions]);
 
   // Handle subscribe/unsubscribe toggle
   const handleToggle = async () => {
-    if (hasSubscription) {
-      await unsubscribe();
-    } else {
-      await subscribe();
+    setIsToggling(true);
+    try {
+      if (hasSubscription) {
+        await unsubscribe();
+      } else {
+        await subscribe();
+      }
+    } finally {
+      setIsToggling(false);
     }
   };
 
@@ -35,6 +46,8 @@ const PushNotificationToggle = () => {
     }
   };
 
+  const isLoading = loading || isToggling;
+
   // Not supported
   if (!isSupported) {
     return (
@@ -43,6 +56,9 @@ const PushNotificationToggle = () => {
           <FaBellSlash className="mr-2" />
           <span className="text-sm">Push notifications not supported in this browser</span>
         </div>
+        <p className="text-xs text-gray-400 mt-2">
+          Please use a modern browser like Chrome, Firefox, or Edge.
+        </p>
       </div>
     );
   }
@@ -58,6 +74,19 @@ const PushNotificationToggle = () => {
         <p className="text-sm text-red-600">
           Please enable notifications in your browser settings to receive order alerts.
         </p>
+        <button
+          onClick={() => {
+            // Show instructions for enabling notifications
+            if (window.chrome) {
+              alert('To enable notifications:\n1. Click the lock/info icon in address bar\n2. Find "Notifications" setting\n3. Change to "Allow"');
+            } else {
+              alert('Please check your browser settings to enable notifications for this site.');
+            }
+          }}
+          className="mt-2 text-xs text-red-700 underline hover:text-red-800"
+        >
+          How to enable?
+        </button>
       </div>
     );
   }
@@ -81,21 +110,26 @@ const PushNotificationToggle = () => {
         
         <button
           onClick={handleToggle}
-          disabled={loading}
+          disabled={isLoading}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             hasSubscription
               ? 'bg-red-100 text-red-700 hover:bg-red-200'
               : 'bg-indigo-600 text-white hover:bg-indigo-700'
-          } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          {loading ? 'Processing...' : hasSubscription ? 'Disable' : 'Enable'}
+          {isLoading ? (
+            <span className="flex items-center">
+              <FaSpinner className="animate-spin mr-2" size={14} />
+              Processing...
+            </span>
+          ) : hasSubscription ? 'Disable' : 'Enable'}
         </button>
       </div>
 
       {/* Error message */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 rounded-lg text-sm text-red-700">
-          {error}
+        <div className="mb-4 p-3 bg-red-50 rounded-lg text-sm text-red-700 border border-red-200">
+          <strong>Error:</strong> {error}
         </div>
       )}
 
@@ -113,19 +147,30 @@ const PushNotificationToggle = () => {
             )}
             <button
               onClick={handleTest}
-              disabled={loading}
+              disabled={isLoading}
               className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
             >
-              {loading ? 'Sending...' : 'Test Notification'}
+              {isLoading ? 'Sending...' : 'Test Notification'}
             </button>
           </div>
         </div>
       )}
 
       {/* Info text */}
-      <p className="mt-3 text-xs text-gray-400">
-        Note: You must keep the browser installed to receive notifications when the site is closed.
-      </p>
+      <div className="mt-3 pt-3 border-t border-gray-100">
+        <p className="text-xs text-gray-400">
+          {hasSubscription ? (
+            '✓ You will receive notifications for new orders and important updates.'
+          ) : (
+            '💡 Enable notifications to get instant alerts when customers place orders.'
+          )}
+        </p>
+        {hasSubscription && (
+          <p className="text-xs text-gray-400 mt-1">
+            Note: Keep your browser installed to receive notifications even when the site is closed.
+          </p>
+        )}
+      </div>
     </div>
   );
 };
