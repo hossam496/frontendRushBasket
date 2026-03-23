@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { usePushNotifications } from '../../hooks/usePushNotifications';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 import { FaBell, FaBellSlash, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 
 const PushNotificationToggle = () => {
