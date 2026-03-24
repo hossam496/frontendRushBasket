@@ -149,7 +149,6 @@ export const usePushNotifications = () => {
       console.log('[Push] Got VAPID public key:', vapidPublicKey.substring(0, 30) + '...');
       
       console.log('[Push] Waiting for service worker...');
-      // Wait for service worker with timeout
       const registration = await Promise.race([
         navigator.serviceWorker.ready,
         new Promise((_, reject) => 
@@ -160,16 +159,14 @@ export const usePushNotifications = () => {
       console.log('[Push] Service worker ready:', registration.scope);
       
       console.log('[Push] Creating push subscription...');
-      // Subscribe
       const pushSubscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey.trim())
       });
       
       console.log('[Push] Push subscription created:', pushSubscription.endpoint);
-      
       console.log('[Push] Sending subscription to server...');
-      // Send subscription to server with timeout
+
       const response = await Promise.race([
         api.post('/api/notifications/subscribe', {
           subscription: {
@@ -191,18 +188,18 @@ export const usePushNotifications = () => {
       if (response.data.success) {
         setSubscription(pushSubscription);
         await fetchSubscriptionCount();
-        console.log('[Push] ✅ Subscription saved to server');
+        console.log('[Push] ✅ Subscription saved successfully');
         return true;
       } else {
         throw new Error(response.data.message || 'Failed to save subscription');
       }
+    } catch (err) {
       console.error('[Push] ❌ Subscribe error:', err);
       
       let errorMessage = err.response?.data?.message || err.message || 'Unknown push service error';
       
-      // Check for specific error conditions
       if (errorMessage.includes('VAPID') || errorMessage.includes('configured')) {
-        errorMessage = 'Push service not configured on server. Please check Vercel environment variables.';
+        errorMessage = 'Push service not configured on server. Please check environment variables.';
       } else if (errorMessage.includes('Only admin')) {
         errorMessage = 'Push notifications are only available for admin users.';
       } else if (errorMessage.includes('permission')) {
@@ -211,10 +208,8 @@ export const usePushNotifications = () => {
         errorMessage = 'Connection timeout. Please check your network and try again.';
       }
       
-      console.log('[DEBUG] Final errorMessage set to state:', errorMessage);
       setError(errorMessage);
       
-      // Update permission state if needed
       if (errorMessage.includes('permission') || errorMessage.includes('denied')) {
         setPermission('denied');
       }
