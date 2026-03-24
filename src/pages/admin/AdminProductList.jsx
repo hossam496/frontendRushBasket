@@ -32,7 +32,8 @@ const AdminProductList = () => {
     oldPrice: '',
     category: 'Fruits',
     description: '',
-    image: null
+    image: null,
+    imageUrl: ''
   });
 
   useEffect(() => {
@@ -92,7 +93,8 @@ const AdminProductList = () => {
       oldPrice: product.oldPrice ? product.oldPrice.toString() : '',
       category: product.category,
       description: product.description || '',
-      image: null
+      image: null,
+      imageUrl: product.imageUrl || ''
     });
     setIsEditModalOpen(true);
   };
@@ -107,6 +109,8 @@ const AdminProductList = () => {
     formData.append('description', newProduct.description);
     if (newProduct.image) {
       formData.append('image', newProduct.image);
+    } else if (newProduct.imageUrl) {
+      formData.append('imageUrl', newProduct.imageUrl);
     }
 
     try {
@@ -137,6 +141,8 @@ const AdminProductList = () => {
     formData.append('description', newProduct.description);
     if (newProduct.image) {
       formData.append('image', newProduct.image);
+    } else if (newProduct.imageUrl) {
+      formData.append('imageUrl', newProduct.imageUrl);
     }
 
     try {
@@ -394,7 +400,18 @@ const AdminProductList = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image URL (Optional)</label>
+                <input 
+                  type="text" 
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  value={newProduct.imageUrl}
+                  onChange={(e) => setNewProduct({...newProduct, imageUrl: e.target.value})}
+                  placeholder="Paste external link or local asset name (e.g. Onion.png)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Or Upload Image</label>
                 <div 
                   className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500 transition-colors"
                   onClick={() => document.getElementById('image-upload').click()}
@@ -409,6 +426,15 @@ const AdminProductList = () => {
                       >
                         <FiX size={16} />
                       </button>
+                    </div>
+                  ) : newProduct.imageUrl ? (
+                    <div className="relative">
+                      <img 
+                        src={newProduct.imageUrl.startsWith('http') ? newProduct.imageUrl : `${api.defaults.baseURL}/${newProduct.imageUrl}`} 
+                        className="h-32 mx-auto rounded-lg object-contain" 
+                        onError={(e) => { e.target.src = 'https://placehold.co/128?text=Image+Not+Found'; }}
+                      />
+                      <p className="text-sm text-gray-500 mt-2">Preview from URL</p>
                     </div>
                   ) : (
                     <div className="py-4">
@@ -520,7 +546,18 @@ const AdminProductList = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image URL (Optional)</label>
+                <input 
+                  type="text" 
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  value={newProduct.imageUrl}
+                  onChange={(e) => setNewProduct({...newProduct, imageUrl: e.target.value})}
+                  placeholder="Paste external link or local asset name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Or Upload New Image</label>
                 <div 
                   className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500 transition-colors"
                   onClick={() => document.getElementById('edit-image-upload').click()}
@@ -536,10 +573,22 @@ const AdminProductList = () => {
                         <FiX size={16} />
                       </button>
                     </div>
+                  ) : newProduct.imageUrl ? (
+                    <div className="relative">
+                      <img 
+                        src={newProduct.imageUrl.startsWith('http') ? newProduct.imageUrl : `${api.defaults.baseURL}/${newProduct.imageUrl}`} 
+                        className="h-32 mx-auto rounded-lg object-contain" 
+                        onError={(e) => { e.target.src = 'https://placehold.co/128?text=Image+Not+Found'; }}
+                      />
+                      <p className="text-sm text-gray-500 mt-2">Preview from URL</p>
+                    </div>
                   ) : editingProduct?.imageUrl ? (
                     <div className="relative">
-                      <img src={`${api.defaults.baseURL}${editingProduct.imageUrl}`} className="h-32 mx-auto rounded-lg object-contain" />
-                      <p className="text-sm text-gray-500 mt-2">Click to change image</p>
+                      <img 
+                        src={`${api.defaults.baseURL}${editingProduct.imageUrl.startsWith('/') ? '' : '/'}${editingProduct.imageUrl}`} 
+                        className="h-32 mx-auto rounded-lg object-contain" 
+                      />
+                      <p className="text-sm text-gray-500 mt-2">Current image</p>
                     </div>
                   ) : (
                     <div className="py-4">
