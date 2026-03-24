@@ -6,6 +6,7 @@ import { useCart } from "../CartContext";
 import { FaChevronRight, FaMinus, FaPlus, FaShoppingCart, FaThList } from "react-icons/fa";
 import { categories } from "../assets/dummyData";
 import api, { API_BASE_URL } from '../services/api';
+import { ProductCardSkeleton } from './UI/LoadingStates';
 
 // Memoized Product Card component
 const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) => {
@@ -25,7 +26,10 @@ const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) =
           }
           alt={product.name}
           className={itemsHomeStyles.productImage}
+          width={300}
+          height={200}
           loading="lazy"
+          decoding="async"
           onError={handleImageError}
         />
       </div>
@@ -286,10 +290,10 @@ const ItemsHome = () => {
           {/* product grid */}
           <div className={itemsHomeStyles.productsGrid}>
             {loading ? (
-              <div className="col-span-full py-20 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-                <p className="text-gray-500">Loading products...</p>
-              </div>
+              // Skeleton cards prevent CLS: grid has fixed dimensions before real data arrives
+              Array.from({ length: 8 }).map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))
             ) : error ? (
               <div className="col-span-full py-20 text-center text-red-500">
                 <p>{error}</p>

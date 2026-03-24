@@ -3,7 +3,9 @@ import { bannerStyles } from '../assets/dummyStyles'
 import { FiSearch, FiTruck } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { features } from '../assets/Dummy'
-import BannerFood from '../assets/FoodBanner.png'
+
+// Use public/ path so the <link rel="preload"> in index.html works on the same URL
+const BANNER_IMG = '/FoodBanner.png'
 
 const BannerHome = ({ onSearch }) => {
 
@@ -83,7 +85,15 @@ const BannerHome = ({ onSearch }) => {
                     <div className=' relative flex justify-center'>
                         <div className={bannerStyles.imageContainer}>
                             <div className={bannerStyles.imageInner}>
-                                <img src={BannerFood} alt="Banner" className=' object-cover w-full h-full' />
+                                <img
+                                  src={BANNER_IMG}
+                                  alt="Fresh groceries delivered to your door"
+                                  className=' object-cover w-full h-full'
+                                  width={600}
+                                  height={500}
+                                  fetchpriority="high"
+                                  decoding="async"
+                                />
                             </div>
                         </div>
 

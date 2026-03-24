@@ -18,10 +18,14 @@
   
   <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://api.stripe.com" />
-  
-  <!-- DNS Prefetch -->
+  <!-- Upgrade dns-prefetch to full preconnect for the backend API -->
+  <link rel="preconnect" href="https://backend1-eight-lovat.vercel.app" crossorigin />
   <link rel="dns-prefetch" href="//backend1-eight-lovat.vercel.app" />
+
+  <!-- CRITICAL: Preload LCP hero image so browser fetches it before React boots -->
+  <link rel="preload" as="image" href="/FoodBanner.png" fetchpriority="high" />
   
   <!-- Resource Management -->
   <meta name="referrer" content="no-referrer-when-downgrade" />

@@ -9,10 +9,9 @@ import {
   FiPlus,
   FiSearch,
 } from "react-icons/fi";
-import { data, Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { groceryData } from "../assets/dummyDataItem";
-import axios from "axios";
-import { API_BASE_URL } from '../services/api';
+import api, { API_BASE_URL } from '../services/api';
 
 const BACKEND_URL = API_BASE_URL;
 
@@ -53,6 +52,10 @@ const ProductCard = ({ item }) => {
           src={imgSrc}
           alt={item.name}
           className={itemsPageStyles.productImage}
+          width={300}
+          height={200}
+          loading="lazy"
+          decoding="async"
         />
       </div>
 
@@ -125,9 +128,9 @@ const Items = () => {
     }
   }, [location]);
 
-  // featch from backend side
+  // fetch from backend — using centralized api service (consistent baseURL, auth headers, error handling)
   useEffect(() => {
-    axios.get(`${BACKEND_URL}/api/items`)
+    api.get('/api/items')
       .then(res => {
         const products = Array.isArray(res.data)
           ? res.data
@@ -141,7 +144,7 @@ const Items = () => {
         }, {})
         setData(Object.values(grouped))
       })
-      .catch(err => console.error('Fetching error:', err))
+      .catch(err => console.error('[Items] Fetching error:', err))
   }, [])
 
   const itemMatchesSearch = (item, term) => {

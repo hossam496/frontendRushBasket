@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/' : '/',
+  base: '/',
   plugins: [
     react(),
     tailwindcss()
@@ -13,17 +13,29 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
+          // Core React — loaded on every page
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
           ui: ['react-icons', 'react-hot-toast'],
-          charts: ['chart.js', 'react-chartjs-2', 'recharts'],
+          // Payment — loaded only on checkout
           payment: ['@stripe/react-stripe-js', '@stripe/stripe-js'],
-          utils: ['axios', 'socket.io-client']
+          // Lightweight utilities used app-wide
+          utils: ['axios'],
+          // Admin-only: chart libs, drag & drop, modals, socket.io
+          // These will NOT be downloaded by regular users on the homepage / items page
+          admin: [
+            'chart.js',
+            'react-chartjs-2',
+            'recharts',
+            '@dnd-kit/core',
+            '@dnd-kit/sortable',
+            '@dnd-kit/utilities',
+            'sweetalert2',
+            'socket.io-client',
+          ],
         },
-        // Optimize asset file names for better caching
+        // Optimize asset file names for long-term caching
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.');
-          const ext = info[info.length - 1];
           if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)$/.test(assetInfo.name)) {
             return `media/[name]-[hash][extname]`;
           }
@@ -38,11 +50,19 @@ export default defineConfig({
       }
     },
     minify: 'terser',
+    terserOptions: {
+      compress: {
+        // Strip all console.* and debugger in production builds
+        drop_console: true,
+        drop_debugger: true,
+        // Remove dead code from tree-shaking
+        passes: 2,
+      }
+    },
     sourcemap: false,
-    chunkSizeWarningLimit: 1000,
-    // Optimize assets
-    assetsInlineLimit: 4096, // Inline assets smaller than 4KB
-    cssCodeSplit: true
+    chunkSizeWarningLimit: 600,
+    assetsInlineLimit: 4096, // Inline assets smaller than 4 KB as base64
+    cssCodeSplit: true,
   },
   server: {
     host: true,
