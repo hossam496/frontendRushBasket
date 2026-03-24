@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import api from '../services/api';
 import { useAuth } from './AuthContext';
+
 const NotificationContext = createContext();
 
 export const useNotifications = () => useContext(NotificationContext);
@@ -11,7 +12,11 @@ export const NotificationProvider = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch all notifications initially
+  // Use a ref to track the current unread count without causing stale closures in interval callbacks
+  const unreadCountRef = useRef(0);
+  unreadCountRef.current = unreadCount;
+
+  // Fetch all notifications
   const fetchNotifications = useCallback(async () => {
     if (!user || user.role !== 'admin') {
       setIsLoading(false);
@@ -22,7 +27,7 @@ export const NotificationProvider = ({ children }) => {
       const { data } = await api.get('/api/notifications/history?limit=20');
       if (data.success) {
         setNotifications(data.notifications);
-        setUnreadCount(data.unreadCount);
+        setUnreadCount(data.unreadCount ?? 0);
       }
     } catch (error) {
       console.error('[NotificationContext] Failed to fetch notifications:', error);
@@ -31,34 +36,40 @@ export const NotificationProvider = ({ children }) => {
     }
   }, [user]);
 
-  // Fast polling just for the unread count
-  const pollUnreadCount = useCallback(async () => {
-    if (!user || user.role !== 'admin') return;
+  // Setup initial fetch + stable polling interval
+  // We use a ref for fetchNotifications to avoid restarting the interval on every render
+  const fetchRef = useRef(fetchNotifications);
+  fetchRef.current = fetchNotifications;
 
-    try {
-      const { data } = await api.get('/api/notifications/history/unread-count');
-      if (data.success && data.count !== unreadCount) {
-        // If the unread count grew, we should fetch the actual notifications again to show the new ones in the list
-        if (data.count > unreadCount) {
-          fetchNotifications();
-        } else {
-          setUnreadCount(data.count);
-        }
-      }
-    } catch (error) {
-      console.error('[NotificationContext] Polling error:', error);
-    }
-  }, [user, unreadCount, fetchNotifications]);
-
-  // Setup initial fetch and polling
   useEffect(() => {
-    fetchNotifications();
-
-    if (user && user.role === 'admin') {
-      const interval = setInterval(pollUnreadCount, 10000); // 10 seconds polling
-      return () => clearInterval(interval);
+    if (!user || user.role !== 'admin') {
+      setIsLoading(false);
+      return;
     }
-  }, [fetchNotifications, pollUnreadCount, user]);
+
+    // Initial load
+    fetchRef.current();
+
+    // Poll every 10 seconds — stable interval that never gets recreated
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await api.get('/api/notifications/history/unread-count');
+        if (data.success) {
+          const newCount = data.count ?? 0;
+          if (newCount !== unreadCountRef.current) {
+            // Count changed — re-fetch the full list to get new notifications
+            fetchRef.current();
+          }
+        }
+      } catch (error) {
+        // Silently ignore poll errors to prevent dashboard disruption
+        console.warn('[NotificationContext] Poll error (non-critical):', error.message);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  // Only restart if user changes (login/logout), NOT on every unread count change
+  }, [user]);
 
   // Mark single as read
   const markAsRead = async (id) => {
@@ -66,11 +77,9 @@ export const NotificationProvider = ({ children }) => {
       // Optimistic UI update
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
-
       await api.patch(`/api/notifications/history/${id}/read`);
     } catch (error) {
-      // Revert if failed (optional, simplified here)
-      fetchNotifications();
+      fetchRef.current(); // Re-sync on error
     }
   };
 
@@ -80,10 +89,9 @@ export const NotificationProvider = ({ children }) => {
       // Optimistic UI update
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
-
       await api.patch('/api/notifications/history/read-all');
     } catch (error) {
-      fetchNotifications();
+      fetchRef.current();
     }
   };
 
