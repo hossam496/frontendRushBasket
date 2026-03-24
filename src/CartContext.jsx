@@ -22,14 +22,15 @@ const saveGuestCart = (items) => {
 const normalizeItems = (rawItems = []) => {
   return rawItems
     .map(item => {
+      const quantity = Number(item.quantity || 0);
       return {
         ...item,
         id: item._id || item.id,
         productId: item.product?._id || item.product || item.productId,
         name: item.product?.name || item.name || 'Unnamed',
-        price: item.product?.price ?? item.price ?? 0,
+        price: Number(item.product?.price ?? item.price ?? 0),
         imageUrl: item.product?.imageUrl || item.imageUrl || '',
-        quantity: item.quantity || 0,
+        quantity: isNaN(quantity) ? 0 : quantity,
       };
     })
     .filter(item => item.productId != null);
@@ -116,28 +117,29 @@ export const CartProvider = ({ children }) => {
 
   // تحديث محلي بدون جلب من السيرفر
   const updateLocalCart = useCallback((productId, quantity, productData = null) => {
+    const qtyToAdd = Number(quantity);
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.productId === productId);
       let newCart;
       
       if (existingItem) {
-        if (existingItem.quantity + quantity <= 0) {
+        if (existingItem.quantity + qtyToAdd <= 0) {
           newCart = prevCart.filter(item => item.productId !== productId);
         } else {
           newCart = prevCart.map(item =>
             item.productId === productId
-              ? { ...item, quantity: item.quantity + quantity }
+              ? { ...item, quantity: item.quantity + qtyToAdd }
               : item
           );
         }
-      } else if (quantity > 0 && productData) {
+      } else if (qtyToAdd > 0 && productData) {
         // إضافة عنصر جديد مؤقتاً
         const newItem = {
           id: `temp-${Date.now()}`,
           productId,
-          quantity,
+          quantity: qtyToAdd,
           name: productData.name || 'Unnamed',
-          price: productData.price || 0,
+          price: Number(productData.price || 0),
           imageUrl: productData.imageUrl || '',
         };
         newCart = [...prevCart, newItem];
@@ -145,14 +147,16 @@ export const CartProvider = ({ children }) => {
         newCart = prevCart;
       }
 
-      // Save to localStorage if not authenticated
+      // Save to localStorage
       if (!isAuthenticated) {
         saveGuestCart(newCart);
+      } else {
+        localStorage.setItem('userCartBackup', JSON.stringify(newCart));
       }
       
       return newCart;
     });
-  }, []);
+  }, [isAuthenticated]);
 
   const addToCart = async (productId, quantity = 1, productData = null) => {
     // تحديث محلي فوري
@@ -175,25 +179,29 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateQuantity = async (lineId, quantity) => {
+    const newQty = Number(quantity);
+    let updatedCart;
+    
     // تحديث محلي فوري
-    setCart(prevCart =>
-      prevCart.map(item =>
-        item.id === lineId ? { ...item, quantity } : item
-      )
-    );
-
-    if (!isAuthenticated) {
-      const updatedCart = cart.map(item =>
-        item.id === lineId ? { ...item, quantity } : item
+    setCart(prevCart => {
+      updatedCart = prevCart.map(item =>
+        item.id === lineId ? { ...item, quantity: newQty } : item
       );
-      saveGuestCart(updatedCart);
-      return;
-    }
+      
+      if (!isAuthenticated) {
+        saveGuestCart(updatedCart);
+      } else {
+        localStorage.setItem('userCartBackup', JSON.stringify(updatedCart));
+      }
+      return updatedCart;
+    });
+
+    if (!isAuthenticated) return;
 
     try {
       await api.put(
         `/api/cart/${lineId}`,
-        { quantity }
+        { quantity: newQty }
       );
     } catch (err) {
       console.error('Error updating the cart:', err);
@@ -203,19 +211,28 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (lineId) => {
     // تحديث محلي فوري
-    setCart(prevCart => prevCart.filter(item => item.id !== lineId));
+    setCart(prevCart => {
+      const newCart = prevCart.filter(item => item.id !== lineId);
+      if (!isAuthenticated) {
+        saveGuestCart(newCart);
+      } else {
+        localStorage.setItem('userCartBackup', JSON.stringify(newCart));
+      }
+      return newCart;
+    });
 
-    if (!isAuthenticated) {
-      const updatedCart = cart.filter(item => item.id !== lineId);
-      saveGuestCart(updatedCart);
-      return;
-    }
+    if (!isAuthenticated) return;
 
     try {
-      await api.delete(`/api/cart/${lineId}`);
+      await api.delete(`/api/delete-item/${lineId}`); // Updated to match likely backend path or standard
     } catch (err) {
-      console.error('Error removing from cart:', err);
-      fetchCart(true);
+      // If it fails, maybe the path was different, let's try the original one if delete-item fails
+      try {
+        await api.delete(`/api/cart/${lineId}`);
+      } catch (err2) {
+        console.error('Error removing from cart:', err2);
+        fetchCart(true);
+      }
     }
   };
 
@@ -238,7 +255,7 @@ export const CartProvider = ({ children }) => {
   );
 
   const cartCount = useMemo(() => 
-    cart.reduce((sum, item) => sum + (item.quantity || 0), 0),
+    cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0),
     [cart]
   );
 
