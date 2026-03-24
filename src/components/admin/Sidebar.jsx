@@ -16,6 +16,7 @@ import {
   FiUsers,
   FiSettings
 } from 'react-icons/fi';
+import logo from '../../assets/logo.png';
 
 const Sidebar = ({ isCollapsed, isMobileOpen, onMobileClose }) => {
   const navigate = useNavigate();
@@ -61,12 +62,10 @@ const Sidebar = ({ isCollapsed, isMobileOpen, onMobileClose }) => {
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-              A
-            </div>
+            <img src={logo} alt="Logo" className="w-10 h-10 object-contain" />
             {!isCollapsed && (
               <span className="ml-3 text-xl font-bold text-gray-900">
-                Admin<span className="text-indigo-600">Hub</span>
+                Rush<span className="text-indigo-600">Basket</span>
               </span>
             )}
           </div>

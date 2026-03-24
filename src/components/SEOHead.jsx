@@ -18,7 +18,7 @@ const SEOHead = ({
   const finalTitle = title ? `${title} | ${siteTitle}` : siteTitle;
   const finalDescription = description || siteDescription;
   const finalKeywords = keywords || 'ecommerce, shopping, premium products, online store, rushbasket';
-  const finalOgImage = ogImage || `${baseUrl}/logo.png`;
+  const finalOgImage = ogImage || `${baseUrl}/assets/logo.png`;
   const finalOgUrl = ogUrl || baseUrl;
 
   // Structured data for product
