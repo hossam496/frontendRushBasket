@@ -17,12 +17,19 @@
   <!-- Apple Touch Icon -->
   <link rel="apple-touch-icon" href="/logo.png" />
 
-  <!-- Preconnect for performance -->
+  <!-- Resource Hints -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://api.stripe.com" />
-
-  <!-- DNS Prefetch -->
   <link rel="dns-prefetch" href="//backend1-eight-lovat.vercel.app" />
+
+  <!-- Preload Critical Assets -->
+  <link rel="preload" as="image" href="/FoodBanner.png" fetchpriority="high" />
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+  </noscript>
 
   <!-- Resource Management -->
   <meta name="referrer" content="no-referrer-when-downgrade" />
