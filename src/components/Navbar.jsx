@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
-import api, { setAccessToken } from '../services/api';
+import api from '../services/api';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   FiHome,
@@ -18,7 +18,7 @@ import { navbarStyles } from '../assets/dummyStyles';
 import { navItems } from '../assets/Dummy'
 
 function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) {
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { cartCount } = useCart();
@@ -70,14 +70,7 @@ function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) 
 
   // Logout handler
   const handleLogout = async () => {
-    try {
-      await api.post('/api/auth/logout');
-    } catch (err) {
-      console.error('Logout failed:', err);
-    }
-    setAccessToken(null);
-    localStorage.removeItem('userData');
-    localStorage.removeItem('userRole');
+    await logout();
     navigate('/login');
   };
 

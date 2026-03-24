@@ -5,8 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { FaChevronRight, FaMinus, FaPlus, FaShoppingCart, FaThList } from "react-icons/fa";
 import { categories } from "../assets/dummyData";
-import axios from 'axios'
-import { API_BASE_URL } from '../services/api';
+import api, { API_BASE_URL } from '../services/api';
 
 // Memoized Product Card component
 const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) => {
@@ -79,6 +78,9 @@ const ItemsHome = () => {
     return localStorage.getItem("activeCategory") || "All";
   });
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
     localStorage.setItem("activeCategory", activeCategory);
   }, [activeCategory]);
@@ -87,16 +89,32 @@ const ItemsHome = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/items`)
-        const normalized = res.data.map((p) => ({
+        setLoading(true);
+        setError(null);
+        console.log('[ItemsHome] Fetching products from:', `${API_BASE_URL}/api/items`);
+        const res = await api.get('/api/items');
+        
+        // Safety check: Ensure res.data is an array
+        const data = Array.isArray(res.data) ? res.data : (res.data?.products || []);
+        
+        if (!Array.isArray(data)) {
+           console.error('[ItemsHome] Invalid products data format:', res.data);
+           setProducts([]);
+           return;
+        }
+
+        const normalized = data.map((p) => ({
           ...p,
           id: p._id,
-        }))
-        setProducts(normalized)
+        }));
+        setProducts(normalized);
       } catch (err) {
-        console.error('Error fetching products:', err)
+        console.error('[ItemsHome] Error fetching products:', err);
+        setError('Failed to load products. Please try again later.');
+      } finally {
+        setLoading(false);
       }
-    }
+    };
     fetchProducts()
   }, [])
 
@@ -267,7 +285,22 @@ const ItemsHome = () => {
 
           {/* product grid */}
           <div className={itemsHomeStyles.productsGrid}>
-            {searchedProducts.length > 0 ? (
+            {loading ? (
+              <div className="col-span-full py-20 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+                <p className="text-gray-500">Loading products...</p>
+              </div>
+            ) : error ? (
+              <div className="col-span-full py-20 text-center text-red-500">
+                <p>{error}</p>
+                <button 
+                  onClick={() => window.location.reload()} 
+                  className="mt-4 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : searchedProducts.length > 0 ? (
               searchedProducts.map((product) => (
                 <ProductCard
                   key={product.id}

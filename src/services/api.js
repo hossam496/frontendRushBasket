@@ -32,6 +32,10 @@ export const setAccessToken = (token, rememberMe = true) => {
 export const clearAuthTokens = () => {
   try {
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem('userData');
+    localStorage.removeItem('userRole');
+    // Also clear from sessionStorage just in case
+    sessionStorage.removeItem(TOKEN_KEY);
   } catch (error) {
     console.warn('Failed to clear tokens:', error);
   }

@@ -29,36 +29,32 @@ export const AuthProvider = ({ children }) => {
         const userData = localStorage.getItem('userData');
         const userRole = localStorage.getItem('userRole');
         
-        console.log('[AuthContext] Initializing auth state:', { 
-          hasToken: !!token, 
-          hasUserData: !!userData,
-          userRole 
+        console.log('[AuthContext] Intializing auth - Found:', { 
+          token: !!token, 
+          user: !!userData,
+          role: userRole 
         });
         
-        // Only restore session if BOTH token AND user data exist
         if (token && userData) {
           try {
             const parsedUser = JSON.parse(userData);
             setUser(parsedUser);
             setIsAuthenticated(true);
             setIsAdmin(userRole === 'admin' || parsedUser.role === 'admin');
-            console.log('[AuthContext] Session restored for user:', parsedUser.email);
             
-            // Validate token with backend (optional, async)
+            // Validate token asynchronously
             validateTokenWithBackend(token);
           } catch (parseError) {
-            console.error('[AuthContext] Error parsing user data:', parseError);
+            console.error('[AuthContext] Session data corrupted:', parseError);
             clearAuthState();
           }
-        } else {
-          console.log('[AuthContext] No valid session found');
-          if (!token) {
-            clearAuthState();
-          }
+        } else if (token || userData) {
+          // Partial session data found - clear it to be safe
+          console.warn('[AuthContext] Partial session data found, clearing');
+          clearAuthState();
         }
       } catch (error) {
-        console.error('[AuthContext] Error initializing auth:', error);
-        clearAuthState();
+        console.error('[AuthContext] Init error:', error);
       } finally {
         setLoading(false);
       }
@@ -87,14 +83,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const clearAuthState = () => {
+  const clearAuthState = useCallback(() => {
     clearAuthTokens();
     localStorage.removeItem('userData');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('token'); // Legacy key just in case
+    sessionStorage.removeItem('token');
+    
     setUser(null);
     setIsAuthenticated(false);
     setIsAdmin(false);
-  };
+    console.log('[AuthContext] Auth state cleared');
+  }, []);
 
   const login = useCallback((userData, token, rememberMe = true) => {
     console.log('[AuthContext] Login called for:', userData.email);
@@ -113,9 +113,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = useCallback(() => {
-    console.log('[AuthContext] Logout called');
+    console.log('[AuthContext] Logout initiated');
     clearAuthState();
-  }, []);
+  }, [clearAuthState]);
 
   const value = {
     user,
