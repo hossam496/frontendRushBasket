@@ -51,20 +51,25 @@ export const NotificationProvider = ({ children }) => {
     fetchRef.current();
 
     // Poll every 10 seconds — stable interval that never gets recreated
-    const interval = setInterval(async () => {
-      try {
-        const { data } = await api.get('/api/notifications/history/unread-count');
-        if (data.success) {
-          const newCount = data.count ?? 0;
-          if (newCount !== unreadCountRef.current) {
-            // Count changed — re-fetch the full list to get new notifications
-            fetchRef.current();
-          }
-        }
-      } catch (error) {
-        // Silently ignore poll errors to prevent dashboard disruption
-        console.warn('[NotificationContext] Poll error (non-critical):', error.message);
-      }
+    const interval = setInterval(() => {
+        // Use requestIdleCallback to avoid blocking the main thread for background work
+        const scheduleTask = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+        
+        scheduleTask(async () => {
+            try {
+              const { data } = await api.get('/api/notifications/history/unread-count');
+              if (data.success) {
+                const newCount = data.count ?? 0;
+                if (newCount !== unreadCountRef.current) {
+                  // Count changed — re-fetch the full list to get new notifications
+                  fetchRef.current();
+                }
+              }
+            } catch (error) {
+              // Silently ignore poll errors to prevent dashboard disruption
+              console.warn('[NotificationContext] Poll error (non-critical):', error.message);
+            }
+        });
     }, 10000);
 
     return () => clearInterval(interval);
@@ -95,14 +100,14 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
-  const value = {
+  const value = useMemo(() => ({
     notifications,
     unreadCount,
     isLoading,
     markAsRead,
     markAllAsRead,
     refreshUserNotifications: fetchNotifications
-  };
+  }), [notifications, unreadCount, isLoading, fetchNotifications]);
 
   return (
     <NotificationContext.Provider value={value}>

@@ -72,7 +72,7 @@ export const EmptyState = ({
 
 // Page loading component
 export const PageLoading = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-green-50">
+  <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-emerald-50 to-green-50">
     <div className="text-center">
       <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-emerald-500 mx-auto mb-4"></div>
       <div className="text-emerald-600 font-medium animate-pulse">Loading...</div>

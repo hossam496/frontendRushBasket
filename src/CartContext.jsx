@@ -259,21 +259,35 @@ export const CartProvider = ({ children }) => {
     [cart]
   );
 
+  const refreshCart = useCallback(() => fetchCart(true), [fetchCart]);
+  const isAuth = useCallback(() => isAuthenticated, [isAuthenticated]);
+
+  const value = useMemo(() => ({
+    cart,
+    loading,
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    getCartTotal,
+    cartCount,
+    refreshCart,
+    isAuthenticated: isAuth,
+  }), [
+    cart, 
+    loading, 
+    addToCart, 
+    updateQuantity, 
+    removeFromCart, 
+    clearCart, 
+    getCartTotal, 
+    cartCount, 
+    refreshCart, 
+    isAuth
+  ]);
+
   return (
-    <CartContext.Provider
-      value={{
-        cart,
-        loading,
-        addToCart,
-        updateQuantity,
-        removeFromCart,
-        clearCart,
-        getCartTotal,
-        cartCount,
-        refreshCart: () => fetchCart(true),
-        isAuthenticated: () => isAuthenticated,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

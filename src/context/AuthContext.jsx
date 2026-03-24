@@ -120,14 +120,14 @@ export const AuthProvider = ({ children }) => {
     clearAuthState();
   }, [clearAuthState]);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     isAuthenticated,
     isAdmin,
     loading,
     login,
     logout
-  };
+  }), [user, isAuthenticated, isAdmin, loading, login, logout]);
 
   return (
     <AuthContext.Provider value={value}>

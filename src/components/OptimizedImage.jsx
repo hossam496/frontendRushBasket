@@ -68,8 +68,8 @@ const OptimizedImage = ({
           alt={alt}
           onLoad={handleLoad}
           onError={handleError}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${
-            isLoaded ? 'opacity-100' : 'opacity-0'
+          className={`w-full h-full object-cover transition-all duration-700 ${
+            isLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md scale-95'
           }`}
           loading="lazy"
           decoding="async"
