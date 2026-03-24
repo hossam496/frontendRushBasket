@@ -316,7 +316,7 @@ const AdminOrderList = () => {
                           <FiPhone className="mr-2" /> {selectedOrder.customer?.phone || 'No phone'}
                         </p>
                         <p className="text-sm text-gray-500 flex items-start mt-2">
-                          <FiMapPin className="mr-2 mt-1 flex-shrink-0" /> {selectedOrder.customer?.address || 'No address'}
+                          <FiMapPin className="mr-2 mt-1 shrink-0" /> {selectedOrder.customer?.address || 'No address'}
                         </p>
                       </div>
                     </div>
@@ -381,9 +381,9 @@ const AdminOrderList = () => {
                 <div className="border border-gray-200 rounded-xl overflow-hidden">
                   {selectedOrder.items?.map((item, idx) => (
                     <div key={idx} className={`flex items-center p-4 ${idx !== selectedOrder.items.length - 1 ? 'border-b border-gray-200' : ''}`}>
-                      <div className="w-16 h-16 bg-gray-100 rounded-lg mr-4 overflow-hidden flex-shrink-0">
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg mr-4 overflow-hidden shrink-0">
                         {item.imageUrl ? (
-                          <img src={`${api.defaults.baseURL}${item.imageUrl}`} className="w-full h-full object-cover" alt={item.name} />
+                          <img src={`${api.defaults.baseURL}${item.imageUrl}`} className="w-full h-full object-contain" alt={item.name} />
                         ) : (
                           <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                             <FiPackage className="text-gray-400" />

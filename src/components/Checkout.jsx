@@ -402,7 +402,7 @@ const Checkout = () => {
                         <img
                           src={`${API_BASE_URL}${item.imageUrl.startsWith('/') ? '' : '/'}${item.imageUrl}`}
                           alt={item.name}
-                          className="w-full h-full object-cover rounded"
+                          className="w-full h-full object-contain rounded"
                         />
                       ) : (
                         <FiPackage className="text-emerald-500 w-6 h-6" />

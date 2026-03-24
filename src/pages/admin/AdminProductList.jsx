@@ -249,9 +249,9 @@ const AdminProductList = () => {
                 const imgSrc = getImageSrc(row);
                 return (
                   <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gray-100 rounded-lg mr-3 overflow-hidden flex-shrink-0">
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg mr-3 overflow-hidden shrink-0">
                       {imgSrc ? (
-                        <img src={imgSrc} alt={row.name} className="w-full h-full object-cover" />
+                        <img src={imgSrc} alt={row.name} className="w-full h-full object-contain" />
                       ) : (
                         <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                           <FiPackage className="text-gray-400" />

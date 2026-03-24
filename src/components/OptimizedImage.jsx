@@ -56,7 +56,7 @@ const OptimizedImage = ({
           <img 
             src={placeholder} 
             alt="Loading placeholder"
-            className="w-full h-full object-cover opacity-50"
+            className="w-full h-full object-contain opacity-50"
           />
         </div>
       )}
@@ -68,7 +68,7 @@ const OptimizedImage = ({
           alt={alt}
           onLoad={handleLoad}
           onError={handleError}
-          className={`w-full h-full object-cover transition-all duration-700 ${
+          className={`w-full h-full object-contain transition-all duration-700 ${
             isLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md scale-95'
           }`}
           loading="lazy"

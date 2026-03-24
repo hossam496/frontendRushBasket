@@ -30,7 +30,7 @@ const OrderItem = React.memo(({ item }) => {
       <img 
         src={item.product?.imageUrl || '/placeholder-product.jpg'} 
         alt={item.product?.name || 'Product'}
-        className="w-16 h-16 object-cover rounded-lg"
+        className="w-16 h-16 object-contain rounded-lg"
         loading="lazy"
       />
       <div className="flex-1">

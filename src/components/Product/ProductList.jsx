@@ -17,7 +17,7 @@ export const ProductCard = React.memo(({ product, onAddToCart, loading }) => {
         <img 
           src={product.imageUrl || '/placeholder-product.jpg'} 
           alt={product.name}
-          className="w-full h-48 object-cover rounded-t-lg"
+          className="w-full h-48 object-contain rounded-t-lg"
           loading="lazy"
         />
         {product.stock <= 0 && (
