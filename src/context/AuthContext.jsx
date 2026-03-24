@@ -70,14 +70,17 @@ export const AuthProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (!response.data.success) {
-        console.log('[AuthContext] Token validation failed, clearing session');
+      console.log('[AuthContext] Validation response:', response.data);
+      
+      if (!response.data || response.data.success === false) {
+        console.log('[AuthContext] Token validation explicit failure, clearing session');
         clearAuthState();
       }
     } catch (error) {
+      console.error('[AuthContext] Validation error:', error.response?.data || error.message);
       // Only logout on definite auth failures, not network errors
       if (error.response?.status === 401) {
-        console.log('[AuthContext] Token invalid, clearing session');
+        console.log('[AuthContext] Token invalid (401), clearing session');
         clearAuthState();
       }
     }

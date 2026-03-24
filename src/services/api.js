@@ -97,20 +97,24 @@ api.interceptors.response.use(
       const isPermanentAuthFailure = 
         errorMessage.includes('expired') || 
         errorMessage.includes('invalid') ||
-        errorMessage.includes('User not found');
+        errorMessage.includes('User not found') ||
+        errorMessage.includes('Not authorized');
       
       if (isPermanentAuthFailure) {
-        console.log('[API] Permanent auth failure, clearing session');
+        console.warn(`[API] Permanent auth failure on ${config.method?.toUpperCase()} ${config.url}:`, errorMessage);
         clearAuthTokens();
         localStorage.removeItem('userData');
         localStorage.removeItem('userRole');
         
-        if (window.location.pathname !== '/login') {
+        // Use window.location only if we're not already on login or home
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/login' && currentPath !== '/signup') {
+          console.log('[API] Redirecting to login due to 401');
           toast.error('Session expired - please login again');
           window.location.replace('/login');
         }
       } else {
-        console.log('[API] Temporary auth issue, not logging out');
+        console.log('[API] Temporary or non-critical auth issue, not logging out:', errorMessage);
       }
       
       return Promise.reject(error);

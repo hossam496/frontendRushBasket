@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signupStyles } from "../assets/dummyStyles";
 import { FaArrowLeft, FaCheck, FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
-import api, { saveAuthTokens } from '../services/api';
+import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Signup = () => {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -73,12 +75,9 @@ const Signup = () => {
 
       if (res.data.success) {
         const { token, user } = res.data;
-        saveAuthTokens(token);
-        localStorage.setItem('userData', JSON.stringify(user));
-        localStorage.setItem('userRole', user.role || 'user');
+        login(user, token, formData.remember);
         
         setShowToast(true);
-        window.dispatchEvent(new Event('authStateChanged'));
         
         setTimeout(() => {
           if (user.role === 'admin') {
