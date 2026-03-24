@@ -52,13 +52,16 @@ const Footer = () => {
                 </p>
 
                 <div className="space-x-3 flex">
-                    {socialLinks.map((social, idx) => (
-                        <a href={social.url} key={idx}
-                        target="_blank" aria-label={`Visit our ${social.icon.name.replace('fa', '')} page`}
-                        className={footerStyles.socialLink}>
-                            <social.icon className={footerStyles.socialIcon}></social.icon>
-                        </a>
-                    ))}
+                    {socialLinks.map((social, idx) => {
+                        const label = social.url.split('.com')[0].split('www.')[1] || 'social';
+                        return (
+                            <a href={social.url} key={idx}
+                            target="_blank" rel="noopener noreferrer" aria-label={`Follow us on ${label}`}
+                            className={footerStyles.socialLink}>
+                                <social.icon className={footerStyles.socialIcon} aria-hidden="true"></social.icon>
+                            </a>
+                        );
+                    })}
                 </div>
             </div>
             
@@ -129,9 +132,9 @@ const Footer = () => {
                     <input type="email" placeholder="Enter Email Adress" 
                     className={footerStyles.newsletterInput}/>
 
-                    <button className={footerStyles.newsletterButton}>
-                        <BiMailSend className='mr-2 text-lg' />
-                        <span className="cursor-pointer">Subscibe</span>
+                    <button className={footerStyles.newsletterButton} aria-label="Subscribe to newsletter">
+                        <BiMailSend className='mr-2 text-lg' aria-hidden="true" />
+                        <span className="cursor-pointer">Subscribe</span>
                     </button>
                 </div>
                 <p className={footerStyles.privacyText}>

@@ -50,7 +50,7 @@ const ProductCard = ({ item }) => {
       <div className={itemsPageStyles.imageContainer}>
         <img
           src={imgSrc}
-          alt={item.name}
+          alt={`Image of ${item.name}`}
           className={itemsPageStyles.productImage}
           width={300}
           height={200}
@@ -84,15 +84,17 @@ const ProductCard = ({ item }) => {
               <button
                 onClick={handleDecrement}
                 className={`${itemsPageStyles.quantityButton} ${itemsPageStyles.quantityButtonLeft}`}
+                aria-label={`Decrease quantity of ${item.name}`}
               >
-                <FiMinus />
+                <FiMinus aria-hidden="true" />
               </button>
               <span className={itemsPageStyles.quantityValue}>{quantity}</span>
               <button
                 onClick={handleIncement}
                 className={`${itemsPageStyles.quantityButton} ${itemsPageStyles.quantityButtonRight}`}
+                aria-label={`Increase quantity of ${item.name}`}
               >
-                <FiPlus />
+                <FiPlus aria-hidden="true" />
               </button>
             </div>
           ) : (
@@ -234,8 +236,12 @@ const Items = () => {
               placeholder="Search fruits, vegetables, meats..."
               className={itemsPageStyles.searchInput}
             />
-            <button type="submit" className={itemsPageStyles.searchButton}>
-              <FiSearch className="h-5 w-5" />
+            <button 
+              type="submit" 
+              className={itemsPageStyles.searchButton}
+              aria-label="Search items"
+            >
+              <FiSearch className="h-5 w-5" aria-hidden="true" />
             </button>
           </form>
 

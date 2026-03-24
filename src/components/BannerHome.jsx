@@ -66,8 +66,11 @@ const BannerHome = ({ onSearch }) => {
                                 placeholder='Search for fruits, vegetables, meats, dairy...'
                                 className={bannerStyles.input}
                             />
-                            <button type='submit' className={bannerStyles.searchButton}>
-                                <FiSearch className=' h-4 w-4 sm:h-5 sm:w-5' />
+                            <button
+                                type="submit"
+                                className={bannerStyles.searchButton}
+                                aria-label="Search for products"
+                            >                <FiSearch className=' h-4 w-4 sm:h-5 sm:w-5' />
                             </button>
                         </form>
 

@@ -127,7 +127,7 @@ function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) 
       <div className={navbarStyles.container}>
         <div className={navbarStyles.innerContainer}>
           {/* Logo */}
-          <Link to="/" className={navbarStyles.logoLink}>
+          <Link to="/" className={navbarStyles.logoLink} aria-label="RushBasket - Go to Homepage">
             <img
               src={logo}
               alt="RushBasket Logo"
@@ -197,7 +197,7 @@ function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) 
               </Link>
             )}
 
-            <Link to="/cart" className={navbarStyles.cartLink}>
+            <Link to="/cart" className={navbarStyles.cartLink} aria-label={`View shopping cart, ${cartCount} items`}>
               <FaOpencart
                 className={`${navbarStyles.cartIcon} ${cartBounce ? 'animate-bounce' : ''
                   }`}

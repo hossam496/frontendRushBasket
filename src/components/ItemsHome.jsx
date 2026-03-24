@@ -58,15 +58,17 @@ const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) =
               <button
                 onClick={() => onDecrease(product)}
                 className={itemsHomeStyles.quantityButton}
+                aria-label={`Decrease quantity of ${product.name}`}
               >
-                <FaMinus />
+                <FaMinus aria-hidden="true" />
               </button>
               <span className="font-bold">{quantity}</span>
               <button
                 onClick={() => onIncrease(product)}
                 className={itemsHomeStyles.quantityButton}
+                aria-label={`Increase quantity of ${product.name}`}
               >
-                <FaPlus />
+                <FaPlus aria-hidden="true" />
               </button>
             </div>
           )}
