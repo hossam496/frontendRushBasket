@@ -5,27 +5,67 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#10b981" />
+  <meta name="description"
+    content="RushBasket - Premium e-commerce experience with quality products, fast delivery, and exceptional service." />
+  <meta name="keywords" content="ecommerce, shopping, premium products, online store, rushbasket" />
+  <meta name="author" content="RushBasket" />
 
-  <link rel="preconnect" href="https://backend1-eight-lovat.vercel.app" crossorigin />
-  <link rel="dns-prefetch" href="https://backend1-eight-lovat.vercel.app" />
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="/logo.png" />
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://api.stripe.com" />
+
+  <!-- DNS Prefetch -->
+  <link rel="dns-prefetch" href="//backend1-eight-lovat.vercel.app" />
+
+  <!-- Resource Management -->
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+  <meta http-equiv="Cache-Control" content="public, max-age=31536000" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="RushBasket - Premium E-commerce" />
+  <meta property="og:description" content="Premium shopping experience with quality products and fast delivery." />
+  <meta property="og:image" content="/logo.png" />
+  <meta property="og:url" content="https://frontend-rush-basket.vercel.app" />
+  <meta property="og:type" content="website" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="RushBasket - Premium E-commerce" />
+  <meta name="twitter:description" content="Premium shopping experience with quality products." />
+  <meta name="twitter:image" content="/logo.png" />
+
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
 
   <title>RushBasket - Premium E-commerce</title>
+
+  <!-- Service Worker Registration -->
+  <script>ئ
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('[SW] Registered:', registration.scope);
+          })
+          .catch(error => {
+            console.error('[SW] Registration failed:', error);
+          });
+      });
+    }
+  </script>
 </head>
 
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        // تأخير التسجيل لتحسين أداء الـ LCP
-        setTimeout(() => {
-          navigator.serviceWorker.register('/service-worker.js');
-        }, 2000);
-      });
-    }
-  </script>
 </body>
 
 </html>
