@@ -1,6 +1,6 @@
-const CACHE_NAME = 'rushbasket-cache-v5';
-const DYNAMIC_CACHE_NAME = 'rushbasket-dynamic-v5';
-const STATIC_CACHE_NAME = 'rushbasket-static-v5';
+const CACHE_NAME = 'rushbasket-cache-v6';
+const DYNAMIC_CACHE_NAME = 'rushbasket-dynamic-v6';
+const STATIC_CACHE_NAME = 'rushbasket-static-v6';
 
 const STATIC_ASSETS = [
   '/',
