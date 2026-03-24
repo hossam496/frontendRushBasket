@@ -21,6 +21,7 @@ const Login = lazy(() => import('./components/Login'))
 const Signup = lazy(() => import('./components/Signup'))
 const Logout = lazy(() => import('./components/Logout'))
 const NotificationsPage = lazy(() => import('./components/NotificationsPage'))
+const PWAInstallPrompt = lazy(() => import('./components/PWAInstallPrompt'))
 
 // Admin components - already lazy loaded
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
@@ -109,6 +110,9 @@ const AppContent = () => {
             {/* fallback to home */}
             <Route path='*' element={<Navigate replace to='/' />} />
           </Routes>
+        </Suspense>
+        <Suspense fallback={null}>
+          <PWAInstallPrompt />
         </Suspense>
         {!isAdminPath && (
           <Suspense fallback={<SkeletonLoader />}>
