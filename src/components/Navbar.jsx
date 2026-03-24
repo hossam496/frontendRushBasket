@@ -13,6 +13,7 @@ import {
 import { FaOpencart } from 'react-icons/fa';
 import { useCart } from '../CartContext';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
 import logo from '../assets/logo.png';
 import { navbarStyles } from '../assets/dummyStyles';
 import { navItems } from '../assets/Dummy'
@@ -196,6 +197,8 @@ function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) 
                 <span className="ml-1 text-white">Login</span>
               </Link>
             )}
+
+            <NotificationBell />
 
             <Link to="/cart" className={navbarStyles.cartLink} aria-label={`View shopping cart, ${cartCount} items`}>
               <FaOpencart

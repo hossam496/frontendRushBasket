@@ -595,3 +595,31 @@ export const userOrdersPageStyles = {
   modalFooter: "sticky bottom-0 bg-emerald-900/80 backdrop-blur-md border-t border-emerald-700/50 p-6",
   closeButton: "px-6 py-2 bg-emerald-700/50 hover:bg-emerald-700 text-emerald-100 rounded-full transition"
 };
+
+export const notificationStyles = {
+  bellContainer: "relative",
+  bellButton: "relative p-2.5 rounded-full hover:bg-slate-700/50 transition-colors group",
+  bellIcon: "h-5 w-5 text-slate-100 group-hover:text-green-200 transition-transform",
+  badge: "absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-black bg-green-400 rounded-full min-w-[18px] min-h-[18px] border-2 border-black",
+  dropdown: "absolute right-0 mt-3 w-80 max-w-[calc(100vw-2rem)] bg-slate-900/95 backdrop-blur-xl border border-emerald-500/30 rounded-2xl shadow-2xl z-50 overflow-hidden transform origin-top-right transition-all duration-300",
+  header: "p-4 border-b border-emerald-500/20 flex justify-between items-center bg-emerald-950/30",
+  headerTitle: "text-sm font-bold text-emerald-100",
+  markAllBtn: "text-xs text-emerald-400 hover:text-emerald-200 transition-colors",
+  list: "max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-emerald-800",
+  item: "p-4 border-b border-emerald-500/10 hover:bg-emerald-800/20 transition-colors cursor-pointer relative",
+  unreadItem: "bg-emerald-500/5",
+  itemContent: "flex flex-col",
+  itemHeader: "flex justify-between items-start mb-1",
+  itemTitle: "text-sm font-semibold text-emerald-50",
+  itemTime: "text-[10px] text-emerald-400 font-medium",
+  itemMessage: "text-xs text-emerald-200 line-clamp-2",
+  unreadIndicator: "absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-green-400 rounded-full",
+  empty: "p-8 text-center",
+  emptyText: "text-sm text-emerald-300",
+  footer: "p-3 border-t border-emerald-500/20 text-center bg-emerald-950/30",
+  viewAll: "text-xs font-medium text-emerald-400 hover:text-emerald-200 transition-colors",
+  toast: "fixed bottom-6 right-6 bg-emerald-900/90 backdrop-blur-md border border-emerald-500/30 p-4 rounded-xl shadow-2xl z-[100] flex items-start space-x-3 transform transition-all duration-500",
+  toastTitle: "text-sm font-bold text-emerald-100",
+  toastMessage: "text-xs text-emerald-200"
+};
+

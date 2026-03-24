@@ -4,6 +4,8 @@ import StatCard from "../../components/admin/StatCard";
 import ChartCard from "../../components/admin/ChartCard";
 import DataTable from "../../components/admin/DataTable";
 import PushNotificationToggle from "../../components/PushNotificationToggle";
+import { useNavigate } from "react-router-dom";
+import { useNotifications } from "../../context/NotificationContext";
 import {
   FiTrendingUp,
   FiShoppingBag,
@@ -20,6 +22,9 @@ import api from "../../services/api";
 
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const { notifications } = useNotifications();
+  const recentNotifications = notifications.slice(0, 5);
   const pollingIntervalRef = useRef(null);
   const [stats, setStats] = useState({
     totalSales: 0,
@@ -203,82 +208,107 @@ const AdminDashboard = () => {
         />
       </div>
 
-      {/* Recent Orders Table */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h3 className="text-lg font-bold text-gray-900">Recent Orders</h3>
-            <p className="text-sm text-gray-500 mt-1">Latest customer orders and their status</p>
+      {/* Recent Activity Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        {/* Recent Orders Table */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Recent Orders</h3>
+              <p className="text-sm text-gray-500 mt-1">Latest customer orders</p>
+            </div>
+            <button 
+              onClick={() => navigate('/admin/orders')}
+              className="text-indigo-600 hover:text-indigo-700 font-medium text-sm flex items-center"
+            >
+              <FiEye className="mr-2" />
+              View All
+            </button>
           </div>
-          <button className="text-indigo-600 hover:text-indigo-700 font-medium text-sm flex items-center">
-            <FiEye className="mr-2" />
-            View All
-          </button>
+
+          <div className="flex-1 overflow-hidden">
+            <DataTable
+              data={recentOrders}
+              columns={[
+                {
+                  header: "Order ID",
+                  accessor: "orderId",
+                  cell: (row) => (
+                    <span className="font-medium text-indigo-600">#{row.orderId}</span>
+                  )
+                },
+                {
+                  header: "Amount",
+                  accessor: "total",
+                  cell: (row) => (
+                    <span className="font-medium text-emerald-600">
+                      ${row.total?.toFixed(2)}
+                    </span>
+                  )
+                },
+                {
+                  header: "Status",
+                  accessor: "status",
+                  cell: (row) => (
+                    <span className={`
+                      px-2 py-0.5 rounded-full text-xs font-medium
+                      ${row.status === "Delivered" ? "bg-emerald-50 text-emerald-700" :
+                        row.status === "Processing" || row.status === "Shipped" ? "bg-blue-50 text-blue-700" :
+                        row.status === "Cancelled" ? "bg-red-50 text-red-700" :
+                        "bg-amber-50 text-amber-700"}
+                    `}>
+                      {row.status}
+                    </span>
+                  )
+                }
+              ]}
+              emptyMessage="No recent orders found"
+            />
+          </div>
         </div>
 
-        <DataTable
-          data={recentOrders}
-          columns={[
-            {
-              header: "Order ID",
-              accessor: "orderId",
-              cell: (row) => (
-                <span className="font-medium text-indigo-600">#{row.orderId}</span>
-              )
-            },
-            {
-              header: "Customer",
-              accessor: "customer",
-              cell: (row) => (
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mr-3 font-medium text-sm">
-                    {(typeof row.customer === "string" ? row.customer : row.customer?.name)?.charAt(0) || "C"}
+        {/* Recent Notifications Card */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
+              <p className="text-sm text-gray-500 mt-1">System alerts</p>
+            </div>
+            <button 
+              onClick={() => navigate('/notifications')}
+              className="text-indigo-600 hover:text-indigo-700 font-medium text-sm flex items-center"
+            >
+              <FiBell className="mr-2" />
+              View All
+            </button>
+          </div>
+
+          <div className="flex-1 space-y-4 overflow-y-auto max-h-[400px] pr-2 scrollbar-thin">
+            {recentNotifications.length > 0 ? (
+              recentNotifications.map((notif) => (
+                <div 
+                  key={notif._id} 
+                  className={`p-3 rounded-xl border ${notif.isRead ? 'bg-gray-50 border-gray-100' : 'bg-emerald-50 border-emerald-100'} transition-all`}
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <span className={`text-xs font-bold ${notif.isRead ? 'text-gray-600' : 'text-emerald-700'}`}>
+                      {notif.title}
+                    </span>
+                    <span className="text-[10px] text-gray-400">
+                      {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {typeof row.customer === "string" ? row.customer : row.customer?.name || "Guest"}
-                    </p>
-                  </div>
+                  <p className="text-xs text-gray-500 line-clamp-2">{notif.message}</p>
                 </div>
-              )
-            },
-            {
-              header: "Amount",
-              accessor: "total",
-              cell: (row) => (
-                <span className="font-medium text-emerald-600">
-                  ${row.total?.toFixed(2)}
-                </span>
-              )
-            },
-            {
-              header: "Status",
-              accessor: "status",
-              cell: (row) => (
-                <span className={`
-                  px-2.5 py-1 rounded-full text-xs font-medium
-                  ${row.status === "Delivered" ? "bg-emerald-50 text-emerald-700" :
-                    row.status === "Processing" || row.status === "Shipped" ? "bg-blue-50 text-blue-700" :
-                    row.status === "Cancelled" ? "bg-red-50 text-red-700" :
-                    "bg-amber-50 text-amber-700"}
-                `}>
-                  {row.status}
-                </span>
-              )
-            },
-            {
-              header: "Date",
-              accessor: "date",
-              cell: (row) => (
-                <div className="text-sm text-gray-500">
-                  <div>{new Date(row.date).toLocaleDateString()}</div>
-                  <div className="text-xs">{new Date(row.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                </div>
-              )
-            }
-          ]}
-          emptyMessage="No recent orders found"
-        />
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <FiBell className="text-gray-200 text-4xl mb-2" />
+                <p className="text-gray-400 text-sm">No new notifications</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );

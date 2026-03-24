@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import api from '../services/api';
 import { useAuth } from './AuthContext';
+import { toast } from 'react-hot-toast';
 
 const NotificationContext = createContext();
 
@@ -18,7 +19,7 @@ export const NotificationProvider = ({ children }) => {
 
   // Fetch all notifications
   const fetchNotifications = useCallback(async () => {
-    if (!user || user.role !== 'admin') {
+    if (!user) {
       setIsLoading(false);
       return;
     }
@@ -37,12 +38,13 @@ export const NotificationProvider = ({ children }) => {
   }, [user]);
 
   // Setup initial fetch + stable polling interval
-  // We use a ref for fetchNotifications to avoid restarting the interval on every render
   const fetchRef = useRef(fetchNotifications);
   fetchRef.current = fetchNotifications;
 
   useEffect(() => {
-    if (!user || user.role !== 'admin') {
+    if (!user) {
+      setNotifications([]);
+      setUnreadCount(0);
       setIsLoading(false);
       return;
     }
@@ -50,9 +52,8 @@ export const NotificationProvider = ({ children }) => {
     // Initial load
     fetchRef.current();
 
-    // Poll every 10 seconds — stable interval that never gets recreated
+    // Poll every 15 seconds
     const interval = setInterval(() => {
-        // Use requestIdleCallback to avoid blocking the main thread for background work
         const scheduleTask = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
         
         scheduleTask(async () => {
@@ -60,43 +61,68 @@ export const NotificationProvider = ({ children }) => {
               const { data } = await api.get('/api/notifications/history/unread-count');
               if (data.success) {
                 const newCount = data.count ?? 0;
-                if (newCount !== unreadCountRef.current) {
-                  // Count changed — re-fetch the full list to get new notifications
+                if (newCount > unreadCountRef.current) {
+                  // Count increased — fetch the full list and show toast
+                  const historyRes = await api.get('/api/notifications/history?limit=1');
+                  if (historyRes.data.success && historyRes.data.notifications.length > 0) {
+                    const latest = historyRes.data.notifications[0];
+                    toast.success(
+                      (t) => (
+                        <div onClick={() => { toast.dismiss(t.id); }}>
+                          <p className="font-bold text-sm">{latest.title}</p>
+                          <p className="text-xs">{latest.message}</p>
+                        </div>
+                      ),
+                      { duration: 5000, icon: '🔔' }
+                    );
+                  }
+                  fetchRef.current();
+                } else if (newCount < unreadCountRef.current) {
+                  // Count decreased (maybe read on another tab)
                   fetchRef.current();
                 }
               }
             } catch (error) {
-              // Silently ignore poll errors to prevent dashboard disruption
-              console.warn('[NotificationContext] Poll error (non-critical):', error.message);
+              console.warn('[NotificationContext] Poll error:', error.message);
             }
         });
-    }, 10000);
+    }, 15000);
 
     return () => clearInterval(interval);
-  // Only restart if user changes (login/logout), NOT on every unread count change
   }, [user]);
 
   // Mark single as read
   const markAsRead = async (id) => {
     try {
-      // Optimistic UI update
-      setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
       await api.patch(`/api/notifications/history/${id}/read`);
     } catch (error) {
-      fetchRef.current(); // Re-sync on error
+      fetchRef.current(); 
     }
   };
 
   // Mark all as read
   const markAllAsRead = async () => {
     try {
-      // Optimistic UI update
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
       await api.patch('/api/notifications/history/read-all');
     } catch (error) {
       fetchRef.current();
+    }
+  };
+
+  const deleteNotification = async (id) => {
+    try {
+        await api.delete(`/api/notifications/history/${id}`);
+        const deletedNotif = notifications.find(n => n._id === id);
+        setNotifications(prev => prev.filter(n => n._id !== id));
+        if (deletedNotif && !deletedNotif.isRead) {
+            setUnreadCount(prev => Math.max(0, prev - 1));
+        }
+    } catch (error) {
+        fetchRef.current();
     }
   };
 
@@ -106,7 +132,8 @@ export const NotificationProvider = ({ children }) => {
     isLoading,
     markAsRead,
     markAllAsRead,
-    refreshUserNotifications: fetchNotifications
+    deleteNotification,
+    refreshNotifications: fetchNotifications
   }), [notifications, unreadCount, isLoading, fetchNotifications]);
 
   return (

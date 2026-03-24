@@ -20,6 +20,7 @@ const Checkout = lazy(() => import('./components/Checkout'))
 const Login = lazy(() => import('./components/Login'))
 const Signup = lazy(() => import('./components/Signup'))
 const Logout = lazy(() => import('./components/Logout'))
+const NotificationsPage = lazy(() => import('./components/NotificationsPage'))
 
 // Admin components - already lazy loaded
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
@@ -74,6 +75,9 @@ const AppContent = () => {
             <Route path='/myorders' element={<MyOrders />} />
             <Route path='/payment-success' element={<PaymentSuccessPage />} />
             <Route path='/checkout' element={<Checkout />} />
+            <Route path='/notifications' element={
+              isAuthenticated ? <NotificationsPage /> : <Navigate to="/login" replace />
+            } />
 
             {/* Admin Routes - check isAuthenticated AND isAdmin */}
             <Route path='/admin' element={
