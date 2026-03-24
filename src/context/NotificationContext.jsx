@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
-import useAuth from '../hooks/useAuth';
-
+import { useAuth } from '../hooks/useAuth';
 const NotificationContext = createContext();
 
 export const useNotifications = () => useContext(NotificationContext);
@@ -18,7 +17,7 @@ export const NotificationProvider = ({ children }) => {
       setIsLoading(false);
       return;
     }
-    
+
     try {
       const { data } = await api.get('/api/notifications/history?limit=20');
       if (data.success) {
