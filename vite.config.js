@@ -2,39 +2,22 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
 export default defineConfig({
   base: '/',
-  plugins: [
-    react(),
-    tailwindcss()
-  ],
+  plugins: [react(), tailwindcss()],
   build: {
     rollupOptions: {
       output: {
         manualChunks: {
-          // Core React — loaded on every page
           'vendor-core': ['react', 'react-dom', 'react-router-dom'],
           'vendor-ui': ['react-icons', 'react-hot-toast'],
-          
-          // Payment — Only loaded on /checkout
           'vendor-stripe': ['@stripe/react-stripe-js', '@stripe/stripe-js'],
-          
-          // Admin & Analytics — Only loaded on /admin/*
           'vendor-charts': ['chart.js', 'react-chartjs-2', 'recharts'],
-          'vendor-dnd': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
-          'vendor-utils': ['sweetalert2', 'socket.io-client', 'axios'],
+          'vendor-utils': ['axios', 'socket.io-client'],
         },
-        // Optimize asset file names for long-term caching
         assetFileNames: (assetInfo) => {
-          if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)$/.test(assetInfo.name)) {
-            return `media/[name]-[hash][extname]`;
-          }
           if (/\.(png|jpe?g|gif|svg|webp|avif)$/.test(assetInfo.name)) {
             return `images/[name]-[hash][extname]`;
-          }
-          if (/\.css$/.test(assetInfo.name)) {
-            return `css/[name]-[hash][extname]`;
           }
           return `assets/[name]-[hash][extname]`;
         }
@@ -43,27 +26,9 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: {
       compress: {
-        // Strip all console.* and debugger in production builds
-        drop_console: true,
-        drop_debugger: true,
-        // Remove dead code from tree-shaking
-        passes: 2,
+        drop_console: true, // يمسح الـ logs لتحسين الأداء في الإنتاج
+        drop_debugger: true
       }
-    },
-    sourcemap: false,
-    chunkSizeWarningLimit: 600,
-    assetsInlineLimit: 4096, // Inline assets smaller than 4 KB as base64
-    cssCodeSplit: true,
-  },
-  server: {
-    host: true,
-    port: 5173,
-    hmr: {
-      overlay: false
     }
-  },
-  preview: {
-    host: true,
-    port: 5173
   }
 })
