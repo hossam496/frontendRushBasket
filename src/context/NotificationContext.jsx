@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import api from '../utils/api';
+import api from '../services/api';
 import useAuth from '../hooks/useAuth';
 
 const NotificationContext = createContext();
