@@ -12,10 +12,10 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { groceryData } from "../assets/dummyDataItem";
 import api, { API_BASE_URL } from '../services/api';
+import OptimizedImage from './OptimizedImage';
 
 const BACKEND_URL = API_BASE_URL;
 
-// Product Card Component
 const ProductCard = ({ item }) => {
   const { cart, addToCart, removeFromCart, updateQuantity } = useCart();
   const productId = item._id
@@ -48,14 +48,12 @@ const ProductCard = ({ item }) => {
   return (
     <div className={itemsPageStyles.productCard}>
       <div className={itemsPageStyles.imageContainer}>
-        <img
+        <OptimizedImage
           src={imgSrc}
           alt={`Image of ${item.name}`}
           className={itemsPageStyles.productImage}
           width={300}
           height={200}
-          loading="lazy"
-          decoding="async"
         />
       </div>
 

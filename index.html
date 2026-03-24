@@ -16,22 +16,38 @@
   <!-- Apple Touch Icon -->
   <link rel="apple-touch-icon" href="/logo.png" />
   
-  <!-- Preconnect for performance -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://api.stripe.com" />
-  <!-- Upgrade dns-prefetch to full preconnect for the backend API -->
+  <!-- Resource Hints: Reduced preconnect to critical backend ONLY -->
   <link rel="preconnect" href="https://backend1-eight-lovat.vercel.app" crossorigin />
-  <link rel="dns-prefetch" href="//backend1-eight-lovat.vercel.app" />
+  <link rel="dns-prefetch" href="https://backend1-eight-lovat.vercel.app" />
+  <link rel="dns-prefetch" href="https://js.stripe.com" />
+  <link rel="dns-prefetch" href="https://api.stripe.com" />
+  
+  <!-- Self-hosting Fonts Strategy (Replace with local @font-face in CSS for best LCP) -->
+  <link rel="preload" href="/fonts/inter-v12-latin-regular.woff2" as="font" type="font/woff2" crossorigin />
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/fonts/inter-v12-latin-regular.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Playfair Display';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('/fonts/playfair-display-v37-latin-700.woff2') format('woff2');
+    }
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; }
+  </style>
 
-  <!-- CRITICAL: Preload LCP hero image so browser fetches it before React boots -->
+  <!-- CRITICAL: Preload LCP hero image with high priority -->
   <link rel="preload" as="image" href="/FoodBanner.png" fetchpriority="high" />
   
   <!-- Resource Management -->
   <meta name="referrer" content="no-referrer-when-downgrade" />
-  <meta http-equiv="Cache-Control" content="public, max-age=31536000" />
   
   <!-- Open Graph -->
   <meta property="og:title" content="RushBasket - Premium E-commerce" />
@@ -52,18 +68,22 @@
   
   <title>RushBasket - Premium E-commerce</title>
   
-  <!-- Service Worker Registration -->
+  <!-- Optimized Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
+      const registerSW = () => {
         navigator.serviceWorker.register('/service-worker.js')
-          .then(registration => {
-            console.log('[SW] Registered:', registration.scope);
-          })
-          .catch(error => {
-            console.error('[SW] Registration failed:', error);
-          });
-      });
+          .then(reg => console.log('[SW] Registered'))
+          .catch(err => console.error('[SW] Error:', err));
+      };
+
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(() => {
+          setTimeout(registerSW, 2000); // Wait for initial render
+        });
+      } else {
+        window.addEventListener('load', () => setTimeout(registerSW, 2000));
+      }
     }
   </script>
 </head>

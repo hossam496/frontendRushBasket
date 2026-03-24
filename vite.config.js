@@ -14,25 +14,16 @@ export default defineConfig({
       output: {
         manualChunks: {
           // Core React — loaded on every page
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['react-icons', 'react-hot-toast'],
-          // Payment — loaded only on checkout
-          payment: ['@stripe/react-stripe-js', '@stripe/stripe-js'],
-          // Lightweight utilities used app-wide
-          utils: ['axios'],
-          // Admin-only: chart libs, drag & drop, modals, socket.io
-          // These will NOT be downloaded by regular users on the homepage / items page
-          admin: [
-            'chart.js',
-            'react-chartjs-2',
-            'recharts',
-            '@dnd-kit/core',
-            '@dnd-kit/sortable',
-            '@dnd-kit/utilities',
-            'sweetalert2',
-            'socket.io-client',
-          ],
+          'vendor-core': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['react-icons', 'react-hot-toast'],
+          
+          // Payment — Only loaded on /checkout
+          'vendor-stripe': ['@stripe/react-stripe-js', '@stripe/stripe-js'],
+          
+          // Admin & Analytics — Only loaded on /admin/*
+          'vendor-charts': ['chart.js', 'react-chartjs-2', 'recharts'],
+          'vendor-dnd': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+          'vendor-utils': ['sweetalert2', 'socket.io-client', 'axios'],
         },
         // Optimize asset file names for long-term caching
         assetFileNames: (assetInfo) => {

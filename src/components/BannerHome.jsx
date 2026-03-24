@@ -88,15 +88,18 @@ const BannerHome = ({ onSearch }) => {
                     <div className=' relative flex justify-center'>
                         <div className={bannerStyles.imageContainer}>
                             <div className={bannerStyles.imageInner}>
-                                <img
-                                  src={BANNER_IMG}
-                                  alt="Fresh groceries delivered to your door"
-                                  className=' object-cover w-full h-full'
-                                  width={600}
-                                  height={500}
-                                  fetchpriority="high"
-                                  decoding="async"
-                                />
+                                <picture>
+                                  <source srcSet="/FoodBanner.webp" type="image/webp" />
+                                  <img
+                                    src={BANNER_IMG}
+                                    alt="Fresh groceries delivered to your door"
+                                    className=' object-cover w-full h-full'
+                                    width={600}
+                                    height={500}
+                                    fetchpriority="high"
+                                    decoding="async"
+                                  />
+                                </picture>
                             </div>
                         </div>
 
