@@ -392,8 +392,25 @@ const AdminOrderList = () => {
                   <section>
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Customer</h3>
                     <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
-                      {/* ... باقي كود العميل كما هو (لم أغيره لأنه كان جيد) */}
-                      {/* يمكنك إبقاء الجزء الخاص بالـ Customer Info كما هو */}
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+                          <FiUser size={18} />
+                        </div>
+                        <div>
+                          <div className="text-sm font-black text-slate-900">{selectedOrder.customer?.name || "Guest Account"}</div>
+                          <div className="text-[10px] text-slate-500 font-bold">{selectedOrder.customer?.email || "No email provided"}</div>
+                        </div>
+                      </div>
+                      <div className="space-y-3 pt-4 border-t border-slate-200">
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <FiPhone className="text-slate-400" />
+                          <span className="font-semibold">{selectedOrder.customer?.phone || "N/A"}</span>
+                        </div>
+                        <div className="flex items-start gap-2 text-xs text-slate-600">
+                          <FiMapPin className="text-slate-400 mt-0.5" />
+                          <span className="font-semibold leading-relaxed">{selectedOrder.customer?.address || "N/A"}</span>
+                        </div>
+                      </div>
                     </div>
                   </section>
 
@@ -401,7 +418,30 @@ const AdminOrderList = () => {
                   <section>
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Financial Overview</h3>
                     <div className="bg-indigo-600 rounded-3xl p-6 text-white shadow-xl">
-                      {/* ... كود الفلوس كما هو */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-xs font-bold opacity-80">
+                          <span>Subtotal</span>
+                          <span>${selectedOrder.subtotal?.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-bold opacity-80">
+                          <span>Tax (5%)</span>
+                          <span>${selectedOrder.tax?.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-bold opacity-80 pb-3 border-b border-white/20">
+                          <span>Shipping</span>
+                          <span>${selectedOrder.shipping?.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-2">
+                          <span className="text-lg font-black tracking-tighter uppercase">Total</span>
+                          <span className="text-2xl font-black tracking-tighter italic">
+                            ${selectedOrder.total?.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-2">
+                        <FiCreditCard className="opacity-60" />
+                        <span className="text-[10px] uppercase font-black tracking-widest">{selectedOrder.paymentMethod}</span>
+                      </div>
                     </div>
                   </section>
                 </div>
@@ -442,8 +482,27 @@ const AdminOrderList = () => {
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Order Items</h3>
                     <div className="border border-slate-100 rounded-3xl overflow-hidden bg-white">
                       {selectedOrder.items?.map((item, idx) => (
-                        <div key={idx} className={`flex items-center p-5 ${idx !== selectedOrder.items.length - 1 ? 'border-b' : ''}`}>
-                          {/* باقي كود المنتجات كما هو */}
+                        <div key={idx} className={`flex items-center p-5 ${idx !== selectedOrder.items.length - 1 ? 'border-b border-slate-50' : ''}`}>
+                          <div className="w-16 h-16 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden flex-shrink-0">
+                            {item.imageUrl ? (
+                              <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                <FiPackage size={20} />
+                              </div>
+                            )}
+                          </div>
+                          <div className="ml-4 flex-grow">
+                            <h4 className="text-sm font-black text-slate-800 tracking-tight">{item.name}</h4>
+                            <div className="text-[10px] font-bold text-slate-400 uppercase mt-1">
+                              Qty: {item.quantity} × <span className="text-indigo-600">${item.price?.toFixed(2)}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-black text-slate-900 tracking-tight">
+                              ${(item.price * item.quantity).toFixed(2)}
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>

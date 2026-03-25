@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { 
   FiTrendingUp, 
@@ -16,6 +17,7 @@ import DataTable from '../../components/admin/DataTable';
 
 
 const AdminAnalytics = () => {
+  const navigate = useNavigate();
   const [analyticsData, setAnalyticsData] = useState({
     stats: {},
     salesData: [],
@@ -103,30 +105,36 @@ const AdminAnalytics = () => {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          title="Total Revenue"
-          value={`$${(analyticsData.stats.totalSales || 0).toLocaleString()}`}
-          icon={<FiDollarSign size={20} />}
-          trend={analyticsData.stats.revenueTrend || 0}
-          trendDirection={analyticsData.stats.revenueTrend >= 0 ? 'up' : 'down'}
-          color="emerald"
-        />
-        <StatCard
-          title="Total Orders"
-          value={analyticsData.stats.totalOrders || 0}
-          icon={<FiShoppingCart size={20} />}
-          trend={analyticsData.stats.ordersTrend || 0}
-          trendDirection={analyticsData.stats.ordersTrend >= 0 ? 'up' : 'down'}
-          color="indigo"
-        />
-        <StatCard
-          title="New Customers"
-          value={analyticsData.stats.newCustomers || 0}
-          icon={<FiUsers size={20} />}
-          trend={analyticsData.stats.customersTrend || 0}
-          trendDirection={analyticsData.stats.customersTrend >= 0 ? 'up' : 'down'}
-          color="amber"
-        />
+        <div onClick={() => navigate('/admin/orders')} className="cursor-pointer transition-transform hover:scale-105">
+          <StatCard
+            title="Total Revenue"
+            value={`$${(analyticsData.stats.totalSales || 0).toLocaleString()}`}
+            icon={<FiDollarSign size={20} />}
+            trend={analyticsData.stats.revenueTrend || 0}
+            trendDirection={analyticsData.stats.revenueTrend >= 0 ? 'up' : 'down'}
+            color="emerald"
+          />
+        </div>
+        <div onClick={() => navigate('/admin/orders')} className="cursor-pointer transition-transform hover:scale-105">
+          <StatCard
+            title="Total Orders"
+            value={analyticsData.stats.totalOrders || 0}
+            icon={<FiShoppingCart size={20} />}
+            trend={analyticsData.stats.ordersTrend || 0}
+            trendDirection={analyticsData.stats.ordersTrend >= 0 ? 'up' : 'down'}
+            color="indigo"
+          />
+        </div>
+        <div onClick={() => navigate('/admin/users')} className="cursor-pointer transition-transform hover:scale-105">
+          <StatCard
+            title="Total Users"
+            value={analyticsData.stats.totalCustomers || 0}
+            icon={<FiUsers size={20} />}
+            trend={analyticsData.stats.customersTrend || 0}
+            trendDirection={analyticsData.stats.customersTrend >= 0 ? 'up' : 'down'}
+            color="amber"
+          />
+        </div>
         <StatCard
           title="Active Sessions"
           value={analyticsData.stats.activeSessions || 0}
