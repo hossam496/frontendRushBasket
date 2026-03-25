@@ -70,6 +70,32 @@ const AdminOrderList = () => {
     }
   };
 
+  const handleOrderDelete = async (orderId) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#4f46e5',
+      cancelButtonColor: '#ef4444',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/api/orders/${orderId}`);
+        setOrders(prev => prev.filter(o => o._id !== orderId));
+        Swal.fire(
+          'Deleted!',
+          'Order has been deleted.',
+          'success'
+        );
+      } catch (err) {
+        Swal.fire('Error', 'Failed to delete order', 'error');
+      }
+    }
+  };
+
   const openOrderDetails = useCallback((order) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
@@ -245,6 +271,13 @@ const AdminOrderList = () => {
                             title="Full Details"
                           >
                             <FiEye size={18} className="text-indigo-600" />
+                          </button>
+                          <button
+                            onClick={() => handleOrderDelete(order._id)}
+                            className={`${adminStyles.actionButton} ${adminStyles.dangerBtn} p-2 ml-2`}
+                            title="Delete Order"
+                          >
+                            <FiX size={18} className="text-rose-600" />
                           </button>
                         </td>
                       </tr>

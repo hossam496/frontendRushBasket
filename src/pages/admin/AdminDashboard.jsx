@@ -29,7 +29,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({
     totalSales: 0,
     totalOrders: 0,
-    newCustomers: 0,
+    totalCustomers: 0,
     activeNow: 0,
     revenueTrend: 0,
     ordersTrend: 0,
@@ -109,7 +109,7 @@ const AdminDashboard = () => {
       setStats({
         totalSales: data.stats.totalSales,
         totalOrders: data.stats.totalOrders,
-        newCustomers: data.stats.newCustomers,
+        totalCustomers: data.stats.totalCustomers,
         activeNow: data.stats.activeSessions,
       });
 
@@ -130,7 +130,7 @@ const AdminDashboard = () => {
       setStats({
         totalSales: total,
         totalOrders: orders.length,
-        newCustomers: 0,
+        totalCustomers: 0,
         activeNow: 0,
       });
     }
@@ -163,22 +163,26 @@ const AdminDashboard = () => {
           trendDirection="up"
           color="emerald"
         />
-        <StatCard
-          title="Total Orders"
-          value={stats.totalOrders}
-          icon={<FiShoppingBag size={20} />}
-          trend={8.2}
-          trendDirection="up"
-          color="indigo"
-        />
-        <StatCard
-          title="New Customers"
-          value={stats.newCustomers}
-          icon={<FiUsers size={20} />}
-          trend={-3.1}
-          trendDirection="down"
-          color="amber"
-        />
+        <div onClick={() => navigate('/admin/orders')} className="cursor-pointer transition-transform hover:scale-105">
+          <StatCard
+            title="Total Orders"
+            value={stats.totalOrders}
+            icon={<FiShoppingBag size={20} />}
+            trend={8.2}
+            trendDirection="up"
+            color="indigo"
+          />
+        </div>
+        <div onClick={() => navigate('/admin/users')} className="cursor-pointer transition-transform hover:scale-105">
+          <StatCard
+            title="Total Users"
+            value={stats.totalCustomers}
+            icon={<FiUsers size={20} />}
+            trend={12}
+            trendDirection="up"
+            color="amber"
+          />
+        </div>
         <StatCard
           title="Active Sessions"
           value={stats.activeNow}
