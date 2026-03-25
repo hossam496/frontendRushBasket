@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import api from '../../services/api';
+import api, { API_BASE_URL } from '../../services/api';
 import {
   FiEye, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiSearch,
   FiCalendar, FiUser, FiMapPin, FiMail, FiPhone, FiClock, FiX,
@@ -32,6 +32,20 @@ const AdminOrderList = () => {
       if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
       window.removeEventListener('orderUpdate', handleOrderUpdate);
     };
+  }, []);
+
+  const getImageSrc = useCallback((item) => {
+    const rawImage = item?.imageUrl || item?.image;
+    if (!rawImage) return null;
+    if (typeof rawImage !== 'string') return null;
+    if (rawImage.startsWith('http') || rawImage.startsWith('data:')) return rawImage;
+    
+    // Ensure we have a valid baseURL
+    const base = API_BASE_URL || '';
+    const cleanImage = rawImage.startsWith('/') ? rawImage : `/${rawImage}`;
+    
+    // If it's a relative path starting with uploads, ensure it's correct
+    return `${base}${cleanImage}`;
   }, []);
 
   const fetchOrders = async () => {
@@ -483,16 +497,21 @@ const AdminOrderList = () => {
                     <div className="border border-slate-100 rounded-3xl overflow-hidden bg-white">
                       {selectedOrder.items?.map((item, idx) => (
                         <div key={idx} className={`flex items-center p-5 ${idx !== selectedOrder.items.length - 1 ? 'border-b border-slate-50' : ''}`}>
-                          <div className="w-16 h-16 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden flex-shrink-0">
-                            {item.imageUrl ? (
-                              <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
+                          <div className="w-16 h-16 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shrink-0">
+                            {getImageSrc(item) ? (
+                              <img 
+                                src={getImageSrc(item)} 
+                                alt={item.name} 
+                                className="w-full h-full object-contain" 
+                                onError={(e) => { e.target.src = 'https://placehold.co/100?text=Error'; }}
+                              />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-slate-300">
                                 <FiPackage size={20} />
                               </div>
                             )}
                           </div>
-                          <div className="ml-4 flex-grow">
+                          <div className="ml-4 grow">
                             <h4 className="text-sm font-black text-slate-800 tracking-tight">{item.name}</h4>
                             <div className="text-[10px] font-bold text-slate-400 uppercase mt-1">
                               Qty: {item.quantity} × <span className="text-indigo-600">${item.price?.toFixed(2)}</span>

@@ -17,7 +17,7 @@ import {
   FiClock,
   FiBell,
 } from "react-icons/fi";
-import api from "../../services/api";
+import api, { API_BASE_URL } from "../../services/api";
 
 
 
@@ -99,6 +99,13 @@ const AdminDashboard = () => {
       window.removeEventListener("statsUpdate", handleStatsUpdate);
     };
   }, []);
+  
+  const getImageSrc = (item) => {
+    const rawImage = item.imageUrl || item.image;
+    if (!rawImage) return null;
+    if (rawImage.startsWith('http') || rawImage.startsWith('data:')) return rawImage;
+    return `${API_BASE_URL}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
+  };
 
   const fetchStats = async () => {
     try {
