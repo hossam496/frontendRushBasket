@@ -1,13 +1,14 @@
 {
-  "name": "RushBasket Admin",
+  "name": "RushBasket Premium",
   "short_name": "RushBasket",
-  "description": "RushBasket E-commerce Admin Dashboard - Real-time order notifications",
-  "start_url": "/admin",
+  "description": "RushBasket - Real-time order and status notifications",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
   "orientation": "portrait-primary",
   "scope": "/",
+  "gcm_sender_id": "103953800307",
   "icons": [
     {
       "src": "/assets/logo.png",
@@ -22,23 +23,16 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "shopping", "productivity"],
+  "categories": ["business", "shopping", "lifestyle"],
   "lang": "en",
   "dir": "ltr",
   "prefer_related_applications": false,
   "shortcuts": [
     {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
-      "description": "View dashboard overview",
-      "url": "/admin",
-      "icons": [{ "src": "/assets/logo.png", "sizes": "192x192", "type": "image/png" }]
-    },
-    {
-      "name": "Orders",
+      "name": "My Orders",
       "short_name": "Orders",
-      "description": "View all orders",
-      "url": "/admin/orders",
+      "description": "Track your orders",
+      "url": "/my-orders",
       "icons": [{ "src": "/assets/logo.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]

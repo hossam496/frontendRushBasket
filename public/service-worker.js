@@ -159,18 +159,15 @@ self.addEventListener('push', (event) => {
     };
   }
 
-  // Icon selection based on type
-  let icon = "/icons/default.png";
-  if (notificationData.type === "status") icon = "/icons/order.png";
-  if (notificationData.type === "order") icon = "/icons/cart.png";
-  if (notificationData.type === "system") icon = "/icons/system.png";
-
+  // Icon selection based on type (Ensuring paths exist)
+  let icon = "/assets/logo.png";
+  
   const options = {
-    body: notificationData.body || '',
+    body: notificationData.body || 'You have a new update',
     icon: icon,
-    badge: notificationData.badge || "/icons/badge.png",
+    badge: icon,
     tag: notificationData.tag || `notification-${Date.now()}`,
-    requireInteraction: notificationData.requireInteraction !== false,
+    requireInteraction: true,
     actions: notificationData.actions || [],
     data: notificationData.data || {},
     timestamp: notificationData.timestamp || Date.now(),

@@ -78,7 +78,7 @@ const NotificationBell = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="fixed sm:absolute inset-0 sm:inset-auto sm:right-0 sm:top-full sm:mt-3 w-full sm:w-96 h-[100dvh] sm:h-auto bg-gray-900 sm:bg-gray-900/80 backdrop-blur-2xl border-t sm:border border-white/10 sm:rounded-2xl shadow-2xl z-[9999] overflow-hidden flex flex-col"
+                        className="fixed sm:absolute inset-0 sm:inset-auto sm:right-0 sm:top-full sm:mt-3 w-full sm:w-96 h-dvh sm:h-auto bg-gray-900 sm:bg-gray-900/80 backdrop-blur-2xl border-t sm:border border-white/10 sm:rounded-2xl shadow-2xl z-9999 overflow-hidden flex flex-col"
                     >
                         {/* Header */}
                         <div className="sticky top-0 px-5 py-5 border-b border-white/5 flex justify-between items-center bg-white/5 z-10 backdrop-blur-md">
