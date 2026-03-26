@@ -13,13 +13,20 @@ const Signup = () => {
     password: "",
     remember: false,
   });
-  const [showPassword, setShowPassword] = useState(false); // تعديل: خليناها boolean بسيط
+
+  const [showPassword, setShowPassword] = useState(false);
   const [apiError, setApiError] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [errors, setErrors] = useState({});
-  const navigate = useNavigate();
+  const [passwordChecks, setPasswordChecks] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    symbol: false,
+  });
 
-  // Redirect logic now handled in handleSubmit for better control
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -28,17 +35,32 @@ const Signup = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
     if (apiError) setApiError("");
+
+    // Real-time password checks
+    if (name === "password") {
+      const pass = value;
+      setPasswordChecks({
+        length: pass.length >= 8,
+        uppercase: /[A-Z]/.test(pass),
+        lowercase: /[a-z]/.test(pass),
+        number: /[0-9]/.test(pass),
+        symbol: /[!@#$%^&*(),.?":{}|<>]/.test(pass),
+      });
+    }
   };
 
   const isStrongPassword = (pass) => {
-    const minLength = 8;
-    const hasUpper = /[A-Z]/.test(pass);
-    const hasLower = /[a-z]/.test(pass);
-    const hasNumber = /[0-9]/.test(pass);
-    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
-    return pass.length >= minLength && hasUpper && hasLower && hasNumber && hasSymbol;
+    return (
+      pass.length >= 8 &&
+      /[A-Z]/.test(pass) &&
+      /[a-z]/.test(pass) &&
+      /[0-9]/.test(pass) &&
+      /[!@#$%^&*(),.?":{}|<>]/.test(pass)
+    );
   };
 
   const validate = () => {
@@ -47,13 +69,16 @@ const Signup = () => {
     if (!formData.email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email))
       newErrors.email = "Invalid email format";
+
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (!isStrongPassword(formData.password)) {
       newErrors.password = "Password must be strong (min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol)";
     }
-    if (!formData.remember)
+
+    if (!formData.remember) {
       newErrors.remember = "You must agree to terms and conditions";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -64,14 +89,11 @@ const Signup = () => {
     if (!validate()) return;
 
     try {
-      const res = await api.post(
-        '/api/auth/register',
-        {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password
-        }
-      );
+      const res = await api.post('/api/auth/register', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
 
       if (res.data.success) {
         const { token, user } = res.data;
@@ -80,34 +102,29 @@ const Signup = () => {
         setShowToast(true);
 
         setTimeout(() => {
-          if (user.role === 'admin') {
-            navigate("/admin");
-          } else {
-            navigate("/");
-          }
+          navigate(user.role === 'admin' ? "/admin" : "/");
         }, 1500);
       } else {
         setApiError(res.data.message || "Registration failed");
       }
     } catch (err) {
-      console.error("Signup full error:", err);
-      if (err.response) {
-        console.error("Response data:", err.response.data);
-        const errorMsg = err.response.data.message || err.response.data || "Server error";
-        setApiError(typeof errorMsg === 'string' ? errorMsg : "Registration failed");
-      } else if (err.request) {
-        console.error("Request made but no response received:", err.request);
-        setApiError("Unable to reach server - please check your connection");
-      } else {
-        console.error("Error setting up request:", err.message);
-        setApiError("Signup setup error");
-      }
+      console.error("Signup error:", err);
+      const errorMsg = err.response?.data?.message || "Registration failed";
+      setApiError(typeof errorMsg === 'string' ? errorMsg : "Server error");
     }
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  const checks = [
+    { key: "length", label: "Minimum 8 characters" },
+    { key: "uppercase", label: "At least 1 uppercase letter" },
+    { key: "lowercase", label: "At least 1 lowercase letter" },
+    { key: "number", label: "At least 1 number" },
+    { key: "symbol", label: "At least 1 symbol" },
+  ];
 
   return (
     <div className={signupStyles.page}>
@@ -135,51 +152,99 @@ const Signup = () => {
         <h2 className={signupStyles.title}>Create Account</h2>
 
         <form onSubmit={handleSubmit} className={signupStyles.form}>
+          {/* Name */}
           <div className={signupStyles.inputContainer}>
             <FaUser className={signupStyles.inputIcon} />
-            <input type="text" name="name" value={formData.name} onChange={handleChange}
-              placeholder="Full Name" className={signupStyles.input} />
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Full Name"
+              className={signupStyles.input}
+            />
             {errors.name && <p className={signupStyles.error}>{errors.name}</p>}
           </div>
 
+          {/* Email */}
           <div className={signupStyles.inputContainer}>
             <FaEnvelope className={signupStyles.inputIcon} />
-            <input type="email" name="email" value={formData.email} onChange={handleChange}
-              placeholder="Email Address" className={signupStyles.input} />
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email Address"
+              className={signupStyles.input}
+            />
             {errors.email && <p className={signupStyles.error}>{errors.email}</p>}
           </div>
 
+          {/* Password with real-time checks */}
           <div className={signupStyles.inputContainer}>
             <FaLock className={signupStyles.inputIcon} />
             <input
-              type={showPassword ? 'text' : 'password'} // تعديل: مسحنا .password
+              type={showPassword ? 'text' : 'password'}
               name="password"
               value={formData.password}
               onChange={handleChange}
               placeholder="Password"
               className={signupStyles.passwordInput}
             />
-            <button type="button" onClick={togglePasswordVisibility}
-              className={signupStyles.toggleButton}>
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className={signupStyles.toggleButton}
+            >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
+
+            {/* Real-time password requirements */}
+            {formData.password && (
+              <div className="mt-2 text-sm">
+                {checks.map((check) => (
+                  <div
+                    key={check.key}
+                    className={`flex items-center gap-2 mb-1 ${passwordChecks[check.key] ? "text-green-500" : "text-gray-400"
+                      }`}
+                  >
+                    <FaCheck
+                      className={passwordChecks[check.key] ? "visible" : "invisible"}
+                    />
+                    <span>{check.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {errors.password && <p className={signupStyles.error}>{errors.password}</p>}
           </div>
 
+          {/* Terms Checkbox */}
           <div className={signupStyles.termsContainer}>
             <label className={signupStyles.termsLabel}>
-              <input type="checkbox" name="remember" checked={formData.remember}
-                onChange={handleChange} className={signupStyles.termsCheckbox} />
+              <input
+                type="checkbox"
+                name="remember"
+                checked={formData.remember}
+                onChange={handleChange}
+                className={signupStyles.termsCheckbox}
+              />
               I agree to the Terms and conditions
             </label>
             {errors.remember && <p className={signupStyles.error}>{errors.remember}</p>}
           </div>
 
-          <button type="submit" className={signupStyles.submitButton}>Sign Up</button>
+          <button type="submit" className={signupStyles.submitButton}>
+            Sign Up
+          </button>
         </form>
 
         <p className={signupStyles.signinText}>
-          Already have an Account? <Link to='/login' className={signupStyles.signinLink}>Sign In</Link>
+          Already have an Account?{" "}
+          <Link to="/login" className={signupStyles.signinLink}>
+            Sign In
+          </Link>
         </p>
       </div>
     </div>
