@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signupStyles } from "../assets/dummyStyles";
 import { FaArrowLeft, FaCheck, FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
@@ -18,6 +18,7 @@ const Signup = () => {
   const [apiError, setApiError] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [errors, setErrors] = useState({});
+
   const [passwordChecks, setPasswordChecks] = useState({
     length: false,
     uppercase: false,
@@ -30,17 +31,19 @@ const Signup = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
 
+    // Clear errors
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
     if (apiError) setApiError("");
 
-    // Real-time password checks
+    // Real-time password validation
     if (name === "password") {
       const pass = value;
       setPasswordChecks({
@@ -65,6 +68,7 @@ const Signup = () => {
 
   const validate = () => {
     const newErrors = {};
+
     if (!formData.name.trim()) newErrors.name = "Name is required";
     if (!formData.email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email))
@@ -73,7 +77,7 @@ const Signup = () => {
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (!isStrongPassword(formData.password)) {
-      newErrors.password = "Password must be strong (min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol)";
+      newErrors.password = "Password must be strong";
     }
 
     if (!formData.remember) {
@@ -118,6 +122,7 @@ const Signup = () => {
     setShowPassword(!showPassword);
   };
 
+  // Password requirements list
   const checks = [
     { key: "length", label: "Minimum 8 characters" },
     { key: "uppercase", label: "At least 1 uppercase letter" },
@@ -152,7 +157,7 @@ const Signup = () => {
         <h2 className={signupStyles.title}>Create Account</h2>
 
         <form onSubmit={handleSubmit} className={signupStyles.form}>
-          {/* Name */}
+          {/* Name Field */}
           <div className={signupStyles.inputContainer}>
             <FaUser className={signupStyles.inputIcon} />
             <input
@@ -166,7 +171,7 @@ const Signup = () => {
             {errors.name && <p className={signupStyles.error}>{errors.name}</p>}
           </div>
 
-          {/* Email */}
+          {/* Email Field */}
           <div className={signupStyles.inputContainer}>
             <FaEnvelope className={signupStyles.inputIcon} />
             <input
@@ -180,7 +185,7 @@ const Signup = () => {
             {errors.email && <p className={signupStyles.error}>{errors.email}</p>}
           </div>
 
-          {/* Password with real-time checks */}
+          {/* Password Field with Real-time Checks */}
           <div className={signupStyles.inputContainer}>
             <FaLock className={signupStyles.inputIcon} />
             <input
@@ -199,17 +204,18 @@ const Signup = () => {
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
 
-            {/* Real-time password requirements */}
-            {formData.password && (
-              <div className="mt-2 text-sm">
+            {/* Real-time Password Requirements */}
+            {formData.password.length > 0 && (
+              <div className="mt-3 space-y-2 text-sm">
                 {checks.map((check) => (
                   <div
                     key={check.key}
-                    className={`flex items-center gap-2 mb-1 ${passwordChecks[check.key] ? "text-green-500" : "text-gray-400"
+                    className={`flex items-center gap-2 ${passwordChecks[check.key] ? "text-green-500" : "text-gray-400"
                       }`}
                   >
                     <FaCheck
-                      className={passwordChecks[check.key] ? "visible" : "invisible"}
+                      className={`text-base transition-all ${passwordChecks[check.key] ? "opacity-100" : "opacity-30"
+                        }`}
                     />
                     <span>{check.label}</span>
                   </div>
@@ -220,7 +226,7 @@ const Signup = () => {
             {errors.password && <p className={signupStyles.error}>{errors.password}</p>}
           </div>
 
-          {/* Terms Checkbox */}
+          {/* Terms and Conditions */}
           <div className={signupStyles.termsContainer}>
             <label className={signupStyles.termsLabel}>
               <input
