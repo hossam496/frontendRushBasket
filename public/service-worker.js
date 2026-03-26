@@ -184,6 +184,16 @@ self.addEventListener('push', (event) => {
         console.error('[SW] Failed to show notification:', err);
       })
   );
+
+  // Notify all open clients about the push notification for real-time UI updates
+  self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'PUSH_NOTIFICATION_RECEIVED',
+        data: notificationData
+      });
+    });
+  });
 });
 
 // Handle notification click

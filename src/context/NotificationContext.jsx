@@ -52,43 +52,36 @@ export const NotificationProvider = ({ children }) => {
     // Initial load
     fetchRef.current();
 
-    // Poll every 15 seconds (Temporarily disabled to verify real Web Push)
-    // const interval = setInterval(() => {
-    //     const scheduleTask = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
-    //     
-    //     scheduleTask(async () => {
-    //         try {
-    //           const { data } = await api.get('/api/notifications/history/unread-count');
-    //           if (data.success) {
-    //             const newCount = data.count ?? 0;
-    //             if (newCount > unreadCountRef.current) {
-    //               // Count increased — fetch the full list and show toast
-    //               const historyRes = await api.get('/api/notifications/history?limit=1');
-    //               if (historyRes.data.success && historyRes.data.notifications.length > 0) {
-    //                 const latest = historyRes.data.notifications[0];
-    //                 toast.success(
-    //                   (t) => (
-    //                     <div onClick={() => { toast.dismiss(t.id); }}>
-    //                       <p className="font-bold text-sm">{latest.title}</p>
-    //                       <p className="text-xs">{latest.message}</p>
-    //                     </div>
-    //                   ),
-    //                   { duration: 5000, icon: '🔔' }
-    //                 );
-    //               }
-    //               fetchRef.current();
-    //             } else if (newCount < unreadCountRef.current) {
-    //               // Count decreased (maybe read on another tab)
-    //               fetchRef.current();
-    //             }
-    //           }
-    //         } catch (error) {
-    //           console.warn('[NotificationContext] Poll error:', error.message);
-    //         }
-    //     });
-    // }, 15000);
-
-    // return () => clearInterval(interval);
+    // Real-time update via Service Worker postMessage
+    if ('serviceWorker' in navigator) {
+      const handleMessage = (event) => {
+        if (event.data && event.data.type === 'PUSH_NOTIFICATION_RECEIVED') {
+          console.log('[NotificationContext] Real-time push received, updating UI...');
+          const payload = event.data.data;
+          
+          if (payload) {
+            toast.success(
+              (t) => (
+                <div onClick={() => { toast.dismiss(t.id); }}>
+                  <p className="font-bold text-sm">{payload.title || 'New Notification'}</p>
+                  <p className="text-xs">{payload.body || ''}</p>
+                </div>
+              ),
+              { duration: 5000, icon: '🔔' }
+            );
+          }
+          
+          // Refresh notification list instantly
+          fetchRef.current();
+        }
+      };
+      
+      navigator.serviceWorker.addEventListener('message', handleMessage);
+      
+      return () => {
+        navigator.serviceWorker.removeEventListener('message', handleMessage);
+      };
+    }
   }, [user]);
 
   // Mark single as read
