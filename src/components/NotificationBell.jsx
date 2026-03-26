@@ -78,39 +78,47 @@ const NotificationBell = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="fixed sm:absolute inset-0 sm:inset-auto sm:right-0 sm:top-full sm:mt-3 w-full sm:w-96 h-full sm:h-auto bg-gray-900/95 sm:bg-gray-900/80 backdrop-blur-xl border-t sm:border border-white/10 sm:rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col"
+                        className="fixed sm:absolute inset-0 sm:inset-auto sm:right-0 sm:top-full sm:mt-3 w-full sm:w-96 h-[100dvh] sm:h-auto bg-gray-900 sm:bg-gray-900/80 backdrop-blur-2xl border-t sm:border border-white/10 sm:rounded-2xl shadow-2xl z-[9999] overflow-hidden flex flex-col"
                     >
                         {/* Header */}
-                        <div className="sticky top-0 px-5 py-4 border-b border-white/5 flex justify-between items-center bg-white/5 z-10 backdrop-blur-md">
-                            <div className="flex items-center gap-2">
+                        <div className="sticky top-0 px-5 py-5 border-b border-white/5 flex justify-between items-center bg-white/5 z-10 backdrop-blur-md">
+                            <div className="flex items-center gap-3">
                                 <button 
                                     onClick={() => setIsOpen(false)}
-                                    className="sm:hidden -ml-2 p-2 text-gray-400 hover:text-white"
+                                    className="sm:hidden p-2 -ml-2 text-gray-400 hover:text-white transition-colors"
                                 >
-                                    <Trash2 className="w-5 h-5 rotate-45" /> {/* Close icon helper */}
+                                    <Bell className="w-5 h-5 rotate-12 text-emerald-400" />
                                 </button>
-                                <h3 className="text-sm font-bold text-white">Notifications</h3>
+                                <div>
+                                    <h3 className="text-sm font-bold text-white">Notifications</h3>
+                                    <p className="text-[10px] text-gray-500 font-medium sm:hidden">
+                                        Stay updated with your activities
+                                    </p>
+                                </div>
                                 {unreadCount > 0 && (
-                                    <span className="bg-emerald-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                    <span className="bg-emerald-500 text-black text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg shadow-emerald-500/20">
                                         {unreadCount}
                                     </span>
                                 )}
                             </div>
                             <div className="flex items-center gap-2">
                                 <button 
-                                    onClick={markAllAsRead}
-                                    className="text-[11px] font-medium text-emerald-400 hover:text-emerald-300 transition-colors px-2 py-1 rounded-lg hover:bg-emerald-500/10"
+                                    onClick={(e) => { e.stopPropagation(); markAllAsRead(); }}
+                                    className="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-emerald-500/10"
                                 >
                                     Clear All
                                 </button>
-                                <button className="p-1.5 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5">
-                                    <Settings className="w-4 h-4" />
+                                <button 
+                                    onClick={() => setIsOpen(false)}
+                                    className="sm:hidden p-2 text-gray-400 hover:text-white transition-colors hover:bg-white/5 rounded-full"
+                                >
+                                    <Trash2 className="w-5 h-5" /> 
                                 </button>
                             </div>
                         </div>
 
                         {/* List Area */}
-                        <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent overscroll-contain pb-20 sm:pb-0 sm:max-h-[440px]">
                             {notifications.length > 0 ? (
                                 <div className="divide-y divide-white/5">
                                     {notifications.map((notif) => (
@@ -125,23 +133,24 @@ const NotificationBell = () => {
                                 <motion.div 
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    className="py-12 px-6 text-center"
+                                    className="h-full flex flex-col items-center justify-center py-20 px-6 text-center"
                                 >
-                                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
-                                        <Bell className="w-8 h-8 text-gray-600" />
+                                    <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mb-6 border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
+                                        <Bell className="w-10 h-10 text-gray-700" />
                                     </div>
-                                    <p className="text-sm text-gray-400 font-medium">No notifications yet</p>
-                                    <p className="text-xs text-gray-600 mt-1">We'll alert you when something happens</p>
+                                    <p className="text-base font-bold text-gray-300">No notifications yet</p>
+                                    <p className="text-sm text-gray-600 mt-2 max-w-[200px]">We'll alert you when something happens</p>
                                 </motion.div>
                             )}
                         </div>
 
-                        {/* Footer */}
-                        <div className="sticky bottom-0 p-3 border-t border-white/5 bg-gray-950/90 backdrop-blur-md">
+                        {/* Footer (Always sticky at bottom on mobile) */}
+                        <div className="mt-auto p-4 border-t border-white/5 bg-gray-950/80 backdrop-blur-xl sm:rounded-b-2xl">
                             <button 
                                 onClick={() => { setIsOpen(false); navigate('/notifications'); }}
-                                className="w-full py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-all rounded-xl shadow-lg shadow-emerald-900/20 active:scale-[0.98]"
+                                className="w-full py-3.5 text-xs font-black uppercase tracking-widest text-white bg-emerald-600 hover:bg-emerald-500 transition-all rounded-xl shadow-xl shadow-emerald-900/40 active:scale-[0.98] flex items-center justify-center gap-2"
                             >
+                                <Settings className="w-3.5 h-3.5" />
                                 View All Notifications
                             </button>
                         </div>
