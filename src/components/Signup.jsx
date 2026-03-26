@@ -135,34 +135,40 @@ const Signup = () => {
         <h2 className={signupStyles.title}>Create Account</h2>
 
         <form onSubmit={handleSubmit} className={signupStyles.form}>
-          <div className={signupStyles.inputContainer}>
-            <FaUser className={signupStyles.inputIcon} />
-            <input type="text" name="name" value={formData.name} onChange={handleChange}
-              placeholder="Full Name" className={signupStyles.input} />
+          <div>
+            <div className={signupStyles.inputContainer}>
+              <FaUser className={signupStyles.inputIcon} />
+              <input type="text" name="name" value={formData.name} onChange={handleChange}
+                placeholder="Full Name" className={signupStyles.input} />
+            </div>
             {errors.name && <p className={signupStyles.error}>{errors.name}</p>}
           </div>
 
-          <div className={signupStyles.inputContainer}>
-            <FaEnvelope className={signupStyles.inputIcon} />
-            <input type="email" name="email" value={formData.email} onChange={handleChange}
-              placeholder="Email Address" className={signupStyles.input} />
+          <div>
+            <div className={signupStyles.inputContainer}>
+              <FaEnvelope className={signupStyles.inputIcon} />
+              <input type="email" name="email" value={formData.email} onChange={handleChange}
+                placeholder="Email Address" className={signupStyles.input} />
+            </div>
             {errors.email && <p className={signupStyles.error}>{errors.email}</p>}
           </div>
 
-          <div className={signupStyles.inputContainer}>
-            <FaLock className={signupStyles.inputIcon} />
-            <input
-              type={showPassword ? 'text' : 'password'} // تعديل: مسحنا .password
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              className={signupStyles.passwordInput}
-            />
-            <button type="button" onClick={togglePasswordVisibility}
-              className={signupStyles.toggleButton}>
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
+          <div>
+            <div className={signupStyles.inputContainer}>
+              <FaLock className={signupStyles.inputIcon} />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Password"
+                className={signupStyles.passwordInput}
+              />
+              <button type="button" onClick={togglePasswordVisibility}
+                className={signupStyles.toggleButton}>
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.password && <p className={signupStyles.error}>{errors.password}</p>}
           </div>
 
