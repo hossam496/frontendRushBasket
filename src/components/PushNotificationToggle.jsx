@@ -100,22 +100,21 @@ const PushNotificationToggle = () => {
           </div>
           <div>
             <h3 className="font-medium text-gray-900">Push Notifications</h3>
-            <p className="text-sm text-gray-400">
-              {hasSubscription 
-                ? `Active on ${subscriptionCount} device(s)` 
-                : 'Get real-time updates for your orders'}
+            <p className="text-sm text-gray-500">
+              {hasSubscription
+                ? `Active on ${subscriptionCount} device(s)`
+                : 'Get notified when new orders arrive'}
             </p>
           </div>
         </div>
-        
+
         <button
           onClick={handleToggle}
           disabled={isLoading}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            hasSubscription
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${hasSubscription
               ? 'bg-red-100 text-red-700 hover:bg-red-200'
               : 'bg-indigo-600 text-white hover:bg-indigo-700'
-          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {isLoading ? (
             <span className="flex items-center">
@@ -160,9 +159,9 @@ const PushNotificationToggle = () => {
       <div className="mt-3 pt-3 border-t border-gray-100">
         <p className="text-xs text-gray-400">
           {hasSubscription ? (
-            '✓ You will receive notifications for order status changes and important updates.'
+            '✓ You will receive notifications for new orders and important updates.'
           ) : (
-            '💡 Enable notifications to get instant alerts when your order status is updated.'
+            '💡 Enable notifications to get instant alerts when customers place orders.'
           )}
         </p>
         {hasSubscription && (

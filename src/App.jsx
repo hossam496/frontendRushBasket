@@ -41,20 +41,10 @@ const ScrollToTop = () => {
   return null
 }
 
-import { useFcm } from './hooks/useFcm'
-
 // App content component with auth logic
 const AppContent = () => {
-  const { isAuthenticated, isAdmin, loading, user } = useAuth();
-  const { requestPermission, setupOnMessage } = useFcm();
+  const { isAuthenticated, isAdmin, loading } = useAuth();
   const location = useLocation();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      requestPermission();
-      setupOnMessage();
-    }
-  }, [isAuthenticated, requestPermission, setupOnMessage]);
 
   // Memoized computed values
   const isAdminPath = useMemo(() => location.pathname.startsWith('/admin'), [location.pathname]);
@@ -65,71 +55,71 @@ const AppContent = () => {
 
   return (
     <CartProvider>
-        <Toaster position="top-right" reverseOrder={false} />
-        <ScrollToTop />
-        {!isAdminPath && (
-          <Suspense fallback={<SkeletonLoader />}>
-            <Navbar isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
-          </Suspense>
-        )}
+      <Toaster position="top-right" reverseOrder={false} />
+      <ScrollToTop />
+      {!isAdminPath && (
         <Suspense fallback={<SkeletonLoader />}>
-          <Routes>
-            <Route path='/' element={<Home />} />
-            <Route path='/contact' element={<Contact />} />
-            <Route path='/items' element={<Item />} />
+          <Navbar isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
+        </Suspense>
+      )}
+      <Suspense fallback={<SkeletonLoader />}>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/contact' element={<Contact />} />
+          <Route path='/items' element={<Item />} />
 
-            <Route path='/cart' element={
-              loading ? <SkeletonLoader /> : 
+          <Route path='/cart' element={
+            loading ? <SkeletonLoader /> :
               (isAuthenticated ? <Cart /> : <Navigate replace to='/login' />)
-            } />
+          } />
 
-            <Route path='/myorders' element={<MyOrders />} />
-            <Route path='/payment-success' element={<PaymentSuccessPage />} />
-            <Route path='/checkout' element={<Checkout />} />
-            <Route path='/notifications' element={
-              isAuthenticated ? <NotificationsPage /> : <Navigate to="/login" replace />
-            } />
+          <Route path='/myorders' element={<MyOrders />} />
+          <Route path='/payment-success' element={<PaymentSuccessPage />} />
+          <Route path='/checkout' element={<Checkout />} />
+          <Route path='/notifications' element={
+            isAuthenticated ? <NotificationsPage /> : <Navigate to="/login" replace />
+          } />
 
-            {/* Admin Routes - check isAuthenticated AND isAdmin */}
-            <Route path='/admin' element={
-              loading ? <SkeletonLoader /> : 
+          {/* Admin Routes - check isAuthenticated AND isAdmin */}
+          <Route path='/admin' element={
+            loading ? <SkeletonLoader /> :
               (isAuthenticated && isAdmin ? <AdminDashboard /> : <Navigate to="/login" replace />)
-            } />
-            <Route path='/admin/products' element={
-              loading ? <SkeletonLoader /> : 
+          } />
+          <Route path='/admin/products' element={
+            loading ? <SkeletonLoader /> :
               (isAuthenticated && isAdmin ? <AdminProductList /> : <Navigate to="/login" replace />)
-            } />
-            <Route path='/admin/orders' element={
-              loading ? <SkeletonLoader /> : 
+          } />
+          <Route path='/admin/orders' element={
+            loading ? <SkeletonLoader /> :
               (isAuthenticated && isAdmin ? <AdminOrderList /> : <Navigate to="/login" replace />)
-            } />
-            <Route path='/admin/analytics' element={
-              loading ? <SkeletonLoader /> : 
+          } />
+          <Route path='/admin/analytics' element={
+            loading ? <SkeletonLoader /> :
               (isAuthenticated && isAdmin ? <AdminAnalytics /> : <Navigate to="/login" replace />)
-            } />
-            <Route path='/admin/users' element={
-              loading ? <SkeletonLoader /> : 
+          } />
+          <Route path='/admin/users' element={
+            loading ? <SkeletonLoader /> :
               (isAuthenticated && isAdmin ? <AdminUserList /> : <Navigate to="/login" replace />)
-            } />
+          } />
 
-            {/* auth routes */}
-            <Route path='/login' element={<Login />} />
-            <Route path='/signup' element={<Signup />} />
-            <Route path='/logout' element={<Logout />} />
+          {/* auth routes */}
+          <Route path='/login' element={<Login />} />
+          <Route path='/signup' element={<Signup />} />
+          <Route path='/logout' element={<Logout />} />
 
-            {/* fallback to home */}
-            <Route path='*' element={<Navigate replace to='/' />} />
-          </Routes>
+          {/* fallback to home */}
+          <Route path='*' element={<Navigate replace to='/' />} />
+        </Routes>
+      </Suspense>
+      <Suspense fallback={null}>
+        <PWAInstallPrompt />
+      </Suspense>
+      {!isAdminPath && (
+        <Suspense fallback={<SkeletonLoader />}>
+          <Footer />
         </Suspense>
-        <Suspense fallback={null}>
-          <PWAInstallPrompt />
-        </Suspense>
-        {!isAdminPath && (
-          <Suspense fallback={<SkeletonLoader />}>
-            <Footer />
-          </Suspense>
-        )}
-      </CartProvider>
+      )}
+    </CartProvider>
   );
 };
 
