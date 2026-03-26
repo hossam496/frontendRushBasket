@@ -8,7 +8,21 @@ import NotificationItem from '../NotificationItem';
 const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  const { 
+    notifications, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead, 
+    deleteNotification,
+    refreshNotifications 
+  } = useNotifications();
+
+  const handleToggle = () => {
+    if (!isOpen) {
+      refreshNotifications();
+    }
+    setIsOpen(!isOpen);
+  };
   const navigate = useNavigate();
 
   // Handle clicking outside to close
@@ -36,7 +50,7 @@ const NotificationBell = () => {
     <div className="relative" ref={dropdownRef}>
       {/* Bell Button */}
       <button 
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggle}
         className={`
           relative p-2 rounded-xl transition-all duration-300 group
           ${isOpen ? 'bg-indigo-500/10 text-indigo-400' : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'}

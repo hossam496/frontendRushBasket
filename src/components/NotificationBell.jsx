@@ -13,7 +13,8 @@ const NotificationBell = () => {
         unreadCount, 
         markAsRead, 
         markAllAsRead, 
-        deleteNotification 
+        deleteNotification,
+        refreshNotifications
     } = useNotifications();
     
     const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +32,12 @@ const NotificationBell = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleToggle = () => setIsOpen(!isOpen);
+    const handleToggle = () => {
+        if (!isOpen) {
+            refreshNotifications();
+        }
+        setIsOpen(!isOpen);
+    };
 
     const handleNotificationClick = async (notif) => {
         if (!notif.isRead) {
