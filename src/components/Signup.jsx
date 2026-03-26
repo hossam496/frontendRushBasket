@@ -50,7 +50,7 @@ const Signup = () => {
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (!isStrongPassword(formData.password)) {
-      newErrors.password = "Password must be strong (min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol)";
+      newErrors.password = "Password must be strong:\n• Min 8 characters\n• 1 uppercase & 1 lowercase\n• 1 number & 1 symbol";
     }
     if (!formData.remember)
       newErrors.remember = "You must agree to terms and conditions";
@@ -76,9 +76,9 @@ const Signup = () => {
       if (res.data.success) {
         const { token, user } = res.data;
         login(user, token, formData.remember);
-        
+
         setShowToast(true);
-        
+
         setTimeout(() => {
           if (user.role === 'admin') {
             navigate("/admin");
