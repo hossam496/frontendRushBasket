@@ -193,9 +193,9 @@ self.addEventListener('notificationclick', (event) => {
   const notificationData = event.notification.data || {};
   let targetUrl = notificationData.url || '/';
   
-  // Handle action buttons
+  // Handle action buttons and type-based fallbacks
   if (event.action === 'view-order') {
-    targetUrl = '/admin/orders';
+    targetUrl = notificationData.url || (notificationData.type === 'new-order' ? '/admin/orders' : '/my-orders');
   } else if (event.action === 'dismiss') {
     return;
   }

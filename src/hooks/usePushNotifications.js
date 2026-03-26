@@ -200,8 +200,6 @@ export const usePushNotifications = () => {
       
       if (errorMessage.includes('VAPID') || errorMessage.includes('configured')) {
         errorMessage = 'Push service not configured on server. Please check environment variables.';
-      } else if (errorMessage.includes('Only admin')) {
-        errorMessage = 'Push notifications are only available for admin users.';
       } else if (errorMessage.includes('permission')) {
         errorMessage = 'Notification permission denied. Please enable in browser settings.';
       } else if (errorMessage.includes('timeout')) {
