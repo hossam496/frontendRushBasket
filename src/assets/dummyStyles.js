@@ -542,7 +542,7 @@ export const signupStyles = {
   passwordInput: "w-full pl-10 pr-10 py-2.5 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500",
   toggleButton: "absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400",
   error: "text-xs text-red-500 mt-1",
-  termsContainer: "flex items-center text-sm",
+  termsContainer: "flex flex-col items-start space-y-1 text-sm",
   termsLabel: "flex items-center text-white",
   termsCheckbox: "mr-2 h-4 w-4 cursor-pointer text-green-500 bg-gray-800 border-gray-600 rounded focus:ring-green-500",
   submitButton: "w-full py-2.5 bg-green-500 hover:bg-green-600 text-black font-medium rounded-lg transition",
