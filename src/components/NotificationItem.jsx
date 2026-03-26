@@ -1,44 +1,48 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
-import { Package, User, Bell, Info, CheckCircle2, AlertCircle } from 'lucide-react';
+import { 
+  Package, User, Bell, Info, CheckCircle2, 
+  AlertCircle, Truck, ShoppingCart, Settings 
+} from 'lucide-react';
 
 const NotificationItem = ({ notification, onClick }) => {
-  const { title, message, type, isRead, createdAt } = notification;
+  const { title, message, type, status, isRead, createdAt } = notification;
 
   const getIcon = () => {
     switch (type) {
+      case 'status':
+        return <Truck className="w-5 h-5 text-emerald-400" />;
       case 'order':
-      case 'order-status':
-        return <Package className="w-5 h-5 text-emerald-400" />;
+        return <ShoppingCart className="w-5 h-5 text-blue-400" />;
       case 'registration':
       case 'user':
-        return <User className="w-5 h-5 text-blue-400" />;
+        return <User className="w-5 h-5 text-indigo-400" />;
       case 'system':
-        return <Info className="w-5 h-5 text-indigo-400" />;
+        return <Info className="w-5 h-5 text-slate-400" />;
       case 'admin':
         return <Settings className="w-5 h-5 text-amber-400" />;
-      case 'test':
-        return <CheckCircle2 className="w-5 h-5 text-gray-400" />;
       default:
         return <Bell className="w-5 h-5 text-slate-400" />;
     }
   };
 
   const getStatusColor = () => {
+    switch (status) {
+      case 'delivered': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      case 'shipped': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+      case 'processing': return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+      case 'pending': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      case 'cancelled': return 'bg-red-500/10 text-red-400 border-red-500/20';
+      default: return 'bg-white/5 text-gray-400 border-white/10';
+    }
+  };
+
+  const getTypeColor = () => {
     switch (type) {
-      case 'order':
-      case 'order-status':
-        return 'bg-emerald-500/10 border-emerald-500/20';
-      case 'registration':
-      case 'user':
-        return 'bg-blue-500/10 border-blue-500/20';
-      case 'system':
-        return 'bg-indigo-500/10 border-indigo-500/20';
-      case 'admin':
-        return 'bg-amber-500/10 border-amber-500/20';
-      default:
-        return 'bg-slate-500/10 border-slate-500/20';
+      case 'status': return 'bg-emerald-500/10 border-emerald-500/20';
+      case 'order': return 'bg-blue-500/10 border-blue-500/20';
+      default: return 'bg-indigo-500/10 border-indigo-500/20';
     }
   };
 
@@ -59,7 +63,7 @@ const NotificationItem = ({ notification, onClick }) => {
         {/* Icon Container */}
         <div className={`
           flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
-          ${getStatusColor()} backdrop-blur-sm border border-white/10
+          ${getTypeColor()} backdrop-blur-sm border border-white/10
         `}>
           {getIcon()}
         </div>
@@ -70,13 +74,25 @@ const NotificationItem = ({ notification, onClick }) => {
             <h4 className={`text-sm font-semibold truncate ${!isRead ? 'text-white' : 'text-gray-400'}`}>
               {title}
             </h4>
-            <span className="text-[10px] whitespace-nowrap text-gray-500 font-medium bg-white/5 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] whitespace-nowrap text-gray-500 font-medium">
               {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
             </span>
           </div>
-          <p className={`text-xs leading-relaxed line-clamp-2 ${!isRead ? 'text-gray-200' : 'text-gray-500'}`}>
+          
+          <p className={`text-xs leading-relaxed line-clamp-2 mb-2 ${!isRead ? 'text-gray-200' : 'text-gray-500'}`}>
             {message}
           </p>
+
+          <div className="flex items-center gap-2">
+             {status && (
+               <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border ${getStatusColor()}`}>
+                 {status}
+               </span>
+             )}
+             <span className="text-[9px] text-gray-600 uppercase font-bold tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/5">
+               {type}
+             </span>
+          </div>
         </div>
 
         {/* Unread Indicator */}

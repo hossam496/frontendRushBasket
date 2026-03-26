@@ -155,15 +155,20 @@ self.addEventListener('push', (event) => {
     console.warn('[SW] Failed to parse push data as JSON:', e);
     notificationData = {
       title: 'New Notification',
-      body: event.data.text() || 'You have a new notification',
-      icon: '/icon-192x192.png'
+      body: event.data.text() || 'You have a new notification'
     };
   }
 
+  // Icon selection based on type
+  let icon = "/icons/default.png";
+  if (notificationData.type === "status") icon = "/icons/order.png";
+  if (notificationData.type === "order") icon = "/icons/cart.png";
+  if (notificationData.type === "system") icon = "/icons/system.png";
+
   const options = {
     body: notificationData.body || '',
-    icon: notificationData.icon || '/icon-192x192.png',
-    badge: notificationData.badge || '/badge-72x72.png',
+    icon: icon,
+    badge: notificationData.badge || "/icons/badge.png",
     tag: notificationData.tag || `notification-${Date.now()}`,
     requireInteraction: notificationData.requireInteraction !== false,
     actions: notificationData.actions || [],
