@@ -41,10 +41,20 @@ const ScrollToTop = () => {
   return null
 }
 
+import { useFcm } from './hooks/useFcm'
+
 // App content component with auth logic
 const AppContent = () => {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const { isAuthenticated, isAdmin, loading, user } = useAuth();
+  const { requestPermission, setupOnMessage } = useFcm();
   const location = useLocation();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      requestPermission();
+      setupOnMessage();
+    }
+  }, [isAuthenticated, requestPermission, setupOnMessage]);
 
   // Memoized computed values
   const isAdminPath = useMemo(() => location.pathname.startsWith('/admin'), [location.pathname]);
