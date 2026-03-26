@@ -53,6 +53,8 @@ export const usePushNotifications = () => {
       if (existingSub) {
         setSubscription(existingSub);
         console.log('[Push] Existing subscription found:', existingSub.endpoint);
+        // Automatically sync with server to ensure it's still active
+        await syncSubscriptionWithServer(existingSub);
       } else {
         console.log('[Push] No existing subscription found');
       }
@@ -65,6 +67,26 @@ export const usePushNotifications = () => {
       if (err.message.includes('Service worker')) {
         console.log('[Push] Service worker not ready yet, will retry');
       }
+    }
+  };
+
+  // Sync subscription with server
+  const syncSubscriptionWithServer = async (sub) => {
+    try {
+      console.log('[Push] Syncing subscription with server...');
+      await api.post('/api/notifications/subscribe', {
+        subscription: {
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.toJSON().keys.p256dh,
+            auth: sub.toJSON().keys.auth
+          },
+          expirationTime: sub.expirationTime
+        }
+      });
+      console.log('[Push] Sync complete');
+    } catch (err) {
+      console.warn('[Push] Failed to sync subscription with server:', err.message);
     }
   };
 

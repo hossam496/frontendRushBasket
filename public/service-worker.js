@@ -244,6 +244,43 @@ self.addEventListener('notificationclose', (event) => {
   console.log('[SW] Notification closed:', event.notification.tag);
 });
 
+// Handle subscription change (e.g., when browser rotates keys)
+self.addEventListener('pushsubscriptionchange', (event) => {
+  console.log('[SW] Push subscription changing...');
+  
+  event.waitUntil(
+    self.registration.pushManager.getSubscription()
+      .then((oldSubscription) => {
+        return self.registration.pushManager.subscribe(oldSubscription.options)
+          .then((newSubscription) => {
+            // Send new subscription to your server
+            console.log('[SW] New subscription created:', newSubscription.endpoint);
+            
+            // Note: We use fetch here because it's a background event
+            return fetch('/api/notifications/subscribe', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                subscription: {
+                  endpoint: newSubscription.endpoint,
+                  keys: {
+                    p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(newSubscription.getKey('p256dh')))),
+                    auth: btoa(String.fromCharCode.apply(null, new Uint8Array(newSubscription.getKey('auth'))))
+                  },
+                  expirationTime: newSubscription.expirationTime
+                }
+              })
+            });
+          });
+      })
+      .catch((err) => {
+        console.error('[SW] pushsubscriptionchange failed:', err);
+      })
+  );
+});
+
 // Sync event for background sync (optional)
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-orders') {
