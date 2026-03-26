@@ -3,17 +3,18 @@ import { Link } from 'react-router-dom'
 import { ordersPageStyles } from '../assets/dummyStyles'
 import api from '../services/api';
 import { 
-  FiArrowLeft, 
-  FiSearch, 
-  FiPackage, 
-  FiX, 
-  FiUser, 
-  FiMail, 
-  FiPhone, 
-  FiMapPin, 
-  FiCreditCard,
-  FiShoppingBag
+    FiArrowLeft, 
+    FiSearch, 
+    FiPackage, 
+    FiX, 
+    FiUser, 
+    FiMail, 
+    FiPhone, 
+    FiMapPin, 
+    FiCreditCard,
+     FiShoppingBag
 } from 'react-icons/fi';
+import PushNotificationToggle from './PushNotificationToggle';
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -85,6 +86,11 @@ const MyOrders = () => {
           <div className={ordersPageStyles.titleDivider}>
             <div className={ordersPageStyles.dividerLine} />
           </div>
+        </div>
+
+        {/* Notifications Toggle */}
+        <div className="mb-8 max-w-2xl mx-auto">
+          <PushNotificationToggle />
         </div>
 
         {/* search */}

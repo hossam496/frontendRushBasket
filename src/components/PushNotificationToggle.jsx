@@ -100,10 +100,10 @@ const PushNotificationToggle = () => {
           </div>
           <div>
             <h3 className="font-medium text-gray-900">Push Notifications</h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-400">
               {hasSubscription 
                 ? `Active on ${subscriptionCount} device(s)` 
-                : 'Get notified when new orders arrive'}
+                : 'Get real-time updates for your orders'}
             </p>
           </div>
         </div>
@@ -160,9 +160,9 @@ const PushNotificationToggle = () => {
       <div className="mt-3 pt-3 border-t border-gray-100">
         <p className="text-xs text-gray-400">
           {hasSubscription ? (
-            '✓ You will receive notifications for new orders and important updates.'
+            '✓ You will receive notifications for order status changes and important updates.'
           ) : (
-            '💡 Enable notifications to get instant alerts when customers place orders.'
+            '💡 Enable notifications to get instant alerts when your order status is updated.'
           )}
         </p>
         {hasSubscription && (

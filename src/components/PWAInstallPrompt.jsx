@@ -21,7 +21,7 @@ const PWAInstallPrompt = () => {
       setDeferredPrompt(e)
       // Show our custom install button
       setIsVisible(true)
-      
+
       // Bonus: Premium toast invitation
       toast("Install our app for a better experience 🚀", {
         duration: 5000,
@@ -96,7 +96,7 @@ const PWAInstallPrompt = () => {
         <div className="bg-emerald-950/80 backdrop-blur-xl border border-emerald-500/30 shadow-2xl p-5 rounded-2xl mb-1 max-w-[300px] hidden sm:block relative overflow-hidden group/card">
           {/* Subtle Pulse Background */}
           <div className="absolute inset-0 bg-emerald-500/5 animate-pulse pointer-events-none"></div>
-          
+
           <div className="relative z-10">
             <div className="flex justify-between items-start mb-2.5">
               <h4 className="text-sm font-bold text-emerald-50 tracking-tight flex items-center gap-2">
@@ -127,13 +127,13 @@ const PWAInstallPrompt = () => {
       >
         {/* Shine Animation */}
         <div className="absolute inset-x-0 top-0 h-full w-full bg-linear-to-r from-transparent via-white/20 to-transparent -skew-x-30 -translate-x-full group-hover:animate-shine"></div>
-        
+
         <div className="relative">
           <FiDownload className="text-xl group-hover:-translate-y-1 transition-transform duration-300" />
           <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-400 rounded-full ring-2 ring-emerald-900 animate-pulse"></div>
         </div>
         <span className="relative z-10">Install App</span>
-        
+
         {/* Glow Effect */}
         <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity blur-xl"></div>
       </button>
