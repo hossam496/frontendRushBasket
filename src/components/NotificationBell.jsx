@@ -33,9 +33,6 @@ const NotificationBell = () => {
     }, []);
 
     const handleToggle = () => {
-        if (!isOpen) {
-            refreshNotifications();
-        }
         setIsOpen(!isOpen);
     };
 

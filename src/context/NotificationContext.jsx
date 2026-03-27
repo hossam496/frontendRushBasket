@@ -52,9 +52,17 @@ export const NotificationProvider = ({ children }) => {
     // Initial load
     fetchRef.current();
 
-    // Real-time update via Service Worker postMessage
+    // 1. Polling fallback (every 10 seconds) to ensure UI stays in sync
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchRef.current();
+      }
+    }, 10000);
+
+    // 2. Real-time update via Service Worker postMessage
+    let handleMessage;
     if ('serviceWorker' in navigator) {
-      const handleMessage = (event) => {
+      handleMessage = (event) => {
         if (event.data && event.data.type === 'PUSH_NOTIFICATION_RECEIVED') {
           console.log('[NotificationContext] Real-time push received, updating UI...');
           const payload = event.data.data;
@@ -71,17 +79,20 @@ export const NotificationProvider = ({ children }) => {
             );
           }
           
-          // Refresh notification list instantly
+          // Refresh notification list instantly upon receiving push
           fetchRef.current();
         }
       };
       
       navigator.serviceWorker.addEventListener('message', handleMessage);
-      
-      return () => {
-        navigator.serviceWorker.removeEventListener('message', handleMessage);
-      };
     }
+    
+    return () => {
+      clearInterval(intervalId);
+      if (handleMessage) {
+        navigator.serviceWorker.removeEventListener('message', handleMessage);
+      }
+    };
   }, [user]);
 
   // Mark single as read
