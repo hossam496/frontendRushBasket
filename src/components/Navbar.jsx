@@ -130,7 +130,7 @@ function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) 
           {/* Logo */}
           <Link to="/" className={navbarStyles.logoLink} aria-label="FlashBasket - Go to Homepage">
             <img
-              src="/logo.png"
+              src={logo}
               alt="FlashBasket Logo"
               className={`${navbarStyles.logoImage} ${scrolled ? 'h-10 w-10' : 'h-12 w-12'}`}
             />
