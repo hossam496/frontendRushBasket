@@ -1,7 +1,7 @@
 {
   "name": "FlashBasket",
-  "short_name": "Flash",
-  "description": "FlashBasket - Real-time order and status notifications",
+  "short_name": "FlashBasket",
+  "description": "Fast Online Shopping",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

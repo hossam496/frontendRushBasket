@@ -219,7 +219,7 @@ const ItemsHome = () => {
               }}
               className={itemsHomeStyles.sidebarTitle}
             >
-              FreshCart
+              FlashBasket
             </h1>
             <div className={itemsHomeStyles.sectionDivider} />
           </div>

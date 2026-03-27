@@ -62,10 +62,10 @@ const Sidebar = ({ isCollapsed, isMobileOpen, onMobileClose }) => {
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
           <div className="flex items-center">
-            <img src={logo} alt="Logo" className="w-10 h-10 object-contain" />
+            <img src={logo} alt="FlashBasket Logo" className="w-10 h-10 object-contain" />
             {!isCollapsed && (
               <span className="ml-3 text-xl font-bold text-gray-900">
-                Rush<span className="text-indigo-600">Basket</span>
+                FlashBasket
               </span>
             )}
           </div>

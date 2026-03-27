@@ -190,7 +190,7 @@ const AdminOrderList = () => {
         <div className={adminStyles.card}>
           <div className={adminStyles.cardHeader}>
             <div>
-              <h1 className={adminStyles.headerTitle}>Customer Orders</h1>
+              <h2 className={adminStyles.headerTitle}>Customer Orders</h2>
               <p className={adminStyles.headerSubtitle}>Monitor and fulfill platform transactions</p>
             </div>
 

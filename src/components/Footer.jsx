@@ -44,7 +44,7 @@ const Footer = () => {
             {/* brand */}
             <div>
                 <h2 className={footerStyles.brandTitle}>
-                    FLASH<span className={footerStyles.brandSpan}>BASKET</span>
+                    FlashBasket
                 </h2>
                 <p className={footerStyles.brandText}>
                     Bringing you the freshest organic produce since 202. Our mission is to deliver farm-fresh 
@@ -87,7 +87,7 @@ const Footer = () => {
             {/* contact info */}
             <div>
                 <h3 className={footerStyles.sectionTitle}>
-                    <BsTelephone className= {footerStyles.sectionIcon} />Cotact Us
+                    <BsTelephone className= {footerStyles.sectionIcon} />Contact Us
                 </h3>
                 <ul className="space-y-4 text-sm sm:text-base">
                     <li className={footerStyles.contactItem}>
@@ -125,11 +125,11 @@ const Footer = () => {
                     <FiMail className={footerStyles.sectionIcon} /> NewsLetter
                 </h3>
                 <p className={footerStyles.newsletterText}>
-                    Subsvribe to our newsletter for fresh updates, exclusive offers, 
+                    Subscribe to our newsletter for fresh updates, exclusive offers, 
                     and seasonal recipes!
                 </p>
                 <div className={footerStyles.newsletterForm}>
-                    <input type="email" placeholder="Enter Email Adress" 
+                    <input type="email" placeholder="Enter Email Address" 
                     className={footerStyles.newsletterInput}/>
 
                     <button className={footerStyles.newsletterButton} aria-label="Subscribe to newsletter">
@@ -138,7 +138,7 @@ const Footer = () => {
                     </button>
                 </div>
                 <p className={footerStyles.privacyText}>
-                    We respect your praivacy. unsubscribe at any time.
+                    We respect your privacy. unsubscribe at any time.
                 </p>
             </div>
         </div>
@@ -170,7 +170,7 @@ const Footer = () => {
                     </div>
                 </div>
                 <span className={footerStyles.attributionText}>
-                    Dscigned By{' '}
+                    Designed By{' '}
                     <a href="" 
                     target="_blank"
                     className={footerStyles.attributionLink}>

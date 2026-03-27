@@ -418,7 +418,7 @@ const AdminProductList = () => {
                 >
                   {newProduct.image ? (
                     <div className="relative">
-                      <img src={URL.createObjectURL(newProduct.image)} className="h-32 mx-auto rounded-lg object-contain" />
+                      <img src={URL.createObjectURL(newProduct.image)} alt="Product upload preview" className="h-32 mx-auto rounded-lg object-contain" />
                       <button 
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setNewProduct({...newProduct, image: null})}}
@@ -432,6 +432,7 @@ const AdminProductList = () => {
                       <img 
                         src={newProduct.imageUrl.startsWith('http') ? newProduct.imageUrl : `${api.defaults.baseURL}/${newProduct.imageUrl}`} 
                         className="h-32 mx-auto rounded-lg object-contain" 
+                        alt="Product preview"
                         onError={(e) => { e.target.src = 'https://placehold.co/128?text=Image+Not+Found'; }}
                       />
                       <p className="text-sm text-gray-500 mt-2">Preview from URL</p>
@@ -564,7 +565,7 @@ const AdminProductList = () => {
                 >
                   {newProduct.image ? (
                     <div className="relative">
-                      <img src={URL.createObjectURL(newProduct.image)} className="h-32 mx-auto rounded-lg object-contain" />
+                      <img src={URL.createObjectURL(newProduct.image)} alt="Product upload preview" className="h-32 mx-auto rounded-lg object-contain" />
                       <button 
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setNewProduct({...newProduct, image: null})}}
@@ -578,6 +579,7 @@ const AdminProductList = () => {
                       <img 
                         src={newProduct.imageUrl.startsWith('http') ? newProduct.imageUrl : `${api.defaults.baseURL}/${newProduct.imageUrl}`} 
                         className="h-32 mx-auto rounded-lg object-contain" 
+                        alt="Product preview"
                         onError={(e) => { e.target.src = 'https://placehold.co/128?text=Image+Not+Found'; }}
                       />
                       <p className="text-sm text-gray-500 mt-2">Preview from URL</p>
@@ -587,6 +589,7 @@ const AdminProductList = () => {
                       <img 
                         src={`${api.defaults.baseURL}${editingProduct.imageUrl.startsWith('/') ? '' : '/'}${editingProduct.imageUrl}`} 
                         className="h-32 mx-auto rounded-lg object-contain" 
+                        alt={editingProduct.name}
                       />
                       <p className="text-sm text-gray-500 mt-2">Current image</p>
                     </div>
