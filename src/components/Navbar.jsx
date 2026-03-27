@@ -128,13 +128,13 @@ function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) 
       <div className={navbarStyles.container}>
         <div className={navbarStyles.innerContainer}>
           {/* Logo */}
-          <Link to="/" className={navbarStyles.logoLink} aria-label="RushBasket - Go to Homepage">
+          <Link to="/" className={navbarStyles.logoLink} aria-label="FlashBasket - Go to Homepage">
             <img
               src={logo}
-              alt="RushBasket Logo"
+              alt="FlashBasket Logo"
               className={`${navbarStyles.logoImage} ${scrolled ? 'h-10 w-10' : 'h-12 w-12'}`}
             />
-            <span className={navbarStyles.logoText}>RushBasket</span>
+            <span className={navbarStyles.logoText}>⚡ FlashBasket</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -247,10 +247,10 @@ function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) 
               <div className={navbarStyles.mobileLogo}>
                 <img
                   src={logo}
-                  alt="RushBasket Logo"
+                  alt="FlashBasket Logo"
                   className={navbarStyles.mobileLogoImage}
                 />
-                <span className={navbarStyles.mobileLogoText}>RushBasket</span>
+                <span className={navbarStyles.mobileLogoText}>⚡ FlashBasket</span>
 
               </div>
 

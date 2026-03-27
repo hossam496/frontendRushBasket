@@ -86,7 +86,7 @@ const NotificationsPage = () => {
                         System <span className={styles.titleSpan}>Notifications</span>
                     </h1>
                     <p className={styles.subtitle}>
-                        Stay updated with the latest activities on RushBasket.
+                        Stay updated with the latest activities on FlashBasket.
                     </p>
                     <div className={styles.titleDivider}>
                         <div className={styles.dividerLine}></div>

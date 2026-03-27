@@ -11,13 +11,13 @@ const SEOHead = ({
   product = null,
   type = 'website'
 }) => {
-  const siteTitle = 'RushBasket - Premium E-commerce';
-  const siteDescription = 'Discover premium products at RushBasket. Quality items, fast delivery, and exceptional service.';
+  const siteTitle = 'FlashBasket - Premium E-commerce';
+  const siteDescription = 'Discover premium products at FlashBasket. Quality items, fast delivery, and exceptional service.';
   const baseUrl = 'https://frontend-rush-basket.vercel.app/';
   
   const finalTitle = title ? `${title} | ${siteTitle}` : siteTitle;
   const finalDescription = description || siteDescription;
-  const finalKeywords = keywords || 'ecommerce, shopping, premium products, online store, rushbasket';
+  const finalKeywords = keywords || 'ecommerce, shopping, premium products, online store, flashbasket';
   const finalOgImage = ogImage || `${baseUrl}/assets/logo.png`;
   const finalOgUrl = ogUrl || baseUrl;
 
@@ -30,7 +30,7 @@ const SEOHead = ({
     "image": product.imageUrl,
     "brand": {
       "@type": "Brand",
-      "name": "RushBasket"
+      "name": "FlashBasket"
     },
     "offers": {
       "@type": "Offer",
@@ -52,7 +52,7 @@ const SEOHead = ({
       <title>{finalTitle}</title>
       <meta name="description" content={finalDescription} />
       <meta name="keywords" content={finalKeywords} />
-      <meta name="author" content="RushBasket" />
+      <meta name="author" content="FlashBasket" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.googleapis.com; connect-src 'self' https://api.stripe.com https://js.stripe.com https://backend1-eight-lovat.vercel.app; frame-src 'self' https://js.stripe.com https://hooks.stripe.com;" />
       
@@ -66,7 +66,7 @@ const SEOHead = ({
       <meta property="og:description" content={finalDescription} />
       <meta property="og:image" content={finalOgImage} />
       <meta property="og:url" content={finalOgUrl} />
-      <meta property="og:site_name" content="RushBasket" />
+      <meta property="og:site_name" content="FlashBasket" />
       
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />

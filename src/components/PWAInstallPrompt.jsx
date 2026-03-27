@@ -91,7 +91,7 @@ const PWAInstallPrompt = () => {
       {!isMobile && (
         <div className="bg-white/90 backdrop-blur-md border border-slate-200 shadow-2xl p-4 rounded-2xl mb-1 max-w-[280px] hidden sm:block">
           <div className="flex justify-between items-start mb-2">
-            <h4 className="text-sm font-black text-slate-900 tracking-tight">Enjoy RushBasket offline</h4>
+            <h4 className="text-sm font-black text-slate-900 tracking-tight">Enjoy FlashBasket offline</h4>
             <button onClick={dismissPrompt} className="text-slate-400 hover:text-rose-500 transition-colors">
               <FiX size={16} />
             </button>

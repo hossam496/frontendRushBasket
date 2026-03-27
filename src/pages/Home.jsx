@@ -7,7 +7,7 @@ const Home = () => {
     <>
       <SEOHead 
         title="Premium Shopping Experience"
-        description="Shop the best products at RushBasket. Quality items, amazing prices, and fast delivery."
+        description="Shop the best products at FlashBasket. Quality items, amazing prices, and fast delivery."
         keywords="premium shopping, online store, quality products, best deals"
       />
       <ItemsHome />
