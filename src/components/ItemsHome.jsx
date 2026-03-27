@@ -100,6 +100,7 @@ const ItemsHome = () => {
   });
 
   const [loading, setLoading] = useState(true);
+  const [bestSellers, setBestSellers] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -112,23 +113,28 @@ const ItemsHome = () => {
       try {
         setLoading(true);
         setError(null);
-        console.log('[ItemsHome] Fetching products from:', `${API_BASE_URL}/api/items`);
-        const res = await api.get('/api/items');
         
-        // Safety check: Ensure res.data is an array
-        const data = Array.isArray(res.data) ? res.data : (res.data?.products || []);
+        // Parallel fetch for all items and best sellers
+        const [itemsRes, bestSellersRes] = await Promise.all([
+          api.get('/api/items'),
+          api.get('/api/items/best-sellers').catch(err => {
+            console.warn('[ItemsHome] Could not fetch best sellers:', err);
+            return { data: [] };
+          })
+        ]);
         
-        if (!Array.isArray(data)) {
-           console.error('[ItemsHome] Invalid products data format:', res.data);
-           setProducts([]);
-           return;
-        }
+        // Process all items
+        const itemsData = Array.isArray(itemsRes.data) ? itemsRes.data : (itemsRes.data?.products || []);
+        const normalizedItems = Array.isArray(itemsData) 
+          ? itemsData.map(p => ({ ...p, id: p._id })) 
+          : [];
+        setProducts(normalizedItems);
 
-        const normalized = data.map((p) => ({
-          ...p,
-          id: p._id,
-        }));
-        setProducts(normalized);
+        // Process best sellers
+        const bestSellersData = Array.isArray(bestSellersRes.data) ? bestSellersRes.data : [];
+        const normalizedBestSellers = bestSellersData.map(p => ({ ...p, id: p._id || p.id }));
+        setBestSellers(normalizedBestSellers);
+
       } catch (err) {
         console.error('[ItemsHome] Error fetching products:', err);
         setError('Failed to load products. Please try again later.');
@@ -303,6 +309,30 @@ const ItemsHome = () => {
             </h2>
             <div className={itemsHomeStyles.sectionDivider} />
           </div>
+
+          {/* Best Sellers Section */}
+          {!isSearching && activeCategory === "All" && bestSellers.length > 0 && (
+            <div className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-800 flex items-center">
+                  <span className="mr-2 text-2xl text-amber-500 italic">★</span>
+                  Best Sellers
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {bestSellers.map((product) => (
+                  <ProductCard
+                    key={`best-${product.id}`}
+                    product={product}
+                    quantity={getQuantity(product.id)}
+                    onIncrease={handleIncrease}
+                    onDecrease={handleDecrease}
+                  />
+                ))}
+              </div>
+              <div className="mt-8 border-b border-gray-100" />
+            </div>
+          )}
 
           {/* product grid */}
           <div className={itemsHomeStyles.productsGrid}>
