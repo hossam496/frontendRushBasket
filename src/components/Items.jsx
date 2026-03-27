@@ -23,18 +23,29 @@ const ProductCard = ({ item }) => {
   const cartItem = cart.find(ci => ci.productId === productId);
   const lineId = cartItem?.id
   const quantity = cartItem?.quantity || 0;
+  const [loading, setLoading] = useState(false);
 
-  const handleAddToCart = () => {
-    addToCart(productId, 1, { name: item.name, price: item.price, imageUrl: rawImage });
+  const handleAddToCart = async () => {
+    if (loading) return;
+    setLoading(true);
+    try { await addToCart(productId, 1, { name: item.name, price: item.price, imageUrl: rawImage }); }
+    finally { setLoading(false); }
   };
 
-  const handleIncement = () => {
-    updateQuantity(lineId, quantity + 1)
+  const handleIncement = async () => {
+    if (loading) return;
+    setLoading(true);
+    try { await updateQuantity(lineId, quantity + 1); }
+    finally { setLoading(false); }
   };
 
-  const handleDecrement = () => {
-    if (quantity <= 1) removeFromCart(lineId)
-    else updateQuantity(lineId, quantity - 1)
+  const handleDecrement = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      if (quantity <= 1) await removeFromCart(lineId);
+      else await updateQuantity(lineId, quantity - 1);
+    } finally { setLoading(false); }
   };
 
   const rawImage = item.image || item.imageUrl
@@ -81,7 +92,8 @@ const ProductCard = ({ item }) => {
             <div className={itemsPageStyles.quantityControls}>
               <button
                 onClick={handleDecrement}
-                className={`${itemsPageStyles.quantityButton} ${itemsPageStyles.quantityButtonLeft}`}
+                disabled={loading}
+                className={`${itemsPageStyles.quantityButton} ${itemsPageStyles.quantityButtonLeft} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 aria-label={`Decrease quantity of ${item.name}`}
               >
                 <FiMinus aria-hidden="true" />
@@ -89,7 +101,8 @@ const ProductCard = ({ item }) => {
               <span className={itemsPageStyles.quantityValue}>{quantity}</span>
               <button
                 onClick={handleIncement}
-                className={`${itemsPageStyles.quantityButton} ${itemsPageStyles.quantityButtonRight}`}
+                disabled={loading}
+                className={`${itemsPageStyles.quantityButton} ${itemsPageStyles.quantityButtonRight} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 aria-label={`Increase quantity of ${item.name}`}
               >
                 <FiPlus aria-hidden="true" />
@@ -98,9 +111,10 @@ const ProductCard = ({ item }) => {
           ) : (
             <button
               onClick={handleAddToCart}
-              className={itemsPageStyles.addButton}
+              disabled={loading}
+              className={`${itemsPageStyles.addButton} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              <span>Add to cart</span>
+              <span>{loading ? 'Adding...' : 'Add to cart'}</span>
               <span className={itemsPageStyles.addButtonArrow}>→</span>
             </button>
           )}

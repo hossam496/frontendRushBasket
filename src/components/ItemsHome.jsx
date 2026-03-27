@@ -10,6 +10,18 @@ import { ProductCardSkeleton } from './UI/LoadingStates';
 
 // Memoized Product Card component
 const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleAction = async (actionFn) => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      await actionFn(product);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleImageError = (e) => {
     e.target.onerror = null;
     e.target.src = "https://placehold.co/600x400?text=No+Image";
@@ -47,25 +59,28 @@ const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) =
 
           {quantity === 0 ? (
             <button
-              onClick={() => onIncrease(product)}
-              className={itemsHomeStyles.addButton}
+               onClick={() => handleAction(onIncrease)}
+               disabled={loading}
+               className={`${itemsHomeStyles.addButton} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <FaShoppingCart className="mr-2" />
-              Add
+              {loading ? 'Adding...' : 'Add'}
             </button>
           ) : (
             <div className={itemsHomeStyles.quantityControls}>
               <button
-                onClick={() => onDecrease(product)}
-                className={itemsHomeStyles.quantityButton}
+                onClick={() => handleAction(onDecrease)}
+                disabled={loading}
+                className={`${itemsHomeStyles.quantityButton} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 aria-label={`Decrease quantity of ${product.name}`}
               >
                 <FaMinus aria-hidden="true" />
               </button>
               <span className="font-bold">{quantity}</span>
               <button
-                onClick={() => onIncrease(product)}
-                className={itemsHomeStyles.quantityButton}
+                onClick={() => handleAction(onIncrease)}
+                disabled={loading}
+                className={`${itemsHomeStyles.quantityButton} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 aria-label={`Increase quantity of ${product.name}`}
               >
                 <FaPlus aria-hidden="true" />
@@ -165,21 +180,21 @@ const ItemsHome = () => {
   }, [cart]);
 
   // Memoized handlers
-  const handleIncrease = useCallback((product) => {
+  const handleIncrease = useCallback(async (product) => {
     const lineId = getLineItemId(product._id)
     if(lineId) {
-      updateQuantity(lineId, getQuantity(product._id) + 1)
+      await updateQuantity(lineId, getQuantity(product._id) + 1)
     }
     else{
-      addToCart(product._id, 1, { name: product.name, price: product.price, imageUrl: product.imageUrl })
+      await addToCart(product._id, 1, { name: product.name, price: product.price, imageUrl: product.imageUrl })
     }
   }, [addToCart, updateQuantity, getQuantity, getLineItemId])
 
-  const handleDecrease = useCallback((product) => {
+  const handleDecrease = useCallback(async (product) => {
     const qty = getQuantity(product._id);
     const lineId = getLineItemId(product._id)
-    if (qty > 1 && lineId) updateQuantity(lineId, qty - 1);
-    else if (lineId) removeFromCart(lineId);
+    if (qty > 1 && lineId) await updateQuantity(lineId, qty - 1);
+    else if (lineId) await removeFromCart(lineId);
   }, [updateQuantity, removeFromCart, getQuantity, getLineItemId])
 
   const redirectToItemsPage = useCallback(() => {

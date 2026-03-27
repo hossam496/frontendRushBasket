@@ -172,7 +172,7 @@ export const CartProvider = ({ children }) => {
         { productId, quantity }
       );
       // جلب التحديثات من السيرفر في الخلفية
-      fetchCart(true);
+      await fetchCart(true);
     } catch (err) {
       console.error('Error adding to cart:', err);
     }
