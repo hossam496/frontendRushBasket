@@ -32,7 +32,8 @@ const PWAInstallPrompt = () => {
           background: '#4f46e5',
           color: '#fff',
           fontWeight: 'bold',
-          fontSize: '14px'
+          fontSize: '14px',
+          marginTop: '5px'
         }
       })
     }
