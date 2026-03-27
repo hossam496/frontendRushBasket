@@ -198,6 +198,7 @@ function Navbar({ isAuthenticated: propIsAuthenticated, isAdmin: propIsAdmin }) 
               </Link>
             )}
 
+            <NotificationBell />
 
             <Link to="/cart" className={navbarStyles.cartLink} aria-label={`View shopping cart, ${cartCount} items`}>
               <FaOpencart

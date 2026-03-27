@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { ordersPageStyles as styles } from '../assets/dummyStyles';
 import { useAuth } from '../context/AuthContext';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 const NotificationsPage = () => {
     const { isAuthenticated, isAdmin } = useAuth();
+    const { isSupported, hasSubscription, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState({ page: 1, pages: 1 });
@@ -93,13 +95,34 @@ const NotificationsPage = () => {
                     </div>
                 </div>
 
-                <div className="flex justify-end mb-6">
-                    <button 
-                        onClick={markAllAsRead}
-                        className="flex items-center bg-emerald-700/50 hover:bg-emerald-700 text-emerald-100 px-4 py-2 rounded-full transition-colors text-sm"
-                    >
-                        <FiCheckCircle className="mr-2" /> Mark All as Read
-                    </button>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 bg-emerald-800/20 p-4 rounded-2xl border border-emerald-700/30 gap-4">
+                    <div>
+                        <h3 className="text-emerald-100 font-medium flex items-center">
+                            <FiBell className="mr-2 text-emerald-400" /> Order Updates
+                        </h3>
+                        <p className="text-emerald-400/80 text-xs mt-1">Get push notifications when your order status changes.</p>
+                    </div>
+                    <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
+                        {isSupported && (
+                            <button
+                                onClick={hasSubscription ? unsubscribe : subscribe}
+                                disabled={pushLoading}
+                                className={`flex-1 sm:flex-none px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                    hasSubscription 
+                                        ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30' 
+                                        : 'bg-emerald-500 text-emerald-950 hover:bg-emerald-400'
+                                } ${pushLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {pushLoading ? 'Processing...' : hasSubscription ? 'Disable Alerts' : 'Enable Alerts'}
+                            </button>
+                        )}
+                        <button 
+                            onClick={markAllAsRead}
+                            className="flex-1 sm:flex-none flex justify-center items-center bg-emerald-700/50 hover:bg-emerald-700 text-emerald-100 px-4 py-2 rounded-full transition-colors text-sm"
+                        >
+                            <FiCheckCircle className="mr-2" /> Mark Read
+                        </button>
+                    </div>
                 </div>
 
                 <div className="space-y-4">
