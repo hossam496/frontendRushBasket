@@ -160,7 +160,7 @@ self.addEventListener('push', (event) => {
   }
 
   // Icon selection based on type (Ensuring paths exist)
-  let icon = "/assets/logo.png";
+  let icon = "/logo.png";
   
   const options = {
     body: notificationData.body || 'You have a new update',
