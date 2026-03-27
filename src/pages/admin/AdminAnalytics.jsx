@@ -178,10 +178,27 @@ const AdminAnalytics = () => {
               accessor: "name",
               cell: (row) => (
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg mr-3 flex items-center justify-center">
-                    <FiShoppingCart className="text-gray-500" size={14} />
+                  <div className="w-10 h-10 bg-gray-50 rounded-lg mr-4 overflow-hidden border border-gray-100 flex-shrink-0">
+                    {row.imageUrl ? (
+                       <img 
+                        src={row.imageUrl.startsWith('http') ? row.imageUrl : `${api.defaults.baseURL}${row.imageUrl.startsWith('/') ? '' : '/'}${row.imageUrl}`} 
+                        alt={row.name}
+                        className="w-full h-full object-contain p-1"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://placehold.co/100x100?text=No+Img";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-300">
+                        <FiShoppingCart size={16} />
+                      </div>
+                    )}
                   </div>
-                  <span className="font-medium text-gray-900">{row.name}</span>
+                  <div>
+                    <span className="font-semibold text-gray-900 block">{row.name}</span>
+                    <span className="text-[10px] text-gray-400 uppercase tracking-wider">{row.category || 'Product'}</span>
+                  </div>
                 </div>
               )
             },

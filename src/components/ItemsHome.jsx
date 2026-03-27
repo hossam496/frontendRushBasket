@@ -59,9 +59,9 @@ const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) =
 
           {quantity === 0 ? (
             <button
-               onClick={() => handleAction(onIncrease)}
-               disabled={loading}
-               className={`${itemsHomeStyles.addButton} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => handleAction(onIncrease)}
+              disabled={loading}
+              className={`${itemsHomeStyles.addButton} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <FaShoppingCart className="mr-2" />
               {loading ? 'Adding...' : 'Add'}
@@ -100,7 +100,6 @@ const ItemsHome = () => {
   });
 
   const [loading, setLoading] = useState(true);
-  const [bestSellers, setBestSellers] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -113,28 +112,23 @@ const ItemsHome = () => {
       try {
         setLoading(true);
         setError(null);
-        
-        // Parallel fetch for all items and best sellers
-        const [itemsRes, bestSellersRes] = await Promise.all([
-          api.get('/api/items'),
-          api.get('/api/items/best-sellers').catch(err => {
-            console.warn('[ItemsHome] Could not fetch best sellers:', err);
-            return { data: [] };
-          })
-        ]);
-        
-        // Process all items
-        const itemsData = Array.isArray(itemsRes.data) ? itemsRes.data : (itemsRes.data?.products || []);
-        const normalizedItems = Array.isArray(itemsData) 
-          ? itemsData.map(p => ({ ...p, id: p._id })) 
-          : [];
-        setProducts(normalizedItems);
+        console.log('[ItemsHome] Fetching products from:', `${API_BASE_URL}/api/items`);
+        const res = await api.get('/api/items');
 
-        // Process best sellers
-        const bestSellersData = Array.isArray(bestSellersRes.data) ? bestSellersRes.data : [];
-        const normalizedBestSellers = bestSellersData.map(p => ({ ...p, id: p._id || p.id }));
-        setBestSellers(normalizedBestSellers);
+        // Safety check: Ensure res.data is an array
+        const data = Array.isArray(res.data) ? res.data : (res.data?.products || []);
 
+        if (!Array.isArray(data)) {
+          console.error('[ItemsHome] Invalid products data format:', res.data);
+          setProducts([]);
+          return;
+        }
+
+        const normalized = data.map((p) => ({
+          ...p,
+          id: p._id,
+        }));
+        setProducts(normalized);
       } catch (err) {
         console.error('[ItemsHome] Error fetching products:', err);
         setError('Failed to load products. Please try again later.');
@@ -150,7 +144,7 @@ const ItemsHome = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const isSearching = useMemo(() => searchTerm.trim() !== "", [searchTerm]);
-  
+
   const searchedProducts = useMemo(() => {
     const productMatchesSearch = (product, term) => {
       if (!term) return true;
@@ -162,8 +156,8 @@ const ItemsHome = () => {
     return isSearching
       ? products.filter((product) => productMatchesSearch(product, searchTerm))
       : activeCategory === "All"
-      ? products
-      : products.filter((product) => product.category === activeCategory);
+        ? products
+        : products.filter((product) => product.category === activeCategory);
   }, [products, isSearching, searchTerm, activeCategory]);
 
   const sidebarCategories = useMemo(() => [
@@ -188,10 +182,10 @@ const ItemsHome = () => {
   // Memoized handlers
   const handleIncrease = useCallback(async (product) => {
     const lineId = getLineItemId(product._id)
-    if(lineId) {
+    if (lineId) {
       await updateQuantity(lineId, getQuantity(product._id) + 1)
     }
-    else{
+    else {
       await addToCart(product._id, 1, { name: product.name, price: product.price, imageUrl: product.imageUrl })
     }
   }, [addToCart, updateQuantity, getQuantity, getLineItemId])
@@ -239,11 +233,10 @@ const ItemsHome = () => {
                       setActiveCategory(category.value || category.name);
                       setSearchTerm(""); // reset search
                     }}
-                    className={`${itemsHomeStyles.categoryItem} ${
-                      activeCategory === (category.value || category.name) && !isSearching
+                    className={`${itemsHomeStyles.categoryItem} ${activeCategory === (category.value || category.name) && !isSearching
                         ? itemsHomeStyles.activeCategory
                         : itemsHomeStyles.inactiveCategory
-                    }`}
+                      }`}
                   >
                     <div className={itemsHomeStyles.categoryIcon}>{category.icon}</div>
                     <span className={itemsHomeStyles.categoryName}>{category.name}</span>
@@ -266,11 +259,10 @@ const ItemsHome = () => {
                     setActiveCategory(cat.value || cat.name);
                     setSearchTerm(""); // reset search
                   }}
-                  className={`${itemsHomeStyles.mobileCategoryItem} ${
-                    activeCategory === (cat.value || cat.name) && !isSearching
+                  className={`${itemsHomeStyles.mobileCategoryItem} ${activeCategory === (cat.value || cat.name) && !isSearching
                       ? itemsHomeStyles.activeMobileCategory
                       : itemsHomeStyles.inactiveMobileCategory
-                  }`}
+                    }`}
                 >
                   {cat.name}
                 </button>
@@ -304,35 +296,11 @@ const ItemsHome = () => {
               {isSearching
                 ? "Search Results"
                 : activeCategory === "All"
-                ? "Featured Products"
-                : `Best ${activeCategory}`}
+                  ? "Featured Products"
+                  : `Best ${activeCategory}`}
             </h2>
             <div className={itemsHomeStyles.sectionDivider} />
           </div>
-
-          {/* Best Sellers Section */}
-          {!isSearching && activeCategory === "All" && bestSellers.length > 0 && (
-            <div className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-800 flex items-center">
-                  <span className="mr-2 text-2xl text-amber-500 italic">★</span>
-                  Best Sellers
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {bestSellers.map((product) => (
-                  <ProductCard
-                    key={`best-${product.id}`}
-                    product={product}
-                    quantity={getQuantity(product.id)}
-                    onIncrease={handleIncrease}
-                    onDecrease={handleDecrease}
-                  />
-                ))}
-              </div>
-              <div className="mt-8 border-b border-gray-100" />
-            </div>
-          )}
 
           {/* product grid */}
           <div className={itemsHomeStyles.productsGrid}>
@@ -344,8 +312,8 @@ const ItemsHome = () => {
             ) : error ? (
               <div className="col-span-full py-20 text-center text-red-500">
                 <p>{error}</p>
-                <button 
-                  onClick={() => window.location.reload()} 
+                <button
+                  onClick={() => window.location.reload()}
                   className="mt-4 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
                 >
                   Retry
