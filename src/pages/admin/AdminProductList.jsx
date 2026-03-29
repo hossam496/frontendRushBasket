@@ -157,10 +157,7 @@ const AdminProductList = () => {
     const rawImage = product.imageUrl || product.image;
     if (!rawImage) return null;
     if (rawImage.startsWith('http') || rawImage.startsWith('data:')) return rawImage;
-    
-    // For relative paths, handle the /uploads/ prefix
-    const path = rawImage.startsWith('/') ? rawImage : `/uploads/${rawImage}`;
-    return `${api.defaults.baseURL.replace(/\/api$/, '')}${path}`;
+    return `${api.defaults.baseURL}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
   };
 
   const filteredProducts = products.filter(product =>

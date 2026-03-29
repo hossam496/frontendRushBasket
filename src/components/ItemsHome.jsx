@@ -31,13 +31,7 @@ const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) =
     <div className={itemsHomeStyles.productCard}>
       <div className={itemsHomeStyles.imageContainer}>
         <img
-          src={
-            product.imageUrl?.startsWith('http') || product.imageUrl?.startsWith('data:')
-              ? product.imageUrl
-              : product.imageUrl?.startsWith('/')
-                ? `${API_BASE_URL}${product.imageUrl}`
-                : `${API_BASE_URL}/uploads/${product.imageUrl}`
-          }
+          src={resolveImageSrc(product.imageUrl)}
           alt={product.name}
           className={itemsHomeStyles.productImage}
           width={300}

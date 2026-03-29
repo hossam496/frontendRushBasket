@@ -3,6 +3,7 @@ import { useCart } from "../CartContext";
 import { cartStyles } from "../assets/dummyStyles";
 import { Link } from "react-router-dom";
 import { FiArrowLeft, FiMinus, FiPlus, FiTrash2 } from "react-icons/fi";
+import { resolveImageSrc } from "../services/imageService";
 
 const CartPage = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -12,8 +13,7 @@ const CartPage = () => {
   const getItemName = (item) =>
     item.name ?? item.product?.name ?? "Unnamed item";
   const getItemImage = (item) => {
-    const path = item.image ?? item.product?.imageUrl ?? "";
-    return path ? `${import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app'}${path}` : "";
+    return resolveImageSrc(item.image ?? item.product?.imageUrl);
   };
 
   // subtotal - هذا متغير وليس دالة
