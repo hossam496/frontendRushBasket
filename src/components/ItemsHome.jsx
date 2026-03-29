@@ -34,7 +34,9 @@ const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) =
           src={
             product.imageUrl?.startsWith('http') || product.imageUrl?.startsWith('data:')
               ? product.imageUrl
-              : `${API_BASE_URL}${product.imageUrl?.startsWith('/') ? '' : '/'}${product.imageUrl}`
+              : product.imageUrl?.startsWith('/')
+                ? `${API_BASE_URL}${product.imageUrl}`
+                : `${API_BASE_URL}/uploads/${product.imageUrl}`
           }
           alt={product.name}
           className={itemsHomeStyles.productImage}

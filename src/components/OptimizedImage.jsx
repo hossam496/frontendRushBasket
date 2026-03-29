@@ -42,11 +42,19 @@ const OptimizedImage = ({
   };
 
   const handleError = () => {
+    console.error(`[OptimizedImage] Failed to load: ${src}`);
     setHasError(true);
     setIsLoaded(true);
   };
 
-  const imageSrc = hasError ? "https://placehold.co/600x400?text=Error+Loading+Image" : src;
+  const imageSrc = !src || hasError ? "https://placehold.co/600x400?text=Image+Not+Found" : src;
+
+  // If no src is provided, mark as loaded immediately to show placeholder
+  useEffect(() => {
+    if (!src) {
+      setIsLoaded(true);
+    }
+  }, [src]);
 
   return (
     <div ref={imgRef} className={`relative overflow-hidden ${className}`}>

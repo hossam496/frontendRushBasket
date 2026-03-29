@@ -55,6 +55,10 @@ const ProductCard = ({ item }) => {
     else if (rawImage.startsWith('/')) imgSrc = `${BACKEND_URL}${rawImage}`
     else imgSrc = `${BACKEND_URL}/uploads/${rawImage}`
   }
+  else {
+    // If no image, passing null to OptimizedImage is now handled
+    imgSrc = null
+  }
 
   return (
     <div className={itemsPageStyles.productCard}>
