@@ -1,12 +1,12 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const SEOHead = ({ 
-  title, 
-  description, 
-  keywords, 
-  ogImage, 
-  ogUrl, 
+const SEOHead = ({
+  title,
+  description,
+  keywords,
+  ogImage,
+  ogUrl,
   noIndex = false,
   product = null,
   type = 'website'
@@ -14,7 +14,7 @@ const SEOHead = ({
   const siteTitle = 'FlashBasket - Premium E-commerce';
   const siteDescription = 'Discover premium products at FlashBasket. Quality items, fast delivery, and exceptional service.';
   const baseUrl = 'https://frontend-rush-basket.vercel.app/';
-  
+
   const finalTitle = title ? `${title} | ${siteTitle}` : siteTitle;
   const finalDescription = description || siteDescription;
   const finalKeywords = keywords || 'ecommerce, shopping, premium products, online store, flashbasket';
@@ -54,12 +54,10 @@ const SEOHead = ({
       <meta name="keywords" content={finalKeywords} />
       <meta name="author" content="FlashBasket" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.googleapis.com; connect-src 'self' https://api.stripe.com https://js.stripe.com https://backend1-eight-lovat.vercel.app; frame-src 'self' https://js.stripe.com https://hooks.stripe.com;" />
-      
       {/* Robots */}
       {noIndex && <meta name="robots" content="noindex, nofollow" />}
       {!noIndex && <meta name="robots" content="index, follow" />}
-      
+
       {/* Open Graph */}
       <meta property="og:type" content={type} />
       <meta property="og:title" content={finalTitle} />
@@ -67,25 +65,25 @@ const SEOHead = ({
       <meta property="og:image" content={finalOgImage} />
       <meta property="og:url" content={finalOgUrl} />
       <meta property="og:site_name" content="FlashBasket" />
-      
+
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={finalTitle} />
       <meta name="twitter:description" content={finalDescription} />
       <meta name="twitter:image" content={finalOgImage} />
-      
+
       {/* Additional SEO */}
       <meta name="theme-color" content="#10b981" />
       <meta name="msapplication-TileColor" content="#10b981" />
-      
+
       {/* Canonical URL */}
       <link rel="canonical" href={finalOgUrl} />
-      
+
       {/* Structured Data */}
       <script type="application/ld+json">
         {JSON.stringify(structuredData)}
       </script>
-      
+
       {/* Preconnect to external domains */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://api.stripe.com" />
