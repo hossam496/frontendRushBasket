@@ -13,6 +13,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { groceryData } from "../assets/dummyDataItem";
 import api, { API_BASE_URL } from '../services/api';
 import OptimizedImage from './OptimizedImage';
+import { resolveImageSrc } from "../services/imageService";
 
 const BACKEND_URL = API_BASE_URL;
 
@@ -48,13 +49,8 @@ const ProductCard = ({ item }) => {
     } finally { setLoading(false); }
   };
 
-  const rawImage = item.image || item.imageUrl
-  let imgSrc = null
-  if (rawImage) {
-    if (rawImage.startsWith('http') || rawImage.startsWith('data:')) imgSrc = rawImage
-    else if (rawImage.startsWith('/')) imgSrc = `${BACKEND_URL}${rawImage}`
-    else imgSrc = `${BACKEND_URL}/uploads/${rawImage}`
-  }
+  const rawImage = item.image || item.imageUrl;
+  const imgSrc = resolveImageSrc(rawImage);
 
   return (
     <div className={itemsPageStyles.productCard}>

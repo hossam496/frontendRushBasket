@@ -7,6 +7,7 @@ import { FaChevronRight, FaMinus, FaPlus, FaShoppingCart, FaThList } from "react
 import { categories } from "../assets/dummyData";
 import api, { API_BASE_URL } from '../services/api';
 import { ProductCardSkeleton } from './UI/LoadingStates';
+import { resolveImageSrc } from "../services/imageService";
 
 // Memoized Product Card component
 const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) => {
