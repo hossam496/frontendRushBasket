@@ -33,14 +33,14 @@ const ProductCard = ({ item }) => {
   };
 
   const handleIncement = async () => {
-    if (loading) return;
+    if (loading || !lineId) return;
     setLoading(true);
     try { await updateQuantity(lineId, quantity + 1); }
     finally { setLoading(false); }
   };
 
   const handleDecrement = async () => {
-    if (loading) return;
+    if (loading || !lineId) return;
     setLoading(true);
     try {
       if (quantity <= 1) await removeFromCart(lineId);

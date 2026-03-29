@@ -167,10 +167,26 @@ export const CartProvider = ({ children }) => {
     }
     
     try {
-      await api.post(
+      const response = await api.post(
         '/api/cart',
         { productId, quantity }
       );
+      
+      // Update local cart with real ID returned from server
+      if (response.data && response.data._id) {
+        setCart(prevCart => {
+          return prevCart.map(item => {
+            if (item.productId === productId && item.id.startsWith('temp-')) {
+              return {
+                ...item,
+                id: response.data._id,
+              };
+            }
+            return item;
+          });
+        });
+      }
+      
       // جلب التحديثات من السيرفر في الخلفية
       await fetchCart(true);
     } catch (err) {
@@ -199,13 +215,40 @@ export const CartProvider = ({ children }) => {
     if (!isAuthenticated) return;
 
     try {
+      // If lineId is temporary, fetch cart to get real ID
+      let realLineId = lineId;
+      if (lineId && lineId.startsWith('temp-')) {
+        try {
+          const res = await api.get('/api/cart');
+          const items = Array.isArray(res.data) ? res.data : [];
+          const normalized = normalizeItems(items);
+          
+          // Find the item that matches by productId
+          const tempItem = cart.find(item => item.id === lineId);
+          if (tempItem) {
+            const realItem = normalized.find(item => item.productId === tempItem.productId);
+            if (realItem) {
+              realLineId = realItem.id;
+              // Update local cart with real IDs
+              setCart(normalized);
+              localStorage.setItem('userCartBackup', JSON.stringify(normalized));
+            }
+          }
+        } catch (fetchErr) {
+          console.error('Error fetching cart for temp ID resolution:', fetchErr);
+        }
+      }
+      
       await api.put(
-        `/api/cart/${lineId}`,
+        `/api/cart/${realLineId}`,
         { quantity: newQty }
       );
     } catch (err) {
       console.error('Error updating the cart:', err);
-      fetchCart(true);
+      // Only fetch if it's not a temp ID error - for temp IDs, keep local state
+      if (err.response?.status !== 400 || !lineId?.startsWith('temp-')) {
+        fetchCart(true);
+      }
     }
   };
 
@@ -224,13 +267,11 @@ export const CartProvider = ({ children }) => {
     if (!isAuthenticated) return;
 
     try {
-      await api.delete(`/api/delete-item/${lineId}`); // Updated to match likely backend path or standard
+      await api.delete(`/api/cart/${lineId}`);
     } catch (err) {
-      // If it fails, maybe the path was different, let's try the original one if delete-item fails
-      try {
-        await api.delete(`/api/cart/${lineId}`);
-      } catch (err2) {
-        console.error('Error removing from cart:', err2);
+      console.error('Error removing from cart:', err);
+      // If it fails and it's not a temp ID, fetch the updated cart
+      if (!lineId?.startsWith('temp-')) {
         fetchCart(true);
       }
     }
