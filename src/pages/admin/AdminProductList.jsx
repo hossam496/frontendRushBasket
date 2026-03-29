@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { resolveImageSrc } from '../../services/imageService';
 import { 
   FiPlus, 
   FiTrash2, 
@@ -153,13 +154,6 @@ const AdminProductList = () => {
     }
   };
 
-  const getImageSrc = (product) => {
-    const rawImage = product.imageUrl || product.image;
-    if (!rawImage) return null;
-    if (rawImage.startsWith('http') || rawImage.startsWith('data:')) return rawImage;
-    return `${api.defaults.baseURL}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
-  };
-
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -244,7 +238,7 @@ const AdminProductList = () => {
               header: "Product",
               accessor: "name",
               cell: (row) => {
-                const imgSrc = getImageSrc(row);
+                const imgSrc = resolveImageSrc(row.imageUrl || row.image);
                 return (
                   <div className="flex items-center">
                     <div className="w-12 h-12 bg-gray-100 rounded-lg mr-3 overflow-hidden shrink-0">
@@ -422,7 +416,7 @@ const AdminProductList = () => {
                   ) : newProduct.imageUrl ? (
                     <div className="relative">
                       <img 
-                        src={newProduct.imageUrl.startsWith('http') ? newProduct.imageUrl : `${api.defaults.baseURL}/${newProduct.imageUrl}`} 
+                        src={resolveImageSrc(newProduct.imageUrl)} 
                         className="h-32 mx-auto rounded-lg object-contain" 
                         alt="Product preview"
                         onError={(e) => { e.target.src = 'https://placehold.co/128?text=Image+Not+Found'; }}
@@ -569,7 +563,7 @@ const AdminProductList = () => {
                   ) : newProduct.imageUrl ? (
                     <div className="relative">
                       <img 
-                        src={newProduct.imageUrl.startsWith('http') ? newProduct.imageUrl : `${api.defaults.baseURL}/${newProduct.imageUrl}`} 
+                        src={resolveImageSrc(newProduct.imageUrl)} 
                         className="h-32 mx-auto rounded-lg object-contain" 
                         alt="Product preview"
                         onError={(e) => { e.target.src = 'https://placehold.co/128?text=Image+Not+Found'; }}
@@ -579,7 +573,7 @@ const AdminProductList = () => {
                   ) : editingProduct?.imageUrl ? (
                     <div className="relative">
                       <img 
-                        src={`${api.defaults.baseURL}${editingProduct.imageUrl.startsWith('/') ? '' : '/'}${editingProduct.imageUrl}`} 
+                        src={resolveImageSrc(editingProduct.imageUrl)} 
                         className="h-32 mx-auto rounded-lg object-contain" 
                         alt={editingProduct.name}
                       />

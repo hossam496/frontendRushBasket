@@ -18,6 +18,7 @@ import {
   FiBell,
 } from "react-icons/fi";
 import api, { API_BASE_URL } from "../../services/api";
+import { resolveImageSrc } from "../../services/imageService";
 
 
 
@@ -100,13 +101,6 @@ const AdminDashboard = () => {
     };
   }, []);
   
-  const getImageSrc = (item) => {
-    const rawImage = item.imageUrl || item.image;
-    if (!rawImage) return null;
-    if (rawImage.startsWith('http') || rawImage.startsWith('data:')) return rawImage;
-    return `${API_BASE_URL}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
-  };
-
   const fetchStats = async () => {
     try {
       const res = await api.get('/api/stats');
