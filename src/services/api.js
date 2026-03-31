@@ -63,6 +63,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
       console.log(`[API] Added auth header to ${config.method?.toUpperCase()} ${config.url}`);
+      console.log(`[API] Token: ${token.substring(0, 20)}...`);
     } else {
       console.log(`[API] No token found for ${config.method?.toUpperCase()} ${config.url}`);
     }

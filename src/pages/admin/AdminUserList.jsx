@@ -34,11 +34,14 @@ const AdminUserList = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      console.log('[AdminUserList] Fetching users...');
       const res = await api.get('/api/auth');
+      console.log('[AdminUserList] Response:', res.data);
       setUsers(res.data.users || []);
     } catch (error) {
       console.error("Error fetching users:", error);
-      toast.error("Failed to load users");
+      console.error("Error response:", error.response);
+      toast.error(`Failed to load users: ${error.response?.data?.message || error.message}`);
     } finally {
       setLoading(false);
     }
