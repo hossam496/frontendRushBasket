@@ -5,6 +5,7 @@ import { FaArrowLeft, FaCheck, FaEye, FaEyeSlash, FaLock, FaUser } from "react-i
 import Logout from "./Logout";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../services/api";
 
 const Login = () => {
   const { isAuthenticated, login, user, loading } = useAuth();
@@ -62,7 +63,7 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
