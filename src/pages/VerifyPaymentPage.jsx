@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useCart } from '../CartContext'
 import { useLocation, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../services/api'
 
 const VerifyPaymentPage = () => {
   const [statusMsg, setStatusMsg] = useState("Verifing Payment...")
-  const {clearCart} = useCart
+  const { clearCart } = useCart()
   const navigate = useNavigate()
   const {search} = useLocation()
   useEffect(() => {
@@ -19,14 +19,14 @@ const VerifyPaymentPage = () => {
       return
     }
 
-    if(!session_id) {
+    if (!session_id) {
       setStatusMsg("No session Id Provided.")
       return
     }
 
-    axios.get('http://localhost:4000/api/orders/confirm', {
-      params: {session_id},
-      headers: token ? {Authorization: `Bearer ${token}`} : {},
+    api.get('/api/orders/confirm', {
+      params: { session_id },
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
     .then(() => {
       clearCart()
