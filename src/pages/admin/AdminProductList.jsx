@@ -114,9 +114,12 @@ const AdminProductList = () => {
     }
 
     try {
-      const res = await api.put(`/api/items/${editingProduct._id}`, formData);
+      const res = await api.put(`/api/items/${editingProduct._id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       
-      setProducts(products.map(p => p._id === editingProduct._id ? res.data : p));
+      const updatedProduct = res.data?.product || res.data;
+      setProducts(products.map(p => p._id === editingProduct._id ? updatedProduct : p));
       setIsEditModalOpen(false);
       setEditingProduct(null);
       setNewProduct({ name: '', price: '', oldPrice: '', category: 'Fruits', description: '', image: null });
@@ -142,7 +145,9 @@ const AdminProductList = () => {
     }
 
     try {
-      const res = await api.post('/api/items', formData);
+      const res = await api.post('/api/items', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       setProducts([...products, res.data]);
       setIsAddModalOpen(false);
       setNewProduct({ name: '', price: '', oldPrice: '', category: 'Fruits', description: '', image: null });

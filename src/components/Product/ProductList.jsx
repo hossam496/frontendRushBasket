@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useFetch } from '../hooks/useFetch';
-import { LoadingSpinner, EmptyState, ErrorFallback } from './UI/LoadingStates';
+import { useFetch } from '../../hooks/useFetch';
+import { LoadingSpinner, EmptyState, ErrorFallback } from '../UI/LoadingStates';
 import { FiShoppingBag, FiPackage, FiTrendingUp } from 'react-icons/fi';
+import { resolveImageSrc } from '../../services/imageService';
 
 // Optimized Product Card Component
 export const ProductCard = React.memo(({ product, onAddToCart, loading }) => {
@@ -11,14 +12,22 @@ export const ProductCard = React.memo(({ product, onAddToCart, loading }) => {
     }
   };
 
+  const rawImage = product.image || product.imageUrl;
+  const resolvedImage = rawImage ? resolveImageSrc(rawImage) : null;
+  const fallbackSrc = '/placeholder-product.jpg';
+
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
         <img 
-          src={product.imageUrl || '/placeholder-product.jpg'} 
+          src={resolvedImage || fallbackSrc}
           alt={product.name}
           className="w-full h-48 object-contain rounded-t-lg"
           loading="lazy"
+          onError={(e) => {
+            if (e.currentTarget.src.endsWith(fallbackSrc)) return;
+            e.currentTarget.src = fallbackSrc;
+          }}
         />
         {product.stock <= 0 && (
           <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs">
