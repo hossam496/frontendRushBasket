@@ -1,88 +1,13 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/logo.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#10b981" />
-  <meta name="description" content="FlashBasket is a fast and modern online store for groceries, electronics, and more. Shop quickly and easily." />
-  <meta name="keywords" content="FlashBasket, online shopping, ecommerce, groceries, fast delivery" />
-  <meta name="author" content="FlashBasket" />
-
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="/manifest.json" />
-
-  <!-- Apple Touch Icon -->
-  <link rel="apple-touch-icon" href="/logo.png" />
-
-  <!-- Resource Hints -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://api.stripe.com" />
-  <link rel="dns-prefetch" href="//backend1-eight-lovat.vercel.app" />
-
-  <!-- Preload Critical Assets -->
-  <link rel="preload" as="image" href="/FoodBanner.png" fetchpriority="high" />
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
-  <noscript>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
-  </noscript>
-
-  <!-- Resource Management -->
-  <meta name="referrer" content="no-referrer-when-downgrade" />
-  <meta http-equiv="Cache-Control" content="public, max-age=31536000" />
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="FlashBasket" />
-  <meta property="og:description" content="Fast and Modern Shopping Experience" />
-  <meta property="og:image" content="/logo.png" />
-  <meta property="og:url" content="https://frontend-rush-basket.vercel.app" />
-  <meta property="og:type" content="website" />
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="FlashBasket - Fast Online Shopping" />
-  <meta name="twitter:description" content="FlashBasket is a fast and modern online store for groceries, electronics, and more." />
-  <meta name="twitter:image" content="/logo.png" />
-
-  <!-- Structured Data -->
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "FlashBasket",
-      "url": "https://frontend-rush-basket.vercel.app",
-      "logo": "https://frontend-rush-basket.vercel.app/logo.png"
-    }
-  </script>
-
-  <!-- Security Headers -->
-  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
-
-  <title>FlashBasket - Fast Online Shopping</title>
-
-  <!-- Service Worker Registration -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(registration => {
-            console.log('[SW] Registered:', registration.scope);
-          })
-          .catch(error => {
-            console.error('[SW] Registration failed:', error);
-          });
-      });
-    }
-  </script>
-</head>
-
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-</body>
-
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Basket-Frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

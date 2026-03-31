@@ -44,7 +44,7 @@ const Footer = () => {
             {/* brand */}
             <div>
                 <h2 className={footerStyles.brandTitle}>
-                    FlashBasket
+                    RUSH<span className={footerStyles.brandSpan}>BASKET</span>
                 </h2>
                 <p className={footerStyles.brandText}>
                     Bringing you the freshest organic produce since 202. Our mission is to deliver farm-fresh 
@@ -52,16 +52,13 @@ const Footer = () => {
                 </p>
 
                 <div className="space-x-3 flex">
-                    {socialLinks.map((social, idx) => {
-                        const label = social.url.split('.com')[0].split('www.')[1] || 'social';
-                        return (
-                            <a href={social.url} key={idx}
-                            target="_blank" rel="noopener noreferrer" aria-label={`Follow us on ${label}`}
-                            className={footerStyles.socialLink}>
-                                <social.icon className={footerStyles.socialIcon} aria-hidden="true"></social.icon>
-                            </a>
-                        );
-                    })}
+                    {socialLinks.map((social, idx) => (
+                        <a href={social.url} key={idx}
+                        target="_blank" aria-label={`Visit our ${social.icon.name.replace('fa', '')} page`}
+                        className={footerStyles.socialLink}>
+                            <social.icon className={footerStyles.socialIcon}></social.icon>
+                        </a>
+                    ))}
                 </div>
             </div>
             
@@ -87,7 +84,7 @@ const Footer = () => {
             {/* contact info */}
             <div>
                 <h3 className={footerStyles.sectionTitle}>
-                    <BsTelephone className= {footerStyles.sectionIcon} />Contact Us
+                    <BsTelephone className= {footerStyles.sectionIcon} />Cotact Us
                 </h3>
                 <ul className="space-y-4 text-sm sm:text-base">
                     <li className={footerStyles.contactItem}>
@@ -125,20 +122,20 @@ const Footer = () => {
                     <FiMail className={footerStyles.sectionIcon} /> NewsLetter
                 </h3>
                 <p className={footerStyles.newsletterText}>
-                    Subscribe to our newsletter for fresh updates, exclusive offers, 
+                    Subsvribe to our newsletter for fresh updates, exclusive offers, 
                     and seasonal recipes!
                 </p>
                 <div className={footerStyles.newsletterForm}>
-                    <input type="email" placeholder="Enter Email Address" 
+                    <input type="email" placeholder="Enter Email Adress" 
                     className={footerStyles.newsletterInput}/>
 
-                    <button className={footerStyles.newsletterButton} aria-label="Subscribe to newsletter">
-                        <BiMailSend className='mr-2 text-lg' aria-hidden="true" />
-                        <span className="cursor-pointer">Subscribe</span>
+                    <button className={footerStyles.newsletterButton}>
+                        <BiMailSend className='mr-2 text-lg' />
+                        <span className="cursor-pointer">Subscibe</span>
                     </button>
                 </div>
                 <p className={footerStyles.privacyText}>
-                    We respect your privacy. unsubscribe at any time.
+                    We respect your praivacy. unsubscribe at any time.
                 </p>
             </div>
         </div>
@@ -170,7 +167,7 @@ const Footer = () => {
                     </div>
                 </div>
                 <span className={footerStyles.attributionText}>
-                    Designed By{' '}
+                    Dscigned By{' '}
                     <a href="" 
                     target="_blank"
                     className={footerStyles.attributionLink}>
@@ -186,4 +183,4 @@ const Footer = () => {
   );
 };
 
-export default React.memo(Footer);
+export default Footer;

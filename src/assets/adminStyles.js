@@ -80,7 +80,7 @@ export const listItemsPageStyles = {
   tableRowHover: "hover:bg-gray-50",
   tableDataCell: "py-4 px-4",
   productCell: "flex items-center",
-  productImage: "w-10 h-10 object-contain rounded-lg mr-3",
+  productImage: "w-10 h-10 object-cover rounded-lg mr-3",
   placeholderImage: "bg-gray-200 border-2 border-dashed rounded-xl w-10 h-10 mr-3",
   productName: "font-medium text-gray-900",
   productDescription: "text-sm text-gray-500 line-clamp-1",
@@ -160,7 +160,7 @@ export const ordersPageStyles = {
   modalOrderSummary: "border border-gray-200 rounded-lg",
   modalOrderItem: (index, length) => 
     `flex items-center p-4 ${index !== length - 1 ? 'border-b' : ''}`,
-  modalOrderImage: "w-16 h-16 object-contain rounded-lg mr-4",
+  modalOrderImage: "w-16 h-16 object-cover rounded-lg mr-4",
   modalPlaceholderImage: "bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 mr-4",
   modalOrderTotalSection: "p-4 bg-gray-50",
   modalOrderTotalRow: "flex justify-between py-2",

@@ -28,27 +28,6 @@ const Navbar = () => {
         Boolean(localStorage.getItem('authToken'))
     )
     const mobileMenuRef = useState(null)
-    const [translatedNavItems, setTranslatedNavItems] = useState(navItems)
-
-    // Translate navigation items when language changes
-    useEffect(() => {
-        const translateNavItems = async () => {
-            if (currentLanguage === 'en') {
-                setTranslatedNavItems(navItems)
-                return
-            }
-            
-            const translatedItems = await Promise.all(
-                navItems.map(async (item) => ({
-                    ...item,
-                    name: await translate(item.name, currentLanguage)
-                }))
-            )
-            setTranslatedNavItems(translatedItems)
-        }
-        
-        translateNavItems()
-    }, [currentLanguage, translate])
 
     useEffect(() => {
         setActiveTap(location.pathname)
@@ -104,6 +83,12 @@ const Navbar = () => {
         navigate('/')
     }
 
+    const toggleLanguage = () => {
+        const currentLang = i18n.language || window.localStorage.i18nextLng || 'en';
+        const newLang = currentLang.startsWith('ar') ? 'en' : 'ar';
+        i18n.changeLanguage(newLang);
+    };
+
     return (
         <nav className={`${navbarStyles.nav} ${scrolled ? navbarStyles.scrolledNav : navbarStyles.unscrolledNav}`}>
             <div className={navbarStyles.borderGradient} />
@@ -130,7 +115,7 @@ const Navbar = () => {
 
                     {/* desktop navigation */}
                     <div className={navbarStyles.desktopNav}>
-                        {translatedNavItems.map(item => (
+                        {navItems.map(item => (
                             <Link key={item.name} to={item.path}
                                 className={`${navbarStyles.navItem}
                             ${activeTap === item.path ?
@@ -153,10 +138,16 @@ const Navbar = () => {
 
                     {/* mobile hamburger */}
                     <div className={navbarStyles.iconsContainer}>
-                        <LanguageSwitcher 
-                            variant="toggle" 
+                        <button
+                            onClick={toggleLanguage}
                             className={`${navbarStyles.loginLink} flex items-center justify-center`}
-                        />
+                            aria-label='Toggle Language'
+                        >
+                            <FiGlobe className={`${navbarStyles.loginIcon} ${i18n.language?.startsWith('ar') ? 'text-emerald-400' : 'text-white'}`} />
+                            <span className={`ml-1 font-semibold ${i18n.language?.startsWith('ar') ? 'text-emerald-400' : 'text-white'}`}>
+                                {i18n.language?.startsWith('ar') ? 'AR' : 'EN'}
+                            </span>
+                        </button>
 
                         {isLoggedIn ? (
                             <button onClick={handleLogout}
@@ -164,7 +155,7 @@ const Navbar = () => {
                                 aria-label='Logout'
                             >
                                 <FiUser className={navbarStyles.loginIcon} />
-                                <span className=' ml-1 text-white'>Logout</span>
+                                <span className=' ml-1 text-white'>Logoyt</span>
                             </button>
                         ) : (
                             <Link to='/login' className={navbarStyles.loginLink}>
@@ -220,7 +211,7 @@ const Navbar = () => {
                         </button>
                     </div>
                     <div className={navbarStyles.mobileItemsContainer}>
-                        {translatedNavItems.map((item, idx) => (
+                        {navItems.map((item, idx) => (
                             <Link key={item.name} to={item.path}
                                 className={navbarStyles.mobileItem}
                                 state={{
@@ -236,10 +227,19 @@ const Navbar = () => {
                         ))}
 
                         <div className={navbarStyles.mobileButtons}>
-                            <LanguageSwitcher 
-                                variant="toggle"
+                            <button
+                                onClick={() => {
+                                    toggleLanguage();
+                                    setIsOpen(false);
+                                }}
                                 className={navbarStyles.loginButton}
-                            />
+                                aria-label='Toggle Language'
+                            >
+                                <FiGlobe className={`${navbarStyles.loginButtonIcon} ${i18n.language?.startsWith('ar') ? 'text-emerald-400' : 'text-white'}`} />
+                                <span className={i18n.language?.startsWith('ar') ? 'text-emerald-400 flex-1 text-center' : 'text-white flex-1 text-center'}>
+                                    {i18n.language?.startsWith('ar') ? 'Arabic' : 'English'}
+                                </span>
+                            </button>
 
                             {isLoggedIn ? (
                                 <button onClick={() => {

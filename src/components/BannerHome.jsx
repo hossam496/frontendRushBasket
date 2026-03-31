@@ -3,9 +3,7 @@ import { bannerStyles } from '../assets/dummyStyles'
 import { FiSearch, FiTruck } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { features } from '../assets/Dummy'
-
-// Use public/ path so the <link rel="preload"> in index.html works on the same URL
-const BANNER_IMG = '/FoodBanner.png'
+import BannerFood from '../assets/FoodBanner.png'
 
 const BannerHome = ({ onSearch }) => {
 
@@ -66,11 +64,8 @@ const BannerHome = ({ onSearch }) => {
                                 placeholder='Search for fruits, vegetables, meats, dairy...'
                                 className={bannerStyles.input}
                             />
-                            <button
-                                type="submit"
-                                className={bannerStyles.searchButton}
-                                aria-label="Search for products"
-                            >                <FiSearch className=' h-4 w-4 sm:h-5 sm:w-5' />
+                            <button type='submit' className={bannerStyles.searchButton}>
+                                <FiSearch className=' h-4 w-4 sm:h-5 sm:w-5' />
                             </button>
                         </form>
 
@@ -88,15 +83,7 @@ const BannerHome = ({ onSearch }) => {
                     <div className=' relative flex justify-center'>
                         <div className={bannerStyles.imageContainer}>
                             <div className={bannerStyles.imageInner}>
-                                <img
-                                    src={BANNER_IMG}
-                                    alt="Fresh groceries delivered to your door"
-                                    className=' object-cover w-full h-full'
-                                    width={600}
-                                    height={500}
-                                    fetchpriority="high"
-                                    decoding="async"
-                                />
+                                <img src={BannerFood} alt="Banner" className=' object-cover w-full h-full' />
                             </div>
                         </div>
 

@@ -1,90 +1,70 @@
 import React, { useEffect, useState } from "react";
 import { loginStyles } from "../assets/dummyStyles";
-import { Link, useNavigate, Navigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaCheck, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
-import api from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import Logout from "./Logout";
 
 const Login = () => {
-  const { login, isAuthenticated, user } = useAuth();
-  const navigate = useNavigate();
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      const targetPath = user.role === 'admin' ? '/admin' : '/';
-      navigate(targetPath, { replace: true });
-    }
-  }, [isAuthenticated, user, navigate]);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    Boolean(localStorage.getItem("authToken")),
+  );
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     remember: false,
   });
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShawPassword] = useState(false);
+
   const [showToast, setShowToast] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    const handler = () => {
+      setIsAuthenticated(Boolean(localStorage.getItem("authToken")));
+    };
+    window.addEventListener("authStateChanged", handler);
+    return () => window.removeEventListener("authStateChanged", handler);
+  }, []);
+  if (isAuthenticated) {
+    return <Logout />;
+  }
+
+  // form handler 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const {name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmet = (e) => {
     e.preventDefault();
+    if(!formData.remember){
+      setError('You must agree to terms and condition')
+      return;
+    }
+
+    // generate token and store user data
+    const token = 'mock_token';
+    const userData ={
+      email: formData.email,
+      token,
+      timestamp: new Date().toISOString(),
+    }
+    localStorage.setItem('authToken', token)
+    localStorage.setItem('userData', JSON.stringify(userData))
+
     setError('')
-    
-    // Basic validation
-    if (!formData.email || !formData.password) {
-      setError("Email and password are required")
-      return
-    }
+    setShowToast(true)
 
-    try {
-      const response = await api.post(
-        '/api/auth/login',
-        {
-          email: formData.email,
-          password: formData.password
-        }
-      )
+    window.dispatchEvent(new Event('authStateChanged'))
 
-      if (response?.data?.success) {
-        const { token, user } = response.data
-        login(user, token, formData.remember)
-
-        setShowToast(true)
-
-        // Immediate redirect without setTimeout
-        const targetPath = user.role === 'admin' ? '/admin' : '/';
-        navigate(targetPath, { replace: true });
-      } else {
-        setError(response?.data?.message || "Invalid response from server. Please try again.")
-      }
-    }
-    catch (err) {
-      console.error("Login full error:", err);
-      
-      // Show detailed error message from server
-      if (err.response?.data?.message) {
-        console.error("Server error:", err.response.data);
-        setError(err.response.data.message)
-      } else if (err.response?.status === 500) {
-        setError("Server error - please try again later")
-      } else if (err.response?.status === 401) {
-        setError("Invalid email or password")
-      } else if (err.request) {
-        console.error("No response from server:", err.request);
-        setError("Cannot connect to server - check your internet connection")
-      } else {
-        console.error("Error:", err.message);
-        setError("Login failed - please try again")
-      }
-    }
+    setTimeout(() => {
+      navigate('/')
+    })
   }
 
   return (
@@ -114,41 +94,41 @@ const Login = () => {
 
         <h2 className={loginStyles.title}>Welcome Back</h2>
 
-        <form onSubmit={handleSubmit} className={loginStyles.form}>
+        <form onSubmit={handleSubmet} className={loginStyles.form}>
           {/* email */}
-
+          
           <div className={loginStyles.inputContainer}>
             <FaUser className={loginStyles.inputIcon} />
             <input type="email" name="email" value={formData.email}
-              onChange={handleChange} placeholder="Email Address"
-              required className={loginStyles.input} />
+            onChange={handleChange} placeholder="Email Adress" 
+            required className={loginStyles.input}/>
           </div>
 
           <div className={loginStyles.inputContainer}>
             <FaLock className={loginStyles.inputIcon} />
             <input type={showPassword ? 'text' : 'password'}
-              name="password" value={formData.password}
-              onChange={handleChange} placeholder="password"
-              required className={loginStyles.passwordInput} />
+             name="password" value={formData.password}
+            onChange={handleChange} placeholder="passwrod" 
+            required className={loginStyles.passwordInput}/>
 
-            <button type="button" onClick={() => setShowPassword((v) => !v)}
+            <button type="button" onClick={() => setShawPassword((v) => !v)}
               className={loginStyles.toggleButton}
               aria-label={showPassword ? 'Hide password' : 'Show password'}>
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
           </div>
 
           {/* remember me */}
           <div className={loginStyles.rememberContainer}>
             <label className={loginStyles.rememberLabel}>
               <input type="checkbox" name="remember"
-                checked={formData.remember}
-                onChange={handleChange} className={loginStyles.rememberCheckbox}
-              />
+              checked={formData.remember}
+              onChange={handleChange} className={loginStyles.rememberCheckbox}
+              required />
               Remember me
             </label>
             <Link to='#' className={loginStyles.forgotLink}>
-              Forgot?
+            Forgot?
             </Link>
           </div>
           {error && <p className={loginStyles.error}>{error}</p>}
@@ -161,7 +141,7 @@ const Login = () => {
         <p className={loginStyles.signupText}>
           Dont’t have an account?{' '}
           <Link to='/signup' className={loginStyles.signupLink}>
-            Sign Up
+          Sign Up
           </Link>
         </p>
       </div>

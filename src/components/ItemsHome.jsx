@@ -1,206 +1,70 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { itemsHomeStyles } from "../assets/dummyStyles";
 import BannerHome from "./BannerHome";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { FaChevronRight, FaMinus, FaPlus, FaShoppingCart, FaThList } from "react-icons/fa";
-import { categories } from "../assets/dummyData";
-import api, { API_BASE_URL } from '../services/api';
-import { ProductCardSkeleton } from './UI/LoadingStates';
-import { resolveImageSrc } from "../services/imageService";
-
-// Memoized Product Card component
-const ProductCard = React.memo(({ product, quantity, onIncrease, onDecrease }) => {
-  const [loading, setLoading] = useState(false);
-
-  const handleAction = async (actionFn) => {
-    if (loading) return;
-    setLoading(true);
-    try {
-      await actionFn(product);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleImageError = (e) => {
-    e.target.onerror = null;
-    e.target.src = "https://placehold.co/600x400?text=No+Image";
-  };
-
-  return (
-    <div className={itemsHomeStyles.productCard}>
-      <div className={itemsHomeStyles.imageContainer}>
-        <img
-          src={resolveImageSrc(product.imageUrl)}
-          alt={product.name}
-          className={itemsHomeStyles.productImage}
-          width={300}
-          height={200}
-          loading="lazy"
-          decoding="async"
-          onError={handleImageError}
-        />
-      </div>
-      <div className={itemsHomeStyles.productContent}>
-        <h3 className={itemsHomeStyles.productTitle}>{product.name}</h3>
-        <div className={itemsHomeStyles.priceContainer}>
-          <div>
-            <p className={itemsHomeStyles.currentPrice}>
-              {product.price.toFixed(2)}
-            </p>
-            <span className={itemsHomeStyles.oldPrice}>
-              {(product.price * 1.2).toFixed(2)}
-            </span>
-          </div>
-
-          {quantity === 0 ? (
-            <button
-              onClick={() => handleAction(onIncrease)}
-              disabled={loading}
-              className={`${itemsHomeStyles.addButton} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <FaShoppingCart className="mr-2" />
-              {loading ? 'Adding...' : 'Add'}
-            </button>
-          ) : (
-            <div className={itemsHomeStyles.quantityControls}>
-              <button
-                onClick={() => handleAction(onDecrease)}
-                disabled={loading}
-                className={`${itemsHomeStyles.quantityButton} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                aria-label={`Decrease quantity of ${product.name}`}
-              >
-                <FaMinus aria-hidden="true" />
-              </button>
-              <span className="font-bold">{quantity}</span>
-              <button
-                onClick={() => handleAction(onIncrease)}
-                disabled={loading}
-                className={`${itemsHomeStyles.quantityButton} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                aria-label={`Increase quantity of ${product.name}`}
-              >
-                <FaPlus aria-hidden="true" />
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-});
+import { categories, products } from "../assets/dummyData";
 
 const ItemsHome = () => {
-  const [products, setProducts] = useState([])
   const [activeCategory, setActiveCategory] = useState(() => {
     return localStorage.getItem("activeCategory") || "All";
   });
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     localStorage.setItem("activeCategory", activeCategory);
   }, [activeCategory]);
 
-  // fetch products
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        console.log('[ItemsHome] Fetching products from:', `${API_BASE_URL}/api/items`);
-        const res = await api.get('/api/items');
-
-        // Safety check: Ensure res.data is an array
-        const data = Array.isArray(res.data) ? res.data : (res.data?.products || []);
-
-        if (!Array.isArray(data)) {
-          console.error('[ItemsHome] Invalid products data format:', res.data);
-          setProducts([]);
-          return;
-        }
-
-        const normalized = data.map((p) => ({
-          ...p,
-          id: p._id,
-        }));
-        setProducts(normalized);
-      } catch (err) {
-        console.error('[ItemsHome] Error fetching products:', err);
-        setError('Failed to load products. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts()
-  }, [])
-
   const navigate = useNavigate();
   const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // ← مهم: فارغ مش مسافة
 
-  const isSearching = useMemo(() => searchTerm.trim() !== "", [searchTerm]);
+  // تحديد إذا كان في بحث حقيقي أم لا
+  const isSearching = searchTerm.trim() !== "";
 
-  const searchedProducts = useMemo(() => {
-    const productMatchesSearch = (product, term) => {
-      if (!term) return true;
-      const cleanTerm = term.trim().toLowerCase();
-      const searchWords = cleanTerm.split(/\s+/);
-      return searchWords.every((word) => product.name.toLowerCase().includes(word));
-    };
+  const productMatchesSearch = (product, term) => {
+    if (!term) return true;
+    const cleanTerm = term.trim().toLowerCase();
+    const searchWords = cleanTerm.split(/\s+/);
+    return searchWords.every((word) => product.name.toLowerCase().includes(word));
+  };
 
-    return isSearching
-      ? products.filter((product) => productMatchesSearch(product, searchTerm))
-      : activeCategory === "All"
-        ? products
-        : products.filter((product) => product.category === activeCategory);
-  }, [products, isSearching, searchTerm, activeCategory]);
+  const searchedProducts = isSearching
+    ? products.filter((product) => productMatchesSearch(product, searchTerm))
+    : activeCategory === "All"
+    ? products
+    : products.filter((product) => product.category === activeCategory);
 
-  const sidebarCategories = useMemo(() => [
+  const getQuantity = (productId) => {
+    const item = cart.find((ci) => ci.id === productId);
+    return item ? item.quantity : 0;
+  };
+
+  const handleIncrease = (product) => addToCart(product, 1);
+
+  const handleDecrease = (product) => {
+    const qty = getQuantity(product.id);
+    if (qty > 1) updateQuantity(product.id, qty - 1);
+    else removeFromCart(product.id);
+  };
+
+  const redirectToItemsPage = () => {
+    navigate("/items", { state: { category: activeCategory } });
+  };
+
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+  };
+
+  // sidebar categories
+  const sidebarCategories = [
     {
       name: "All Items",
       icon: <FaThList className="text-lg" />,
       value: "All",
     },
     ...categories,
-  ], []);
-
-  const getQuantity = useCallback((productId) => {
-    const item = cart.find((ci) => ci.productId === productId);
-    return item ? item.quantity : 0;
-  }, [cart]);
-
-  const getLineItemId = useCallback((productId) => {
-    const item = cart.find((ci) => ci.productId === productId)
-    return item ? item.id : null
-  }, [cart]);
-
-  // Memoized handlers
-  const handleIncrease = useCallback(async (product) => {
-    const lineId = getLineItemId(product._id)
-    if (lineId) {
-      await updateQuantity(lineId, getQuantity(product._id) + 1)
-    }
-    else {
-      await addToCart(product._id, 1, { name: product.name, price: product.price, imageUrl: product.imageUrl })
-    }
-  }, [addToCart, updateQuantity, getQuantity, getLineItemId])
-
-  const handleDecrease = useCallback(async (product) => {
-    const qty = getQuantity(product._id);
-    const lineId = getLineItemId(product._id)
-    if (qty > 1 && lineId) await updateQuantity(lineId, qty - 1);
-    else if (lineId) await removeFromCart(lineId);
-  }, [updateQuantity, removeFromCart, getQuantity, getLineItemId])
-
-  const redirectToItemsPage = useCallback(() => {
-    navigate("/items", { state: { category: activeCategory } });
-  }, [navigate, activeCategory]);
-
-  const handleSearch = useCallback((term) => {
-    setSearchTerm(term);
-  }, []);
+  ];
 
   return (
     <div className={itemsHomeStyles.page}>
@@ -216,7 +80,7 @@ const ItemsHome = () => {
               }}
               className={itemsHomeStyles.sidebarTitle}
             >
-              FlashBasket
+              FreshCart
             </h1>
             <div className={itemsHomeStyles.sectionDivider} />
           </div>
@@ -230,10 +94,11 @@ const ItemsHome = () => {
                       setActiveCategory(category.value || category.name);
                       setSearchTerm(""); // reset search
                     }}
-                    className={`${itemsHomeStyles.categoryItem} ${activeCategory === (category.value || category.name) && !isSearching
+                    className={`${itemsHomeStyles.categoryItem} ${
+                      activeCategory === (category.value || category.name) && !isSearching
                         ? itemsHomeStyles.activeCategory
                         : itemsHomeStyles.inactiveCategory
-                      }`}
+                    }`}
                   >
                     <div className={itemsHomeStyles.categoryIcon}>{category.icon}</div>
                     <span className={itemsHomeStyles.categoryName}>{category.name}</span>
@@ -256,10 +121,11 @@ const ItemsHome = () => {
                     setActiveCategory(cat.value || cat.name);
                     setSearchTerm(""); // reset search
                   }}
-                  className={`${itemsHomeStyles.mobileCategoryItem} ${activeCategory === (cat.value || cat.name) && !isSearching
+                  className={`${itemsHomeStyles.mobileCategoryItem} ${
+                    activeCategory === (cat.value || cat.name) && !isSearching
                       ? itemsHomeStyles.activeMobileCategory
                       : itemsHomeStyles.inactiveMobileCategory
-                    }`}
+                  }`}
                 >
                   {cat.name}
                 </button>
@@ -293,39 +159,73 @@ const ItemsHome = () => {
               {isSearching
                 ? "Search Results"
                 : activeCategory === "All"
-                  ? "Featured Products"
-                  : `Best ${activeCategory}`}
+                ? "Featured Products"
+                : `Best ${activeCategory}`}
             </h2>
             <div className={itemsHomeStyles.sectionDivider} />
           </div>
 
           {/* product grid */}
           <div className={itemsHomeStyles.productsGrid}>
-            {loading ? (
-              // Skeleton cards prevent CLS: grid has fixed dimensions before real data arrives
-              Array.from({ length: 8 }).map((_, i) => (
-                <ProductCardSkeleton key={i} />
-              ))
-            ) : error ? (
-              <div className="col-span-full py-20 text-center text-red-500">
-                <p>{error}</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="mt-4 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : searchedProducts.length > 0 ? (
-              searchedProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  quantity={getQuantity(product.id)}
-                  onIncrease={handleIncrease}
-                  onDecrease={handleDecrease}
-                />
-              ))
+            {searchedProducts.length > 0 ? (
+              searchedProducts.map((product) => {
+                const qty = getQuantity(product.id);
+                return (
+                  <div key={product.id} className={itemsHomeStyles.productCard}>
+                    <div className={itemsHomeStyles.imageContainer}>
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className={itemsHomeStyles.productImage}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "/placeholder.png"; // أو رسالة No Image
+                        }}
+                      />
+                    </div>
+                    <div className={itemsHomeStyles.productContent}>
+                      <h3 className={itemsHomeStyles.productTitle}>{product.name}</h3>
+                      <div className={itemsHomeStyles.priceContainer}>
+                        <div>
+                          <p className={itemsHomeStyles.currentPrice}>
+                            {product.price.toFixed(2)}
+                          </p>
+                          <span className={itemsHomeStyles.oldPrice}>
+                            {(product.price * 1.2).toFixed(2)}
+                          </span>
+                        </div>
+
+                        {/* هنا الجزء المهم: الكنترولز بتظهر دلوقتي */}
+                        {qty === 0 ? (
+                          <button
+                            onClick={() => handleIncrease(product)}
+                            className={itemsHomeStyles.addButton}
+                          >
+                            <FaShoppingCart className="mr-2" />
+                            Add
+                          </button>
+                        ) : (
+                          <div className={itemsHomeStyles.quantityControls}>
+                            <button
+                              onClick={() => handleDecrease(product)}
+                              className={itemsHomeStyles.quantityButton}
+                            >
+                              <FaMinus />
+                            </button>
+                            <span className="font-bold">{qty}</span>
+                            <button
+                              onClick={() => handleIncrease(product)}
+                              className={itemsHomeStyles.quantityButton}
+                            >
+                              <FaPlus />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
             ) : (
               <div className={itemsHomeStyles.noProducts}>
                 <div className={itemsHomeStyles.noProductsText}>No Products Found</div>
