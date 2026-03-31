@@ -4,16 +4,39 @@ import BannerHome from "./BannerHome";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { FaChevronRight, FaMinus, FaPlus, FaShoppingCart, FaThList } from "react-icons/fa";
-import { categories, products } from "../assets/dummyData";
+import { categories } from "../assets/dummyData";
+import api from "../services/api";
 
 const ItemsHome = () => {
   const [activeCategory, setActiveCategory] = useState(() => {
     return localStorage.getItem("activeCategory") || "All";
   });
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     localStorage.setItem("activeCategory", activeCategory);
   }, [activeCategory]);
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/api/products');
+        setProducts(response.data || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        // Fallback to dummy data if API fails
+        const { products: dummyProducts } = await import("../assets/dummyData");
+        setProducts(dummyProducts);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const navigate = useNavigate();
   const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
@@ -36,16 +59,25 @@ const ItemsHome = () => {
     : products.filter((product) => product.category === activeCategory);
 
   const getQuantity = (productId) => {
-    const item = cart.find((ci) => ci.id === productId);
+    const item = cart.find((ci) => ci.productId === productId);
     return item ? item.quantity : 0;
   };
 
-  const handleIncrease = (product) => addToCart(product, 1);
+  const handleIncrease = (product) => {
+    // Use the product's _id from the database
+    const productId = product._id || product.id;
+    addToCart(productId, 1, product);
+  };
 
   const handleDecrease = (product) => {
-    const qty = getQuantity(product.id);
-    if (qty > 1) updateQuantity(product.id, qty - 1);
-    else removeFromCart(product.id);
+    const productId = product._id || product.id;
+    const cartItem = cart.find((ci) => ci.productId === productId);
+    const qty = cartItem ? cartItem.quantity : 0;
+    if (qty > 1) {
+      updateQuantity(cartItem.id, qty - 1);
+    } else if (cartItem) {
+      removeFromCart(cartItem.id);
+    }
   };
 
   const redirectToItemsPage = () => {
@@ -169,12 +201,13 @@ const ItemsHome = () => {
           <div className={itemsHomeStyles.productsGrid}>
             {searchedProducts.length > 0 ? (
               searchedProducts.map((product) => {
-                const qty = getQuantity(product.id);
+                const productId = product._id || product.id;
+                const qty = getQuantity(productId);
                 return (
-                  <div key={product.id} className={itemsHomeStyles.productCard}>
+                  <div key={productId} className={itemsHomeStyles.productCard}>
                     <div className={itemsHomeStyles.imageContainer}>
                       <img
-                        src={product.image}
+                        src={product.image || product.imageUrl}
                         alt={product.name}
                         className={itemsHomeStyles.productImage}
                         onError={(e) => {
@@ -188,11 +221,13 @@ const ItemsHome = () => {
                       <div className={itemsHomeStyles.priceContainer}>
                         <div>
                           <p className={itemsHomeStyles.currentPrice}>
-                            {product.price.toFixed(2)}
+                            ${product.price.toFixed(2)}
                           </p>
-                          <span className={itemsHomeStyles.oldPrice}>
-                            {(product.price * 1.2).toFixed(2)}
-                          </span>
+                          {product.oldPrice && (
+                            <span className={itemsHomeStyles.oldPrice}>
+                              ${product.oldPrice.toFixed(2)}
+                            </span>
+                          )}
                         </div>
 
                         {/* هنا الجزء المهم: الكنترولز بتظهر دلوقتي */}

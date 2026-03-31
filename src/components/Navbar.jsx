@@ -7,11 +7,13 @@ import logo from '../assets/logo.png'
 import { FiMenu, FiUser, FiX } from 'react-icons/fi'
 import { FaOpencart } from 'react-icons/fa'
 import { useCart } from '../CartContext'
+import { useAuth } from '../context/AuthContext'
 
 const Navbar = () => {
     const location = useLocation()
     const navigate = useNavigate()
     const { cartCount } = useCart()
+    const { isAuthenticated, user, logout } = useAuth()
 
     const [scrolled, setScrolled] = useState(false)
     const [activeTap, setActiveTap] = useState(location.pathname)
@@ -19,9 +21,6 @@ const Navbar = () => {
     const [cartBouns, setCartBouns] = useState(false)
     const prevCartCountRef = useRef(cartCount)
 
-    const [isLoggedIn, setIsLoggedIn] = useState(
-        Boolean(localStorage.getItem('authToken'))
-    )
     const mobileMenuRef = useRef(null)
 
     useEffect(() => {
@@ -46,14 +45,7 @@ const Navbar = () => {
         prevCartCountRef.current = cartCount
     }, [cartCount])
 
-    // listen for auth changes
-    useEffect(() => {
-        const handler = () => {
-            setIsLoggedIn(Boolean(localStorage.getItem('authToken')))
-        }
-        window.addEventListener('authStateChanged', handler)
-        return () => window.removeEventListener('authStateChanged', handler)
-    }, [])
+    // listen for auth changes - removed since we use AuthContext
 
     // close mobile menu when click outside
     useEffect(() => {
@@ -71,10 +63,7 @@ const Navbar = () => {
 
     // define logout function
     const handleLogout = () => {
-        localStorage.removeItem('authToken')
-        localStorage.removeItem('userData')
-        localStorage.clear()
-        window.dispatchEvent(new Event('authStateChanged'))
+        logout()
         navigate('/')
     }
 
@@ -123,11 +112,32 @@ const Navbar = () => {
                                         navbarStyles.activeIndicator : navbarStyles.navIndicator}`} />
                             </Link>
                         ))}
+                        
+                        {/* Admin Panel Link - Only show for admin users */}
+                        {isAuthenticated && user?.role === 'admin' && (
+                            <Link to='/admin'
+                                className={`${navbarStyles.navItem}
+                            ${activeTap.startsWith('/admin') ?
+                                        navbarStyles.activeNavItem
+                                        : navbarStyles.inactiveNavItem}`}>
+                                <div className='flex items-center'>
+                                    <span className={`${navbarStyles.navIcon}
+                                        ${activeTap.startsWith('/admin') ? navbarStyles.activeNavIcon
+                                            : navbarStyles.inactiveNavIcon}`}>
+                                        <FiUser />
+                                    </span>
+                                    <span>Admin</span>
+                                </div>
+                                <div className={`${navbarStyles.navIndicator}
+                                    ${activeTap.startsWith('/admin') ?
+                                        navbarStyles.activeIndicator : navbarStyles.navIndicator}`} />
+                            </Link>
+                        )}
                     </div>
 
                     {/* mobile hamburger */}
                     <div className={navbarStyles.iconsContainer}>
-                        {isLoggedIn ? (
+                        {isAuthenticated ? (
                             <button onClick={handleLogout}
                                 className={navbarStyles.loginLink}
                                 aria-label='Logout'
@@ -203,9 +213,24 @@ const Navbar = () => {
                                 <span className={navbarStyles.mobileItemText}>{item.name}</span>
                             </Link>
                         ))}
+                        
+                        {/* Admin Panel Link - Mobile - Only show for admin users */}
+                        {isAuthenticated && user?.role === 'admin' && (
+                            <Link to='/admin' className={navbarStyles.mobileItem}
+                                state={{
+                                    transitionDelay: isOpen ? `${navItems.length * 100}ms ` : `0ms`,
+                                    opacity: isOpen ? 1 : 0,
+                                    transform: `translateX(${isOpen ? 0 : '20px'})`
+                                }}
+                                onClick={() => setIsOpen(false)}
+                            >
+                                <span className={navbarStyles.mobileItemIcon}><FiUser /></span>
+                                <span className={navbarStyles.mobileItemText}>Admin Panel</span>
+                            </Link>
+                        )}
 
                         <div className={navbarStyles.mobileButtons}>
-                            {isLoggedIn ? (
+                            {isAuthenticated ? (
                                 <button onClick={() => {
                                     handleLogout();
                                     setIsOpen(false)
