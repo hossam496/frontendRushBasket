@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ordersPageStyles } from '../assets/dummyStyles'
 import api from '../services/api';
+import { resolveImageSrc } from '../services/imageService';
 import {
   FiArrowLeft,
   FiSearch,
@@ -243,14 +244,21 @@ const MyOrders = () => {
 
                     <div className='border border-emerald-700 rounded-xl overflow-hidden'>
                       {selectedOrder.items.map((item, index) => (
-                        <div key={item._id || idx}
+                        <div key={item._id || `${item.name}-${index}`}
                           className={`flex items-center p-4 bg-emerald-900/30 ${index !== selectedOrder.items.length - 1
                               ? "border-b border-emerald-700"
                               : ""
                             }`}>
                           {item.imageUrl ? (
-                            <img src={`${import.meta.env.VITE_API_URL || 'https://backend1-eight-lovat.vercel.app'}${item.imageUrl}`} alt={item.name}
-                              className='w-16 h-16 object-contain rounded-lg mr-4' />
+                            <img
+                              src={resolveImageSrc(item.imageUrl)}
+                              alt={item.name}
+                              className='w-16 h-16 object-contain rounded-lg mr-4'
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = '/placeholder-product.jpg';
+                              }}
+                            />
                           ) : (
                             <div className='bg-emerald-800 border-2 border-dashed border-emerald-700 rounded-xl
                             w-16 h-16 mr-4 flex items-center justify-center'>

@@ -53,7 +53,7 @@ const AdminProductList = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await api.get('/api/items');
+      const res = await api.get('/api/products');
       setProducts(res.data);
       setLoading(false);
     } catch (err) {
@@ -75,7 +75,7 @@ const AdminProductList = () => {
 
     if (result.isConfirmed) {
       try {
-        await api.delete(`/api/items/${id}`);
+        await api.delete(`/api/products/${id}`);
         setProducts(products.filter(p => p._id !== id));
         Swal.fire('Deleted!', 'Product has been deleted.', 'success');
       } catch (err) {
@@ -114,7 +114,7 @@ const AdminProductList = () => {
     }
 
     try {
-      const res = await api.put(`/api/items/${editingProduct._id}`, formData, {
+      const res = await api.put(`/api/products/${editingProduct._id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       
@@ -145,7 +145,7 @@ const AdminProductList = () => {
     }
 
     try {
-      const res = await api.post('/api/items', formData, {
+      const res = await api.post('/api/products', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setProducts([...products, res.data]);

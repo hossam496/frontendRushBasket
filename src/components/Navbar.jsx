@@ -4,16 +4,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { navItems } from '../assets/Dummy'
 
 import logo from '../assets/logo.png'
-import { FiMenu, FiUser, FiX, FiGlobe } from 'react-icons/fi'
+import { FiMenu, FiUser, FiX } from 'react-icons/fi'
 import { FaOpencart } from 'react-icons/fa'
 import { useCart } from '../CartContext'
-import { useTranslate } from '../contexts/TranslationContext'
-import LanguageSwitcher from './LanguageSwitcher'
 
 const Navbar = () => {
-
-    const { translate, currentLanguage, isLoading } = useTranslate()
-
     const location = useLocation()
     const navigate = useNavigate()
     const { cartCount } = useCart()
@@ -27,28 +22,7 @@ const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(
         Boolean(localStorage.getItem('authToken'))
     )
-    const mobileMenuRef = useState(null)
-    const [translatedNavItems, setTranslatedNavItems] = useState(navItems)
-
-    // Translate navigation items when language changes
-    useEffect(() => {
-        const translateNavItems = async () => {
-            if (currentLanguage === 'en') {
-                setTranslatedNavItems(navItems)
-                return
-            }
-            
-            const translatedItems = await Promise.all(
-                navItems.map(async (item) => ({
-                    ...item,
-                    name: await translate(item.name, currentLanguage)
-                }))
-            )
-            setTranslatedNavItems(translatedItems)
-        }
-        
-        translateNavItems()
-    }, [currentLanguage, translate])
+    const mobileMenuRef = useRef(null)
 
     useEffect(() => {
         setActiveTap(location.pathname)
@@ -130,7 +104,7 @@ const Navbar = () => {
 
                     {/* desktop navigation */}
                     <div className={navbarStyles.desktopNav}>
-                        {translatedNavItems.map(item => (
+                        {navItems.map(item => (
                             <Link key={item.name} to={item.path}
                                 className={`${navbarStyles.navItem}
                             ${activeTap === item.path ?
@@ -153,11 +127,6 @@ const Navbar = () => {
 
                     {/* mobile hamburger */}
                     <div className={navbarStyles.iconsContainer}>
-                        <LanguageSwitcher 
-                            variant="toggle" 
-                            className={`${navbarStyles.loginLink} flex items-center justify-center`}
-                        />
-
                         {isLoggedIn ? (
                             <button onClick={handleLogout}
                                 className={navbarStyles.loginLink}
@@ -220,7 +189,7 @@ const Navbar = () => {
                         </button>
                     </div>
                     <div className={navbarStyles.mobileItemsContainer}>
-                        {translatedNavItems.map((item, idx) => (
+                        {navItems.map((item, idx) => (
                             <Link key={item.name} to={item.path}
                                 className={navbarStyles.mobileItem}
                                 state={{
@@ -236,11 +205,6 @@ const Navbar = () => {
                         ))}
 
                         <div className={navbarStyles.mobileButtons}>
-                            <LanguageSwitcher 
-                                variant="toggle"
-                                className={navbarStyles.loginButton}
-                            />
-
                             {isLoggedIn ? (
                                 <button onClick={() => {
                                     handleLogout();

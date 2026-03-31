@@ -144,7 +144,7 @@ const Items = () => {
 
   // fetch from backend — using centralized api service (consistent baseURL, auth headers, error handling)
   useEffect(() => {
-    api.get('/api/items')
+    api.get('/api/products')
       .then(res => {
         const products = Array.isArray(res.data)
           ? res.data

@@ -48,6 +48,7 @@ export const saveAuthTokens = (accessToken, rememberMe = false) => {
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   timeout: 60000, // 60 second timeout for image uploads (especially base64)
   headers: {
     'Content-Type': 'application/json',
