@@ -10,6 +10,12 @@ import Logout from './components/Logout'
 import Navbar from './components/Navbar'
 import Signup from './components/Signup'
 import Contact from './pages/Contact'
+import AdminRoute from './components/AdminRoute'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminProductList from './pages/admin/AdminProductList'
+import AdminUserList from './pages/admin/AdminUserList'
+import AdminOrderList from './pages/admin/AdminOrderList'
+import AdminAnalytics from './pages/admin/AdminAnalytics'
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -20,18 +26,18 @@ const ScrollToTop = () => {
 }
 
 const App = () => {
-
   const [isAuthenticated, setIsAuthenticated] = useState(
-    Boolean(localStorage.getItem('authToken'))
+    Boolean(localStorage.getItem('rush_basket_token'))
   )
 
   useEffect(() =>{
     const handler = () => {
-      setIsAuthenticated(Boolean(localStorage.getItem('authToken')))
+      setIsAuthenticated(Boolean(localStorage.getItem('rush_basket_token')))
     }
     window.addEventListener('authStateChanged', handler)
     return () => window.removeEventListener('authStateChanged', handler)
   }, [])
+
   return (
     <TranslationProvider>
       <CartProvider>
@@ -44,10 +50,37 @@ const App = () => {
 
         <Route path='/cart' element={isAuthenticated ? <Cart /> : <Navigate replace to='/login' />} />
 
-         {/* auth routs */}
+         {/* auth routes */}
          <Route path='/login' element={<Login />} />
          <Route path='/signup' element={<Signup />} />
          <Route path='/logout' element={<Logout />} />
+
+         {/* Admin Routes - Protected */}
+         <Route path='/admin' element={
+           <AdminRoute>
+             <AdminDashboard />
+           </AdminRoute>
+         } />
+         <Route path='/admin/products' element={
+           <AdminRoute>
+             <AdminProductList />
+           </AdminRoute>
+         } />
+         <Route path='/admin/users' element={
+           <AdminRoute>
+             <AdminUserList />
+           </AdminRoute>
+         } />
+         <Route path='/admin/orders' element={
+           <AdminRoute>
+             <AdminOrderList />
+           </AdminRoute>
+         } />
+         <Route path='/admin/analytics' element={
+           <AdminRoute>
+             <AdminAnalytics />
+           </AdminRoute>
+         } />
 
          {/* fallback to home */}
          < Route path='*' element={<Navigate replace to='/' />} />
