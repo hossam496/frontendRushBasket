@@ -126,6 +126,7 @@ const AdminProductList = () => {
       description: product.description || '',
       image: null,
       imageUrl: product.imageUrl || ''
+    });
     setIsEditModalOpen(true);
   };
 
