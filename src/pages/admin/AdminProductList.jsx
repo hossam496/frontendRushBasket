@@ -182,20 +182,26 @@ const AdminProductList = () => {
     console.log('[AdminProductList] Adding product:', newProduct);
     
     try {
-      // First try without image to test basic functionality
-      const productData = {
-        name: newProduct.name,
-        price: newProduct.price,
-        oldPrice: newProduct.oldPrice || newProduct.price,
-        category: newProduct.category,
-        description: newProduct.description,
-        imageUrl: newProduct.imageUrl || 'https://via.placeholder.com/300x300?text=Product' // Default image
-      };
-
-      console.log('[AdminProductList] Sending request to /api/products with data:', productData);
+      const formData = new FormData();
+      formData.append('name', newProduct.name);
+      formData.append('price', newProduct.price);
+      formData.append('oldPrice', newProduct.oldPrice || newProduct.price);
+      formData.append('category', newProduct.category);
+      formData.append('description', newProduct.description);
       
-      const res = await api.post('/api/products', productData, {
-        headers: { 'Content-Type': 'application/json' },
+      if (newProduct.image) {
+        console.log('[AdminProductList] Adding image file:', newProduct.image.name, 'Size:', newProduct.image.size);
+        formData.append('image', newProduct.image);
+      } else if (newProduct.imageUrl) {
+        console.log('[AdminProductList] Adding image URL:', newProduct.imageUrl);
+        formData.append('imageUrl', newProduct.imageUrl);
+      } else {
+        console.log('[AdminProductList] No image provided');
+      }
+
+      console.log('[AdminProductList] Sending request to /api/products');
+      const res = await api.post('/api/products', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       
       console.log('[AdminProductList] Product added successfully:', res.data);
