@@ -180,17 +180,35 @@ const AdminProductList = () => {
     }
 
     console.log('[AdminProductList] Adding product:', newProduct);
+    console.log('[AdminProductList] User auth state:', { isAuthenticated, isAdmin, user: user?.email });
+    
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      Swal.fire('Error', 'You must be logged in to add products', 'error');
+      return;
+    }
+    
+    if (!isAdmin) {
+      Swal.fire('Error', 'You must be an admin to add products', 'error');
+      return;
+    }
     
     try {
       const formData = new FormData();
       formData.append('name', newProduct.name);
       formData.append('price', newProduct.price);
-      formData.append('oldPrice', newProduct.oldPrice || newProduct.price);
+      
+      // Always provide oldPrice - use the actual value if valid, otherwise use the same as price
+      const oldPrice = (newProduct.oldPrice && newProduct.oldPrice !== '' && !isNaN(newProduct.oldPrice)) 
+        ? newProduct.oldPrice 
+        : newProduct.price;
+      formData.append('oldPrice', oldPrice);
+      
       formData.append('category', newProduct.category);
-      formData.append('description', newProduct.description);
+      formData.append('description', newProduct.description || '');
       
       if (newProduct.image) {
-        console.log('[AdminProductList] Adding image file:', newProduct.image.name, 'Size:', newProduct.image.size);
+        console.log('[AdminProductList] Adding image file:', newProduct.image.name, 'Size:', newProduct.image.size, 'Type:', newProduct.image.type);
         formData.append('image', newProduct.image);
       } else if (newProduct.imageUrl) {
         console.log('[AdminProductList] Adding image URL:', newProduct.imageUrl);
@@ -199,7 +217,14 @@ const AdminProductList = () => {
         console.log('[AdminProductList] No image provided');
       }
 
+      // Log FormData contents for debugging
+      console.log('[AdminProductList] FormData contents:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`  ${key}:`, value instanceof File ? `${value.name} (${value.size} bytes)` : value);
+      }
+
       console.log('[AdminProductList] Sending request to /api/products');
+      console.log('[AdminProductList] Request headers:', { 'Content-Type': 'multipart/form-data' });
       const res = await api.post('/api/products', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
