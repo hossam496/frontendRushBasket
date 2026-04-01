@@ -13,20 +13,18 @@ export const ProductCard = React.memo(({ product, onAddToCart, loading }) => {
   };
 
   const rawImage = product.image || product.imageUrl;
-  const resolvedImage = rawImage ? resolveImageSrc(rawImage) : null;
-  const fallbackSrc = '/placeholder-product.jpg';
+  const resolvedImage = resolveImageSrc(rawImage);
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
         <img 
-          src={resolvedImage || fallbackSrc}
+          src={resolvedImage}
           alt={product.name}
           className="w-full h-48 object-contain rounded-t-lg"
           loading="lazy"
           onError={(e) => {
-            if (e.currentTarget.src.endsWith(fallbackSrc)) return;
-            e.currentTarget.src = fallbackSrc;
+            e.currentTarget.src = 'https://placehold.co/300x200?text=No+Image';
           }}
         />
         {product.stock <= 0 && (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import api, { API_BASE_URL } from '../../services/api';
+import api from '../../services/api';
 import {
   FiEye, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiSearch,
   FiCalendar, FiUser, FiMapPin, FiMail, FiPhone, FiClock, FiX,
@@ -41,7 +41,7 @@ const AdminOrderList = () => {
     if (rawImage.startsWith('http') || rawImage.startsWith('data:')) return rawImage;
     
     // Ensure we have a valid baseURL
-    const base = API_BASE_URL || '';
+    const base = api.defaults.baseURL || '';
     const cleanImage = rawImage.startsWith('/') ? rawImage : `/${rawImage}`;
     
     // If it's a relative path starting with uploads, ensure it's correct

@@ -1,4 +1,4 @@
-import { API_URL } from "./api";
+import API_URL from "./api";
 
 /**
  * Resolves a product image URL correctly regardless of its format.
@@ -10,7 +10,7 @@ import { API_URL } from "./api";
  */
 export const resolveImageSrc = (rawImage) => {
   if (!rawImage || typeof rawImage !== 'string') {
-    return null;
+    return 'https://placehold.co/300x300?text=No+Image';
   }
 
   // 1. If it's already a full URL or base64, return as is
@@ -19,14 +19,14 @@ export const resolveImageSrc = (rawImage) => {
   }
 
   // 2. Normalize Base URL (remove trailing slash and /api suffix)
-  let baseUrl = API_URL || '';
-  baseUrl = baseUrl.replace(/\/$/, '').replace(/\/api$/, '');
+  const baseUrl = API_URL.defaults.baseURL || '';
+  const normalizedBaseUrl = baseUrl.replace(/\/$/, '').replace(/\/api$/, '');
   
   // 3. Handle paths with leading slash
   if (rawImage.startsWith('/')) {
-    return `${baseUrl}${rawImage}`;
+    return `${normalizedBaseUrl}${rawImage}`;
   }
   
   // 4. Fallback: assume it's in the uploads folder
-  return `${baseUrl}/uploads/${rawImage}`;
+  return `${normalizedBaseUrl}/uploads/${rawImage}`;
 };

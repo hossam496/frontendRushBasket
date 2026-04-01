@@ -17,7 +17,7 @@ import {
   FiClock,
   FiBell,
 } from "react-icons/fi";
-import api, { API_BASE_URL } from "../../services/api";
+import api from "../../services/api";
 import { resolveImageSrc } from "../../services/imageService";
 
 

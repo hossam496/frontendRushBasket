@@ -18,7 +18,7 @@ const productService = {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return response.data;
+    return response.data.product || response.data;
   },
 
   /**
@@ -30,7 +30,7 @@ const productService = {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return response.data;
+    return response.data.product || response.data;
   },
 
   /**

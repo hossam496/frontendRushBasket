@@ -17,7 +17,7 @@ import {
   FiCheck 
 } from 'react-icons/fi';
 
-const API_BASE_URL = api.defaults.baseURL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_your_key_here');
 

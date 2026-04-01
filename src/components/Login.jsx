@@ -5,7 +5,7 @@ import { FaArrowLeft, FaCheck, FaEye, FaEyeSlash, FaLock, FaUser } from "react-i
 import Logout from "./Logout";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import { API_BASE_URL } from "../services/api";
+import API from "../services/api";
 
 const Login = () => {
   const { isAuthenticated, login, user, loading } = useAuth();
@@ -63,18 +63,12 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
+      const response = await API.post('/api/auth/login', {
+        email: formData.email,
+        password: formData.password
       });
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         // Use the AuthContext login method

@@ -115,7 +115,7 @@ const AdminProductList = () => {
     try {
       if (isEditModalOpen && editingProduct) {
         const updated = await productService.updateProduct(editingProduct._id, formData);
-        setProducts(products.map(p => p._id === editingProduct._id ? updated.product : p));
+        setProducts(products.map(p => p._id === editingProduct._id ? updated : p));
         toast.success('Product updated successfully');
       } else {
         const created = await productService.createProduct(formData);
@@ -126,7 +126,8 @@ const AdminProductList = () => {
       closeModals();
     } catch (err) {
       console.error('Error saving product:', err);
-      toast.error(err.response?.data?.message || 'Failed to save product');
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to save product';
+      toast.error(errorMessage);
     }
   };
 
@@ -200,10 +201,12 @@ const AdminProductList = () => {
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gray-100 rounded-lg mr-3 overflow-hidden shrink-0">
                     <img 
-                      src={resolveImageSrc(row.image || row.imageUrl) || 'https://placehold.co/100?text=No+Image'} 
+                      src={resolveImageSrc(row.image || row.imageUrl)} 
                       alt={row.name} 
                       className="w-full h-full object-contain"
-                      onError={(e) => { e.target.src = 'https://placehold.co/100?text=Error'; }}
+                      onError={(e) => { 
+                        e.target.src = 'https://placehold.co/100?text=Error'; 
+                      }}
                     />
                   </div>
                   <div>
