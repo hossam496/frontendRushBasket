@@ -11,21 +11,26 @@ import {
   FiFilter,
   FiDownload,
   FiEye,
-  FiPackage
+  FiPackage,
+  FiImage,
+  FiDollarSign,
+  FiTag,
 } from 'react-icons/fi';
 import Swal from 'sweetalert2';
 import AdminLayout from '../../components/admin/AdminLayout';
 import DataTable from '../../components/admin/DataTable';
 import StatCard from '../../components/admin/StatCard';
-
+import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
 
 const AdminProductList = () => {
+  const { user, isAuthenticated, isAdmin } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
@@ -35,6 +40,18 @@ const AdminProductList = () => {
     image: null,
     imageUrl: ''
   });
+
+  // Debug authentication state
+  useEffect(() => {
+    console.log('[AdminProductList] Auth state:', { user, isAuthenticated, isAdmin });
+    if (!isAuthenticated) {
+      console.error('[AdminProductList] User not authenticated');
+    } else if (!isAdmin) {
+      console.error('[AdminProductList] User is not admin');
+    } else {
+      console.log('[AdminProductList] User is authenticated admin:', user);
+    }
+  }, [user, isAuthenticated, isAdmin]);
 
   useEffect(() => {
     fetchProducts();
@@ -132,29 +149,47 @@ const AdminProductList = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
+    
+    // Validation
+    if (!newProduct.name || !newProduct.price || !newProduct.category) {
+      Swal.fire('Error', 'Please fill in all required fields', 'error');
+      return;
+    }
+
+    console.log('[AdminProductList] Adding product:', newProduct);
+    
     const formData = new FormData();
     formData.append('name', newProduct.name);
     formData.append('price', newProduct.price);
     formData.append('oldPrice', newProduct.oldPrice || newProduct.price);
     formData.append('category', newProduct.category);
     formData.append('description', newProduct.description);
+    
     if (newProduct.image) {
+      console.log('[AdminProductList] Adding image file:', newProduct.image.name);
       formData.append('image', newProduct.image);
     } else if (newProduct.imageUrl) {
+      console.log('[AdminProductList] Adding image URL:', newProduct.imageUrl);
       formData.append('imageUrl', newProduct.imageUrl);
+    } else {
+      console.log('[AdminProductList] No image provided');
     }
 
     try {
+      console.log('[AdminProductList] Sending request to /api/products');
       const res = await api.post('/api/products', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+      console.log('[AdminProductList] Product added successfully:', res.data);
       setProducts([...products, res.data]);
       setIsAddModalOpen(false);
       setNewProduct({ name: '', price: '', oldPrice: '', category: 'Fruits', description: '', image: null });
       Swal.fire('Success', 'Product added successfully', 'success');
     } catch (err) {
-      console.error('Error adding product:', err);
-      Swal.fire('Error', `Failed to add product: ${err.response?.data?.message || err.message}`, 'error');
+      console.error('[AdminProductList] Error adding product:', err);
+      console.error('[AdminProductList] Error response:', err.response);
+      const errorMessage = err.response?.data?.message || err.message || 'Unknown error';
+      Swal.fire('Error', `Failed to add product: ${errorMessage}`, 'error');
     }
   };
 
