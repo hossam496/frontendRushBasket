@@ -1,12 +1,13 @@
 import React from "react";
 import { useCart } from "../CartContext";
 import { cartStyles } from "../assets/dummyStyles";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiMinus, FiPlus, FiTrash2 } from "react-icons/fi";
 
 const CartPage = () => {
   const { cart, removeFromCart, updateQuantity, clearCart, getCartTotal } =
     useCart();
+  const navigate = useNavigate();
 
   const handleQuantityChange = (itemId, change) => {
     const item = cart.find((i) => i.id === itemId);
@@ -95,7 +96,7 @@ const CartPage = () => {
           {/* order summery */}
           <div className="lg:col-span-1">
             <div className={cartStyles.orderSummaryCard}>
-              <h2 className={cartStyles.orderSummaryTitle}>Order Summery</h2>
+              <h2 className={cartStyles.orderSummaryTitle}>Order Summary</h2>
 
               <div className="space-y-4 text-sm sm:text-base">
 
@@ -105,12 +106,12 @@ const CartPage = () => {
                 </div>
 
                 <div className={cartStyles.orderSummaryRow}>
-                  <span className={cartStyles.orderSummaryLabel}>Shopping</span>
+                  <span className={cartStyles.orderSummaryLabel}>Shipping</span>
                   <span className={cartStyles.orderSummaryValue}>Free</span>
                 </div>
 
                 <div className={cartStyles.orderSummaryRow}>
-                  <span className={cartStyles.orderSummaryLabel}>Texes (5%)</span>
+                  <span className={cartStyles.orderSummaryLabel}>Taxes (5%)</span>
                   <span className={cartStyles.orderSummaryValue}>{((getCartTotal || 0) * 0.05).toFixed(2)}</span>
                 </div>
 
@@ -122,7 +123,7 @@ const CartPage = () => {
                 </div>
               </div>
 
-              <button className={cartStyles.checkoutButton}>
+              <button onClick={() => navigate('/checkout')} className={cartStyles.checkoutButton}>
                 Proceed to Checkout
               </button>
 

@@ -5,6 +5,7 @@ import { CartProvider } from './CartContext'
 import { TranslationProvider } from './contexts/TranslationContext'
 import Item from './pages/Item'
 import Cart from './pages/Cart'
+import Checkout from './components/Checkout'
 import Login from './components/Login'
 import Logout from './components/Logout'
 import Navbar from './components/Navbar'
@@ -20,7 +21,7 @@ import AdminAnalytics from './pages/admin/AdminAnalytics'
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo(0,0)
+    window.scrollTo(0, 0)
   }, [pathname]);
   return null
 }
@@ -30,7 +31,7 @@ const App = () => {
     Boolean(localStorage.getItem('rush_basket_token'))
   )
 
-  useEffect(() =>{
+  useEffect(() => {
     const handler = () => {
       setIsAuthenticated(Boolean(localStorage.getItem('rush_basket_token')))
     }
@@ -42,49 +43,50 @@ const App = () => {
     <TranslationProvider>
       <CartProvider>
         <ScrollToTop />
-        <Navbar isAuthenticated = {isAuthenticated} />
-      <Routes>
-        <Route path='/' element={<Home/>} />
-        <Route path='/contact' element={<Contact />} />
-        <Route path='/items' element={<Item />} />
+        <Navbar isAuthenticated={isAuthenticated} />
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/contact' element={<Contact />} />
+          <Route path='/items' element={<Item />} />
 
-        <Route path='/cart' element={isAuthenticated ? <Cart /> : <Navigate replace to='/login' />} />
+          <Route path='/cart' element={isAuthenticated ? <Cart /> : <Navigate replace to='/login' />} />
+          <Route path='/checkout' element={isAuthenticated ? <Checkout /> : <Navigate replace to='/login' />} />
 
-         {/* auth routes */}
-         <Route path='/login' element={<Login />} />
-         <Route path='/signup' element={<Signup />} />
-         <Route path='/logout' element={<Logout />} />
+          {/* auth routes */}
+          <Route path='/login' element={<Login />} />
+          <Route path='/signup' element={<Signup />} />
+          <Route path='/logout' element={<Logout />} />
 
-         {/* Admin Routes - Protected */}
-         <Route path='/admin' element={
-           <AdminRoute>
-             <AdminDashboard />
-           </AdminRoute>
-         } />
-         <Route path='/admin/products' element={
-           <AdminRoute>
-             <AdminProductList />
-           </AdminRoute>
-         } />
-         <Route path='/admin/users' element={
-           <AdminRoute>
-             <AdminUserList />
-           </AdminRoute>
-         } />
-         <Route path='/admin/orders' element={
-           <AdminRoute>
-             <AdminOrderList />
-           </AdminRoute>
-         } />
-         <Route path='/admin/analytics' element={
-           <AdminRoute>
-             <AdminAnalytics />
-           </AdminRoute>
-         } />
+          {/* Admin Routes - Protected */}
+          <Route path='/admin' element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
+          <Route path='/admin/products' element={
+            <AdminRoute>
+              <AdminProductList />
+            </AdminRoute>
+          } />
+          <Route path='/admin/users' element={
+            <AdminRoute>
+              <AdminUserList />
+            </AdminRoute>
+          } />
+          <Route path='/admin/orders' element={
+            <AdminRoute>
+              <AdminOrderList />
+            </AdminRoute>
+          } />
+          <Route path='/admin/analytics' element={
+            <AdminRoute>
+              <AdminAnalytics />
+            </AdminRoute>
+          } />
 
-         {/* fallback to home */}
-         < Route path='*' element={<Navigate replace to='/' />} />
-      </Routes>
+          {/* fallback to home */}
+          < Route path='*' element={<Navigate replace to='/' />} />
+        </Routes>
       </CartProvider>
     </TranslationProvider>
   )
