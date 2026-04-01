@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { 
-  FiPlus, 
-  FiTrash2, 
-  FiEdit2, 
-  FiMenu, 
+import {
+  FiPlus,
+  FiTrash2,
+  FiEdit2,
+  FiMenu,
   FiSearch,
   FiUploadCloud,
   FiX,
@@ -38,7 +38,7 @@ const AdminProductList = () => {
 
   useEffect(() => {
     fetchProducts();
-    
+
     const handleProductUpdate = (e) => {
       console.log('Real-time product update received:', e.detail);
       fetchProducts();
@@ -117,7 +117,7 @@ const AdminProductList = () => {
       const res = await api.put(`/api/products/${editingProduct._id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      
+
       const updatedProduct = res.data?.product || res.data;
       setProducts(products.map(p => p._id === editingProduct._id ? updatedProduct : p));
       setIsEditModalOpen(false);
@@ -161,8 +161,19 @@ const AdminProductList = () => {
   const getImageSrc = (product) => {
     const rawImage = product.imageUrl || product.image;
     if (!rawImage) return null;
-    if (rawImage.startsWith('http') || rawImage.startsWith('data:')) return rawImage;
-    return `${api.defaults.baseURL}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
+
+    // If it's a full URL or base64, return as is
+    if (rawImage.startsWith('http') || rawImage.startsWith('data:')) {
+      return rawImage;
+    }
+
+    // If it's a relative path starting with /, assume it's already complete
+    if (rawImage.startsWith('/')) {
+      return `${api.defaults.baseURL}${rawImage}`;
+    }
+
+    // Otherwise, assume it's a filename in the /uploads folder
+    return `${api.defaults.baseURL}/uploads/${rawImage}`;
   };
 
   const filteredProducts = products.filter(product =>
@@ -230,7 +241,7 @@ const AdminProductList = () => {
                 <FiFilter className="mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Filter</span>
               </button>
-              <button 
+              <button
                 onClick={() => setIsAddModalOpen(true)}
                 className="flex items-center justify-center px-3 py-2 sm:px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
               >
@@ -323,7 +334,7 @@ const AdminProductList = () => {
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-900">Add New Product</h2>
-              <button 
+              <button
                 onClick={() => setIsAddModalOpen(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
@@ -334,23 +345,23 @@ const AdminProductList = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
-                  <input 
+                  <input
                     required
-                    type="text" 
+                    type="text"
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     value={newProduct.name}
-                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
-                  <input 
+                  <input
                     required
-                    type="number" 
+                    type="number"
                     step="0.01"
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     value={newProduct.price}
-                    onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
                   />
                 </div>
               </div>
@@ -358,21 +369,21 @@ const AdminProductList = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Old Price ($)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     step="0.01"
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     value={newProduct.oldPrice}
-                    onChange={(e) => setNewProduct({...newProduct, oldPrice: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, oldPrice: e.target.value })}
                     placeholder="Optional - for sale display"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                  <select 
+                  <select
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     value={newProduct.category}
-                    onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
                   >
                     <option>Fruits</option>
                     <option>Vegetables</option>
@@ -388,37 +399,37 @@ const AdminProductList = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea 
+                <textarea
                   rows="3"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   value={newProduct.description}
-                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                  onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                 ></textarea>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Image URL (Optional)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   value={newProduct.imageUrl}
-                  onChange={(e) => setNewProduct({...newProduct, imageUrl: e.target.value})}
+                  onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
                   placeholder="Paste external link or local asset name (e.g. Onion.png)"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Or Upload Image</label>
-                <div 
+                <div
                   className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500 transition-colors"
                   onClick={() => document.getElementById('image-upload').click()}
                 >
                   {newProduct.image ? (
                     <div className="relative">
                       <img src={URL.createObjectURL(newProduct.image)} alt="Product upload preview" className="h-32 mx-auto rounded-lg object-contain" />
-                      <button 
+                      <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); setNewProduct({...newProduct, image: null})}}
+                        onClick={(e) => { e.stopPropagation(); setNewProduct({ ...newProduct, image: null }) }}
                         className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
                       >
                         <FiX size={16} />
@@ -426,9 +437,9 @@ const AdminProductList = () => {
                     </div>
                   ) : newProduct.imageUrl ? (
                     <div className="relative">
-                      <img 
-                        src={newProduct.imageUrl.startsWith('http') ? newProduct.imageUrl : `${api.defaults.baseURL}/${newProduct.imageUrl}`} 
-                        className="h-32 mx-auto rounded-lg object-contain" 
+                      <img
+                        src={newProduct.imageUrl.startsWith('http') ? newProduct.imageUrl : `${api.defaults.baseURL}/${newProduct.imageUrl}`}
+                        className="h-32 mx-auto rounded-lg object-contain"
                         alt="Product preview"
                         onError={(e) => { e.target.src = 'https://placehold.co/128?text=Image+Not+Found'; }}
                       />
@@ -440,17 +451,17 @@ const AdminProductList = () => {
                       <p className="text-sm text-gray-500">Click to upload image</p>
                     </div>
                   )}
-                  <input 
+                  <input
                     id="image-upload"
-                    type="file" 
-                    hidden 
-                    onChange={(e) => setNewProduct({...newProduct, image: e.target.files[0]})}
+                    type="file"
+                    hidden
+                    onChange={(e) => setNewProduct({ ...newProduct, image: e.target.files[0] })}
                   />
                 </div>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 sm:py-3 px-4 rounded-lg font-medium transition-colors text-sm sm:text-base"
               >
                 Add Product
@@ -466,7 +477,7 @@ const AdminProductList = () => {
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-900">Edit Product</h2>
-              <button 
+              <button
                 onClick={() => {
                   setIsEditModalOpen(false);
                   setEditingProduct(null);
@@ -481,23 +492,23 @@ const AdminProductList = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
-                  <input 
+                  <input
                     required
-                    type="text" 
+                    type="text"
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     value={newProduct.name}
-                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
-                  <input 
+                  <input
                     required
-                    type="number" 
+                    type="number"
                     step="0.01"
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     value={newProduct.price}
-                    onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
                   />
                 </div>
               </div>
@@ -505,21 +516,21 @@ const AdminProductList = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Old Price ($)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     step="0.01"
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     value={newProduct.oldPrice}
-                    onChange={(e) => setNewProduct({...newProduct, oldPrice: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, oldPrice: e.target.value })}
                     placeholder="Optional - for sale display"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                  <select 
+                  <select
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     value={newProduct.category}
-                    onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
                   >
                     <option>Fruits</option>
                     <option>Vegetables</option>
@@ -535,37 +546,37 @@ const AdminProductList = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea 
+                <textarea
                   rows="3"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   value={newProduct.description}
-                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                  onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                 ></textarea>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Image URL (Optional)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   value={newProduct.imageUrl}
-                  onChange={(e) => setNewProduct({...newProduct, imageUrl: e.target.value})}
+                  onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
                   placeholder="Paste external link or local asset name"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Or Upload New Image</label>
-                <div 
+                <div
                   className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500 transition-colors"
                   onClick={() => document.getElementById('edit-image-upload').click()}
                 >
                   {newProduct.image ? (
                     <div className="relative">
                       <img src={URL.createObjectURL(newProduct.image)} alt="Product upload preview" className="h-32 mx-auto rounded-lg object-contain" />
-                      <button 
+                      <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); setNewProduct({...newProduct, image: null})}}
+                        onClick={(e) => { e.stopPropagation(); setNewProduct({ ...newProduct, image: null }) }}
                         className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
                       >
                         <FiX size={16} />
@@ -573,9 +584,9 @@ const AdminProductList = () => {
                     </div>
                   ) : newProduct.imageUrl ? (
                     <div className="relative">
-                      <img 
-                        src={newProduct.imageUrl.startsWith('http') ? newProduct.imageUrl : `${api.defaults.baseURL}/${newProduct.imageUrl}`} 
-                        className="h-32 mx-auto rounded-lg object-contain" 
+                      <img
+                        src={newProduct.imageUrl.startsWith('http') ? newProduct.imageUrl : `${api.defaults.baseURL}/${newProduct.imageUrl}`}
+                        className="h-32 mx-auto rounded-lg object-contain"
                         alt="Product preview"
                         onError={(e) => { e.target.src = 'https://placehold.co/128?text=Image+Not+Found'; }}
                       />
@@ -583,9 +594,9 @@ const AdminProductList = () => {
                     </div>
                   ) : editingProduct?.imageUrl ? (
                     <div className="relative">
-                      <img 
-                        src={`${api.defaults.baseURL}${editingProduct.imageUrl.startsWith('/') ? '' : '/'}${editingProduct.imageUrl}`} 
-                        className="h-32 mx-auto rounded-lg object-contain" 
+                      <img
+                        src={`${api.defaults.baseURL}${editingProduct.imageUrl.startsWith('/') ? '' : '/'}${editingProduct.imageUrl}`}
+                        className="h-32 mx-auto rounded-lg object-contain"
                         alt={editingProduct.name}
                       />
                       <p className="text-sm text-gray-500 mt-2">Current image</p>
@@ -596,17 +607,17 @@ const AdminProductList = () => {
                       <p className="text-sm text-gray-500">Click to upload new image</p>
                     </div>
                   )}
-                  <input 
+                  <input
                     id="edit-image-upload"
-                    type="file" 
-                    hidden 
-                    onChange={(e) => setNewProduct({...newProduct, image: e.target.files[0]})}
+                    type="file"
+                    hidden
+                    onChange={(e) => setNewProduct({ ...newProduct, image: e.target.files[0] })}
                   />
                 </div>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition-colors"
               >
                 Update Product
