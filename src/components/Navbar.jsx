@@ -67,6 +67,11 @@ const Navbar = () => {
         navigate('/')
     }
 
+    // Do not render navbar on admin routes
+    if (location.pathname.startsWith('/admin')) {
+        return null;
+    }
+
     return (
         <nav className={`${navbarStyles.nav} ${scrolled ? navbarStyles.scrolledNav : navbarStyles.unscrolledNav}`}>
             <div className={navbarStyles.borderGradient} />
@@ -112,7 +117,7 @@ const Navbar = () => {
                                         navbarStyles.activeIndicator : navbarStyles.navIndicator}`} />
                             </Link>
                         ))}
-                        
+
                         {/* Admin Panel Link - Only show for admin users */}
                         {isAuthenticated && user?.role === 'admin' && (
                             <Link to='/admin'
@@ -213,7 +218,7 @@ const Navbar = () => {
                                 <span className={navbarStyles.mobileItemText}>{item.name}</span>
                             </Link>
                         ))}
-                        
+
                         {/* Admin Panel Link - Mobile - Only show for admin users */}
                         {isAuthenticated && user?.role === 'admin' && (
                             <Link to='/admin' className={navbarStyles.mobileItem}
