@@ -6,6 +6,7 @@ import { useCart } from "../CartContext";
 import { FaChevronRight, FaMinus, FaPlus, FaShoppingCart, FaThList } from "react-icons/fa";
 import { categories } from "../assets/dummyData";
 import api from "../services/api";
+import toast from 'react-hot-toast';
 
 const ItemsHome = () => {
   const [activeCategory, setActiveCategory] = useState(() => {
@@ -23,12 +24,34 @@ const ItemsHome = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
+        console.log('[ItemsHome] Fetching products from:', api.defaults.baseURL + '/api/products');
         const response = await api.get('/api/products');
+        console.log('[ItemsHome] API Response:', response.data);
         setProducts(response.data || []);
         console.log('[ItemsHome] Products fetched:', response.data?.length || 0);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('[ItemsHome] Error fetching products:', error);
+        console.error('[ItemsHome] Error details:', {
+          message: error.message,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+        
+        // Show user-friendly error message
+        if (error.response?.status === 0 || !error.response) {
+          // Network error
+          toast.error('Unable to connect to server. Please check your connection.');
+        } else if (error.response?.status >= 500) {
+          // Server error
+          toast.error('Server error. Please try again later.');
+        } else {
+          // Other errors
+          toast.error('Failed to load products.');
+        }
+        
         // Fallback to dummy data if API fails
+        console.log('[ItemsHome] Falling back to dummy data');
         const { products: dummyProducts } = await import("../assets/dummyData");
         setProducts(dummyProducts);
       } finally {
