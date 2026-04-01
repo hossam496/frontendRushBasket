@@ -246,16 +246,21 @@ const AdminProductList = () => {
       setProducts([...products, res.data]);
       
       // Trigger product update event for main site
-      window.dispatchEvent(new CustomEvent('productUpdate', { 
+      console.log('[AdminProductList] Triggering product update event...');
+      const updateEvent = new CustomEvent('productUpdate', { 
         detail: { action: 'added', product: res.data }
-      }));
+      });
+      window.dispatchEvent(updateEvent);
+      console.log('[AdminProductList] Event dispatched:', updateEvent);
       
       // Also trigger storage event for cross-tab updates
-      localStorage.setItem('productUpdate', JSON.stringify({
+      const storageData = {
         action: 'added',
         product: res.data,
         timestamp: Date.now()
-      }));
+      };
+      localStorage.setItem('productUpdate', JSON.stringify(storageData));
+      console.log('[AdminProductList] Storage event triggered:', storageData);
       
       setIsAddModalOpen(false);
       setNewProduct({ name: '', price: '', oldPrice: '', category: 'Fruits', description: '', image: null, imageUrl: '' });

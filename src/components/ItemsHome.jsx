@@ -39,22 +39,26 @@ const ItemsHome = () => {
     fetchProducts();
 
     // Listen for product updates from admin dashboard
-    const handleProductUpdate = () => {
-      console.log('[ItemsHome] Product update detected, refreshing...');
+    const handleProductUpdate = (event) => {
+      console.log('[ItemsHome] Product update event received:', event.detail);
+      console.log('[ItemsHome] Refreshing products...');
       fetchProducts();
     };
 
     window.addEventListener('productUpdate', handleProductUpdate);
+    console.log('[ItemsHome] Product update listener added');
     
     // Also listen for storage changes (for cross-tab updates)
     const handleStorageChange = (e) => {
       if (e.key === 'productUpdate') {
-        console.log('[ItemsHome] Storage update detected, refreshing...');
+        console.log('[ItemsHome] Storage update detected:', e.newValue);
+        console.log('[ItemsHome] Refreshing products...');
         fetchProducts();
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
+    console.log('[ItemsHome] Storage change listener added');
 
     return () => {
       window.removeEventListener('productUpdate', handleProductUpdate);
