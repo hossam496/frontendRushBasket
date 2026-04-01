@@ -25,6 +25,7 @@ const ItemsHome = () => {
         setLoading(true);
         const response = await api.get('/api/products');
         setProducts(response.data || []);
+        console.log('[ItemsHome] Products fetched:', response.data?.length || 0);
       } catch (error) {
         console.error('Error fetching products:', error);
         // Fallback to dummy data if API fails
@@ -36,6 +37,29 @@ const ItemsHome = () => {
     };
 
     fetchProducts();
+
+    // Listen for product updates from admin dashboard
+    const handleProductUpdate = () => {
+      console.log('[ItemsHome] Product update detected, refreshing...');
+      fetchProducts();
+    };
+
+    window.addEventListener('productUpdate', handleProductUpdate);
+    
+    // Also listen for storage changes (for cross-tab updates)
+    const handleStorageChange = (e) => {
+      if (e.key === 'productUpdate') {
+        console.log('[ItemsHome] Storage update detected, refreshing...');
+        fetchProducts();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('productUpdate', handleProductUpdate);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const navigate = useNavigate();

@@ -92,12 +92,26 @@ const AdminProductList = () => {
 
     if (result.isConfirmed) {
       try {
+        const deletedProduct = products.find(p => p._id === id);
         await api.delete(`/api/products/${id}`);
         setProducts(products.filter(p => p._id !== id));
+        
+        // Trigger product update event for main site
+        window.dispatchEvent(new CustomEvent('productUpdate', { 
+          detail: { action: 'deleted', product: deletedProduct }
+        }));
+        
+        // Also trigger storage event for cross-tab updates
+        localStorage.setItem('productUpdate', JSON.stringify({
+          action: 'deleted',
+          product: deletedProduct,
+          timestamp: Date.now()
+        }));
+        
         Swal.fire('Deleted!', 'Product has been deleted.', 'success');
       } catch (err) {
         console.error('Error deleting product:', err);
-        Swal.fire('Error', 'Failed to delete product', 'error');
+        Swal.fire('Error', `Failed to delete product: ${err.response?.data?.message || err.message}`, 'error');
       }
     }
   };
@@ -112,34 +126,42 @@ const AdminProductList = () => {
       description: product.description || '',
       image: null,
       imageUrl: product.imageUrl || ''
-    });
     setIsEditModalOpen(true);
   };
 
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('name', newProduct.name);
-    formData.append('price', newProduct.price);
-    formData.append('oldPrice', newProduct.oldPrice || newProduct.price);
-    formData.append('category', newProduct.category);
-    formData.append('description', newProduct.description);
-    if (newProduct.image) {
-      formData.append('image', newProduct.image);
-    } else if (newProduct.imageUrl) {
-      formData.append('imageUrl', newProduct.imageUrl);
-    }
-
     try {
+      const formData = new FormData();
+      formData.append('name', editingProduct.name);
+      formData.append('price', editingProduct.price);
+      formData.append('oldPrice', editingProduct.oldPrice || editingProduct.price);
+      formData.append('category', editingProduct.category);
+      formData.append('description', editingProduct.description);
+      if (editingProduct.image) {
+        formData.append('image', editingProduct.image);
+      }
+
       const res = await api.put(`/api/products/${editingProduct._id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      const updatedProduct = res.data?.product || res.data;
-      setProducts(products.map(p => p._id === editingProduct._id ? updatedProduct : p));
+      
+      setProducts(products.map(p => p._id === editingProduct._id ? res.data : p));
+      
+      // Trigger product update event for main site
+      window.dispatchEvent(new CustomEvent('productUpdate', { 
+        detail: { action: 'updated', product: res.data }
+      }));
+      
+      // Also trigger storage event for cross-tab updates
+      localStorage.setItem('productUpdate', JSON.stringify({
+        action: 'updated',
+        product: res.data,
+        timestamp: Date.now()
+      }));
+      
       setIsEditModalOpen(false);
       setEditingProduct(null);
-      setNewProduct({ name: '', price: '', oldPrice: '', category: 'Fruits', description: '', image: null });
       Swal.fire('Success', 'Product updated successfully', 'success');
     } catch (err) {
       console.error('Error updating product:', err);
@@ -177,6 +199,19 @@ const AdminProductList = () => {
       
       console.log('[AdminProductList] Product added successfully:', res.data);
       setProducts([...products, res.data]);
+      
+      // Trigger product update event for main site
+      window.dispatchEvent(new CustomEvent('productUpdate', { 
+        detail: { action: 'added', product: res.data }
+      }));
+      
+      // Also trigger storage event for cross-tab updates
+      localStorage.setItem('productUpdate', JSON.stringify({
+        action: 'added',
+        product: res.data,
+        timestamp: Date.now()
+      }));
+      
       setIsAddModalOpen(false);
       setNewProduct({ name: '', price: '', oldPrice: '', category: 'Fruits', description: '', image: null, imageUrl: '' });
       Swal.fire('Success', 'Product added successfully', 'success');
