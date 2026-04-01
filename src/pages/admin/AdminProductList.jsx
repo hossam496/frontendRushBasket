@@ -193,6 +193,19 @@ const AdminProductList = () => {
       return;
     }
     
+    // Validate token before proceeding
+    try {
+      console.log('[AdminProductList] Validating authentication token...');
+      const validateResponse = await api.get('/api/auth/validate');
+      console.log('[AdminProductList] Token validation successful:', validateResponse.data);
+    } catch (validateError) {
+      console.error('[AdminProductList] Token validation failed:', validateError);
+      Swal.fire('Authentication Error', 'Your session has expired. Please log in again.', 'error').then(() => {
+        window.location.href = '/login';
+      });
+      return;
+    }
+    
     try {
       const formData = new FormData();
       formData.append('name', newProduct.name);
@@ -250,6 +263,21 @@ const AdminProductList = () => {
     } catch (err) {
       console.error('[AdminProductList] Error adding product:', err);
       console.error('[AdminProductList] Error response:', err.response);
+      
+      // Handle specific authentication errors
+      if (err.response?.status === 401) {
+        Swal.fire('Authentication Error', 'Your session has expired. Please log in again.', 'error').then(() => {
+          // Redirect to login page
+          window.location.href = '/login';
+        });
+        return;
+      }
+      
+      if (err.response?.status === 403) {
+        Swal.fire('Permission Denied', 'You do not have permission to add products. Admin access required.', 'error');
+        return;
+      }
+      
       const errorMessage = err.response?.data?.message || err.message || 'Unknown error';
       Swal.fire('Error', `Failed to add product: ${errorMessage}`, 'error');
     }
