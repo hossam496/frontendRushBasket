@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api, { setAccessToken } from '../../services/api';
+import api, { clearAuthTokens } from '../../services/api';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   FiHome,
@@ -36,7 +36,7 @@ const Sidebar = ({ isCollapsed, isMobileOpen, onMobileClose }) => {
     } catch (err) {
       console.error('Logout failed:', err);
     }
-    setAccessToken(null);
+    clearAuthTokens();
     localStorage.removeItem('userData');
     localStorage.removeItem('userRole');
     window.dispatchEvent(new Event('authStateChanged'));

@@ -18,7 +18,55 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const initRef = useRef(false);
 
-  // Initialize auth state from localStorage on app load
+  // Helper: Clear Auth State
+  const clearAuthState = useCallback(() => {
+    clearAuthTokens();
+    localStorage.removeItem('userData');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    
+    setUser(null);
+    setIsAuthenticated(false);
+    setIsAdmin(false);
+    console.log('[AuthContext] Auth state cleared');
+  }, []);
+
+  // Helper: Validate Token
+  const validateTokenWithBackend = useCallback(async (token) => {
+    try {
+      const response = await api.get('/api/auth/validate', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (!response.data || response.data.success === false) {
+        clearAuthState();
+      }
+    } catch (error) {
+      console.error('[AuthContext] Validation error:', error.response?.data || error.message);
+      if (error.response?.status === 401) {
+        clearAuthState();
+      }
+    }
+  }, [clearAuthState]);
+
+  // Login handler
+  const login = useCallback((userData, token) => {
+    localStorage.setItem('rush_basket_token', token);
+    localStorage.setItem('userData', JSON.stringify(userData));
+    localStorage.setItem('userRole', userData.role || 'user');
+    
+    setUser(userData);
+    setIsAuthenticated(true);
+    setIsAdmin(userData.role === 'admin');
+  }, []);
+
+  // Logout handler
+  const logout = useCallback(() => {
+    clearAuthState();
+  }, [clearAuthState]);
+
+  // Initialize auth state
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
@@ -28,12 +76,6 @@ export const AuthProvider = ({ children }) => {
         const token = getAccessToken();
         const userData = localStorage.getItem('userData');
         const userRole = localStorage.getItem('userRole');
-        
-        console.log('[AuthContext] Intializing auth - Found:', { 
-          token: !!token, 
-          user: !!userData,
-          role: userRole 
-        });
         
         if (token && userData) {
           try {
@@ -45,12 +87,9 @@ export const AuthProvider = ({ children }) => {
             // Validate token asynchronously
             validateTokenWithBackend(token);
           } catch (parseError) {
-            console.error('[AuthContext] Session data corrupted:', parseError);
             clearAuthState();
           }
         } else if (token || userData) {
-          // Partial session data found - clear it to be safe
-          console.warn('[AuthContext] Partial session data found, clearing');
           clearAuthState();
         }
       } catch (error) {
@@ -61,64 +100,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
-  }, []);
-
-  // Async token validation (doesn't block UI)
-  const validateTokenWithBackend = async (token) => {
-    try {
-      const response = await api.get('/api/auth/validate', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      console.log('[AuthContext] Validation response:', response.data);
-      
-      if (!response.data || response.data.success === false) {
-        console.log('[AuthContext] Token validation explicit failure, clearing session');
-        clearAuthState();
-      }
-    } catch (error) {
-      console.error('[AuthContext] Validation error:', error.response?.data || error.message);
-      // Only logout on definite auth failures, not network errors
-      if (error.response?.status === 401) {
-        console.log('[AuthContext] Token invalid (401), clearing session');
-        clearAuthState();
-      }
-    }
-  };
-
-  const clearAuthState = useCallback(() => {
-    clearAuthTokens();
-    localStorage.removeItem('userData');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('token'); // Legacy key just in case
-    sessionStorage.removeItem('token');
-    
-    setUser(null);
-    setIsAuthenticated(false);
-    setIsAdmin(false);
-    console.log('[AuthContext] Auth state cleared');
-  }, []);
-
-  const login = useCallback((userData, token, rememberMe = true) => {
-    console.log('[AuthContext] Login called for:', userData.email);
-    
-    // Save token and user data
-    localStorage.setItem('rush_basket_token', token);
-    localStorage.setItem('userData', JSON.stringify(userData));
-    localStorage.setItem('userRole', userData.role || 'user');
-    
-    // Update state
-    setUser(userData);
-    setIsAuthenticated(true);
-    setIsAdmin(userData.role === 'admin');
-    
-    console.log('[AuthContext] Login complete - isAdmin:', userData.role === 'admin');
-  }, []);
-
-  const logout = useCallback(() => {
-    console.log('[AuthContext] Logout initiated');
-    clearAuthState();
-  }, [clearAuthState]);
+  }, [clearAuthState, validateTokenWithBackend]);
 
   const value = useMemo(() => ({
     user,

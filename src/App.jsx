@@ -85,7 +85,7 @@ const App = () => {
           } />
 
           {/* fallback to home */}
-          < Route path='*' element={<Navigate replace to='/' />} />
+          <Route path='*' element={<Navigate replace to='/' />} />
         </Routes>
       </CartProvider>
     </TranslationProvider>
