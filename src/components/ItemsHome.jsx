@@ -55,8 +55,8 @@ const ItemsHome = () => {
   const searchedProducts = isSearching
     ? products.filter((product) => productMatchesSearch(product, searchTerm))
     : activeCategory === "All"
-    ? products
-    : products.filter((product) => product.category === activeCategory);
+      ? products
+      : products.filter((product) => product.category === activeCategory);
 
   const getQuantity = (productId) => {
     const item = cart.find((ci) => ci.productId === productId);
@@ -126,11 +126,10 @@ const ItemsHome = () => {
                       setActiveCategory(category.value || category.name);
                       setSearchTerm(""); // reset search
                     }}
-                    className={`${itemsHomeStyles.categoryItem} ${
-                      activeCategory === (category.value || category.name) && !isSearching
+                    className={`${itemsHomeStyles.categoryItem} ${activeCategory === (category.value || category.name) && !isSearching
                         ? itemsHomeStyles.activeCategory
                         : itemsHomeStyles.inactiveCategory
-                    }`}
+                      }`}
                   >
                     <div className={itemsHomeStyles.categoryIcon}>{category.icon}</div>
                     <span className={itemsHomeStyles.categoryName}>{category.name}</span>
@@ -153,11 +152,10 @@ const ItemsHome = () => {
                     setActiveCategory(cat.value || cat.name);
                     setSearchTerm(""); // reset search
                   }}
-                  className={`${itemsHomeStyles.mobileCategoryItem} ${
-                    activeCategory === (cat.value || cat.name) && !isSearching
+                  className={`${itemsHomeStyles.mobileCategoryItem} ${activeCategory === (cat.value || cat.name) && !isSearching
                       ? itemsHomeStyles.activeMobileCategory
                       : itemsHomeStyles.inactiveMobileCategory
-                  }`}
+                    }`}
                 >
                   {cat.name}
                 </button>
@@ -191,8 +189,8 @@ const ItemsHome = () => {
               {isSearching
                 ? "Search Results"
                 : activeCategory === "All"
-                ? "Featured Products"
-                : `Best ${activeCategory}`}
+                  ? "Featured Products"
+                  : `Best ${activeCategory}`}
             </h2>
             <div className={itemsHomeStyles.sectionDivider} />
           </div>
@@ -207,12 +205,20 @@ const ItemsHome = () => {
                   <div key={productId} className={itemsHomeStyles.productCard}>
                     <div className={itemsHomeStyles.imageContainer}>
                       <img
-                        src={product.image || product.imageUrl}
+                        src={
+                          product.image?.startsWith('http') || product.image?.startsWith('data:')
+                            ? product.image
+                            : product.imageUrl?.startsWith('http') || product.imageUrl?.startsWith('data:')
+                              ? product.imageUrl
+                              : product.image?.startsWith('/') || product.imageUrl?.startsWith('/')
+                                ? `${api.defaults.baseURL}${product.image || product.imageUrl}`
+                                : `${api.defaults.baseURL}/uploads/${product.image || product.imageUrl}`
+                        }
                         alt={product.name}
                         className={itemsHomeStyles.productImage}
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = "/placeholder.png"; // أو رسالة No Image
+                          e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
                         }}
                       />
                     </div>
