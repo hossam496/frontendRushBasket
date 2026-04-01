@@ -158,32 +158,27 @@ const AdminProductList = () => {
 
     console.log('[AdminProductList] Adding product:', newProduct);
     
-    const formData = new FormData();
-    formData.append('name', newProduct.name);
-    formData.append('price', newProduct.price);
-    formData.append('oldPrice', newProduct.oldPrice || newProduct.price);
-    formData.append('category', newProduct.category);
-    formData.append('description', newProduct.description);
-    
-    if (newProduct.image) {
-      console.log('[AdminProductList] Adding image file:', newProduct.image.name);
-      formData.append('image', newProduct.image);
-    } else if (newProduct.imageUrl) {
-      console.log('[AdminProductList] Adding image URL:', newProduct.imageUrl);
-      formData.append('imageUrl', newProduct.imageUrl);
-    } else {
-      console.log('[AdminProductList] No image provided');
-    }
-
     try {
-      console.log('[AdminProductList] Sending request to /api/products');
-      const res = await api.post('/api/products', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      // First try without image to test basic functionality
+      const productData = {
+        name: newProduct.name,
+        price: newProduct.price,
+        oldPrice: newProduct.oldPrice || newProduct.price,
+        category: newProduct.category,
+        description: newProduct.description,
+        imageUrl: newProduct.imageUrl || 'https://via.placeholder.com/300x300?text=Product' // Default image
+      };
+
+      console.log('[AdminProductList] Sending request to /api/products with data:', productData);
+      
+      const res = await api.post('/api/products', productData, {
+        headers: { 'Content-Type': 'application/json' },
       });
+      
       console.log('[AdminProductList] Product added successfully:', res.data);
       setProducts([...products, res.data]);
       setIsAddModalOpen(false);
-      setNewProduct({ name: '', price: '', oldPrice: '', category: 'Fruits', description: '', image: null });
+      setNewProduct({ name: '', price: '', oldPrice: '', category: 'Fruits', description: '', image: null, imageUrl: '' });
       Swal.fire('Success', 'Product added successfully', 'success');
     } catch (err) {
       console.error('[AdminProductList] Error adding product:', err);
