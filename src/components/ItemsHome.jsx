@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { FaChevronRight, FaMinus, FaPlus, FaShoppingCart, FaThList } from "react-icons/fa";
 import { categories } from "../assets/dummyData";
-import api from "../services/api";
+import productService from "../services/productService";
+import { resolveImageSrc } from "../services/imageService";
 import toast from 'react-hot-toast';
 
 const ItemsHome = () => {
@@ -19,81 +20,45 @@ const ItemsHome = () => {
     localStorage.setItem("activeCategory", activeCategory);
   }, [activeCategory]);
 
-  // Fetch products from API
-  useEffect(() => {
-    const fetchProducts = async () => {
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await productService.getProducts();
+      setProducts(data || []);
+    } catch (error) {
+      console.error('[ItemsHome] Error fetching products:', error);
+      toast.error('Failed to load products.');
+      
+      // Fallback to dummy data
       try {
-        setLoading(true);
-        console.log('[ItemsHome] Fetching products from:', api.defaults.baseURL + '/api/products');
-        const response = await api.get('/api/products');
-        console.log('[ItemsHome] API Response:', response.data);
-        setProducts(response.data || []);
-        console.log('[ItemsHome] Products fetched:', response.data?.length || 0);
-      } catch (error) {
-        console.error('[ItemsHome] Error fetching products:', error);
-        console.error('[ItemsHome] Error details:', {
-          message: error.message,
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data
-        });
-        
-        // Show user-friendly error message
-        if (error.response?.status === 0 || !error.response) {
-          // Network error
-          toast.error('Unable to connect to server. Please check your connection.');
-        } else if (error.response?.status >= 500) {
-          // Server error
-          toast.error('Server error. Please try again later.');
-        } else {
-          // Other errors
-          toast.error('Failed to load products.');
-        }
-        
-        // Fallback to dummy data if API fails
-        console.log('[ItemsHome] Falling back to dummy data');
         const { products: dummyProducts } = await import("../assets/dummyData");
         setProducts(dummyProducts);
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error('[ItemsHome] Failed to load dummy data');
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchProducts();
 
-    // Listen for product updates from admin dashboard
-    const handleProductUpdate = (event) => {
-      console.log('[ItemsHome] Product update event received:', event.detail);
-      console.log('[ItemsHome] Refreshing products...');
-      fetchProducts();
-    };
-
+    const handleProductUpdate = () => fetchProducts();
     window.addEventListener('productUpdate', handleProductUpdate);
-    console.log('[ItemsHome] Product update listener added');
-    
-    // Also listen for storage changes (for cross-tab updates)
-    const handleStorageChange = (e) => {
-      if (e.key === 'productUpdate') {
-        console.log('[ItemsHome] Storage update detected:', e.newValue);
-        console.log('[ItemsHome] Refreshing products...');
-        fetchProducts();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    console.log('[ItemsHome] Storage change listener added');
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'productUpdate') fetchProducts();
+    });
 
     return () => {
       window.removeEventListener('productUpdate', handleProductUpdate);
-      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
   const navigate = useNavigate();
   const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
-  const [searchTerm, setSearchTerm] = useState(""); // ← مهم: فارغ مش مسافة
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // تحديد إذا كان في بحث حقيقي أم لا
   const isSearching = searchTerm.trim() !== "";
 
   const productMatchesSearch = (product, term) => {
@@ -115,7 +80,6 @@ const ItemsHome = () => {
   };
 
   const handleIncrease = (product) => {
-    // Use the product's _id from the database
     const productId = product._id || product.id;
     addToCart(productId, 1, product);
   };
@@ -135,36 +99,19 @@ const ItemsHome = () => {
     navigate("/items", { state: { category: activeCategory } });
   };
 
-  const handleSearch = (term) => {
-    setSearchTerm(term);
-  };
-
-  // sidebar categories
   const sidebarCategories = [
-    {
-      name: "All Items",
-      icon: <FaThList className="text-lg" />,
-      value: "All",
-    },
+    { name: "All Items", icon: <FaThList className="text-lg" />, value: "All" },
     ...categories,
   ];
 
   return (
     <div className={itemsHomeStyles.page}>
-      <BannerHome onSearch={handleSearch} />
+      <BannerHome onSearch={setSearchTerm} />
 
       <div className="flex flex-col lg:flex-row flex-1">
         <aside className={itemsHomeStyles.sidebar}>
           <div className={itemsHomeStyles.sidebarHeader}>
-            <h1
-              style={{
-                fontFamily: "'Playfair', serif",
-                textShadow: "2px 2px 4px rgba(0,0,0,0.2)",
-              }}
-              className={itemsHomeStyles.sidebarTitle}
-            >
-              FreshCart
-            </h1>
+            <h1 className={itemsHomeStyles.sidebarTitle} style={{ fontFamily: "'Playfair', serif" }}>RushBasket</h1>
             <div className={itemsHomeStyles.sectionDivider} />
           </div>
 
@@ -175,7 +122,7 @@ const ItemsHome = () => {
                   <button
                     onClick={() => {
                       setActiveCategory(category.value || category.name);
-                      setSearchTerm(""); // reset search
+                      setSearchTerm("");
                     }}
                     className={`${itemsHomeStyles.categoryItem} ${activeCategory === (category.value || category.name) && !isSearching
                         ? itemsHomeStyles.activeCategory
@@ -191,9 +138,7 @@ const ItemsHome = () => {
           </div>
         </aside>
 
-        {/* main content */}
         <main className={itemsHomeStyles.mainContent}>
-          {/* mobile category scroll */}
           <div className={itemsHomeStyles.mobileCategories}>
             <div className="flex space-x-4 overflow-x-auto pb-2">
               {sidebarCategories.map((cat) => (
@@ -201,7 +146,7 @@ const ItemsHome = () => {
                   key={cat.name}
                   onClick={() => {
                     setActiveCategory(cat.value || cat.name);
-                    setSearchTerm(""); // reset search
+                    setSearchTerm("");
                   }}
                   className={`${itemsHomeStyles.mobileCategoryItem} ${activeCategory === (cat.value || cat.name) && !isSearching
                       ? itemsHomeStyles.activeMobileCategory
@@ -214,39 +159,20 @@ const ItemsHome = () => {
             </div>
           </div>
 
-          {/* search result header */}
           {isSearching && (
             <div className={itemsHomeStyles.searchResults}>
-              <div className="flex items-center justify-center">
-                <span className="text-emerald-700 font-medium">
-                  Search results for: <span className="font-bold">"{searchTerm}"</span>
-                </span>
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="ml-4 text-emerald-500 hover:text-emerald-700 p-1 rounded-full transition-colors"
-                >
-                  <span className="text-sm bg-emerald-100 px-2 py-1 rounded-full">Clear</span>
-                </button>
-              </div>
+              <span className="text-emerald-700 font-medium">Search results for: <span className="font-bold">"{searchTerm}"</span></span>
+              <button onClick={() => setSearchTerm("")} className="ml-4 text-emerald-500 bg-emerald-100 px-2 py-1 rounded-full text-sm">Clear</button>
             </div>
           )}
 
-          {/* section title */}
           <div className="text-center mb-6">
-            <h2
-              className={itemsHomeStyles.sectionTitle}
-              style={{ fontFamily: "'Playfair', serif" }}
-            >
-              {isSearching
-                ? "Search Results"
-                : activeCategory === "All"
-                  ? "Featured Products"
-                  : `Best ${activeCategory}`}
+            <h2 className={itemsHomeStyles.sectionTitle} style={{ fontFamily: "'Playfair', serif" }}>
+              {isSearching ? "Search Results" : activeCategory === "All" ? "Featured Products" : `Best ${activeCategory}`}
             </h2>
             <div className={itemsHomeStyles.sectionDivider} />
           </div>
 
-          {/* product grid */}
           <div className={itemsHomeStyles.productsGrid}>
             {searchedProducts.length > 0 ? (
               searchedProducts.map((product) => {
@@ -256,61 +182,26 @@ const ItemsHome = () => {
                   <div key={productId} className={itemsHomeStyles.productCard}>
                     <div className={itemsHomeStyles.imageContainer}>
                       <img
-                        src={
-                          product.image?.startsWith('http') || product.image?.startsWith('data:')
-                            ? product.image
-                            : product.imageUrl?.startsWith('http') || product.imageUrl?.startsWith('data:')
-                              ? product.imageUrl
-                              : product.image?.startsWith('/') || product.imageUrl?.startsWith('/')
-                                ? `${api.defaults.baseURL}${product.image || product.imageUrl}`
-                                : `${api.defaults.baseURL}/uploads/${product.image || product.imageUrl}`
-                        }
+                        src={resolveImageSrc(product.image || product.imageUrl) || "https://via.placeholder.com/300x200?text=No+Image"}
                         alt={product.name}
                         className={itemsHomeStyles.productImage}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
-                        }}
+                        onError={(e) => { e.target.src = "https://via.placeholder.com/300x200?text=Error"; }}
                       />
                     </div>
                     <div className={itemsHomeStyles.productContent}>
                       <h3 className={itemsHomeStyles.productTitle}>{product.name}</h3>
                       <div className={itemsHomeStyles.priceContainer}>
                         <div>
-                          <p className={itemsHomeStyles.currentPrice}>
-                            ${product.price.toFixed(2)}
-                          </p>
-                          {product.oldPrice && (
-                            <span className={itemsHomeStyles.oldPrice}>
-                              ${product.oldPrice.toFixed(2)}
-                            </span>
-                          )}
+                          <p className={itemsHomeStyles.currentPrice}>${product.price.toFixed(2)}</p>
+                          {product.oldPrice && <span className={itemsHomeStyles.oldPrice}>${product.oldPrice.toFixed(2)}</span>}
                         </div>
-
-                        {/* هنا الجزء المهم: الكنترولز بتظهر دلوقتي */}
                         {qty === 0 ? (
-                          <button
-                            onClick={() => handleIncrease(product)}
-                            className={itemsHomeStyles.addButton}
-                          >
-                            <FaShoppingCart className="mr-2" />
-                            Add
-                          </button>
+                          <button onClick={() => handleIncrease(product)} className={itemsHomeStyles.addButton}><FaShoppingCart className="mr-2" />Add</button>
                         ) : (
                           <div className={itemsHomeStyles.quantityControls}>
-                            <button
-                              onClick={() => handleDecrease(product)}
-                              className={itemsHomeStyles.quantityButton}
-                            >
-                              <FaMinus />
-                            </button>
+                            <button onClick={() => handleDecrease(product)} className={itemsHomeStyles.quantityButton}><FaMinus /></button>
                             <span className="font-bold">{qty}</span>
-                            <button
-                              onClick={() => handleIncrease(product)}
-                              className={itemsHomeStyles.quantityButton}
-                            >
-                              <FaPlus />
-                            </button>
+                            <button onClick={() => handleIncrease(product)} className={itemsHomeStyles.quantityButton}><FaPlus /></button>
                           </div>
                         )}
                       </div>
@@ -319,21 +210,10 @@ const ItemsHome = () => {
                 );
               })
             ) : (
-              <div className={itemsHomeStyles.noProducts}>
-                <div className={itemsHomeStyles.noProductsText}>No Products Found</div>
-                {isSearching && (
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className={itemsHomeStyles.clearSearchButton}
-                  >
-                    Clear Search
-                  </button>
-                )}
-              </div>
+              <div className={itemsHomeStyles.noProducts}>No Products Found</div>
             )}
           </div>
 
-          {/* view all button */}
           {!isSearching && (
             <div className="text-center mt-8">
               <button onClick={redirectToItemsPage} className={itemsHomeStyles.viewAllButton}>

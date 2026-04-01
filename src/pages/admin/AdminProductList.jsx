@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import productService from '../../services/productService';
+import { resolveImageSrc } from '../../services/imageService';
 import {
   FiPlus,
   FiTrash2,
@@ -35,8 +36,6 @@ const AdminProductList = () => {
     image: null,
     imageUrl: ''
   });
-
-  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     fetchProducts();
@@ -146,13 +145,6 @@ const AdminProductList = () => {
     });
   };
 
-  const getImageSrc = (product) => {
-    const img = product.image || product.imageUrl;
-    if (!img) return null;
-    if (img.startsWith('http') || img.startsWith('data:')) return img;
-    return `${API_URL}${img}`;
-  };
-
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -208,7 +200,7 @@ const AdminProductList = () => {
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gray-100 rounded-lg mr-3 overflow-hidden shrink-0">
                     <img 
-                      src={getImageSrc(row) || 'https://placehold.co/100?text=No+Image'} 
+                      src={resolveImageSrc(row.image || row.imageUrl) || 'https://placehold.co/100?text=No+Image'} 
                       alt={row.name} 
                       className="w-full h-full object-contain"
                       onError={(e) => { e.target.src = 'https://placehold.co/100?text=Error'; }}
