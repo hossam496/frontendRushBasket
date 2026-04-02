@@ -36,14 +36,41 @@ API.interceptors.request.use((config) => {
 // Interceptor to handle errors (e.g. 401 Unauthorized)
 API.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
-      clearAuthTokens();
-      localStorage.removeItem('userData');
-      if (!['/login', '/signup'].includes(window.location.pathname)) {
-        window.location.href = '/login';
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If 401 error and not already retrying
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't refresh for login/signup/logout
+      if (['/api/auth/login', '/api/auth/register', '/api/auth/logout'].some(url => originalRequest.url.includes(url))) {
+        return Promise.reject(error);
+      }
+
+      originalRequest._retry = true;
+
+      try {
+        // Attempt to refresh the token using the refresh cookie
+        const response = await axios.post(`${API_URL}/api/auth/refresh`, {}, { withCredentials: true });
+
+        if (response.data.success) {
+          const { accessToken } = response.data;
+          localStorage.setItem('rush_basket_token', accessToken);
+
+          // Retry the original request with the new token
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          return API(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error('[API] Refresh token failed:', refreshError);
+        // If refresh fails, clear all and redirect to login
+        clearAuthTokens();
+        localStorage.removeItem('userData');
+        if (typeof window !== 'undefined' && !['/login', '/signup'].includes(window.location.pathname)) {
+          window.location.href = '/login';
+        }
       }
     }
+
     return Promise.reject(error);
   }
 );
