@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import api, { clearAuthTokens } from '../../services/api';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
