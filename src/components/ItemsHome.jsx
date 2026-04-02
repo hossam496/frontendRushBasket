@@ -28,7 +28,7 @@ const ItemsHome = () => {
     } catch (error) {
       console.error('[ItemsHome] Error fetching products:', error);
       toast.error('Failed to load products.');
-      
+
       // Fallback to dummy data
       try {
         const { products: dummyProducts } = await import("../assets/dummyData");
@@ -125,8 +125,8 @@ const ItemsHome = () => {
                       setSearchTerm("");
                     }}
                     className={`${itemsHomeStyles.categoryItem} ${activeCategory === (category.value || category.name) && !isSearching
-                        ? itemsHomeStyles.activeCategory
-                        : itemsHomeStyles.inactiveCategory
+                      ? itemsHomeStyles.activeCategory
+                      : itemsHomeStyles.inactiveCategory
                       }`}
                   >
                     <div className={itemsHomeStyles.categoryIcon}>{category.icon}</div>
@@ -149,8 +149,8 @@ const ItemsHome = () => {
                     setSearchTerm("");
                   }}
                   className={`${itemsHomeStyles.mobileCategoryItem} ${activeCategory === (cat.value || cat.name) && !isSearching
-                      ? itemsHomeStyles.activeMobileCategory
-                      : itemsHomeStyles.inactiveMobileCategory
+                    ? itemsHomeStyles.activeMobileCategory
+                    : itemsHomeStyles.inactiveMobileCategory
                     }`}
                 >
                   {cat.name}
@@ -182,10 +182,10 @@ const ItemsHome = () => {
                   <div key={productId} className={itemsHomeStyles.productCard}>
                     <div className={itemsHomeStyles.imageContainer}>
                       <img
-                        src={resolveImageSrc(product.image || product.imageUrl) || "https://via.placeholder.com/300x200?text=No+Image"}
+                        src={resolveImageSrc(product.image || product.imageUrl) || "https://placehold.co/300x200?text=No+Image"}
                         alt={product.name}
                         className={itemsHomeStyles.productImage}
-                        onError={(e) => { e.target.src = "https://via.placeholder.com/300x200?text=Error"; }}
+                        onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/300x200?text=Error"; }}
                       />
                     </div>
                     <div className={itemsHomeStyles.productContent}>

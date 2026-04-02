@@ -26,9 +26,9 @@ const ProductCard = ({ item }) => {
   const handleAddToCart = async () => {
     if (loading) return;
     setLoading(true);
-    try { 
-      await addToCart(productId, 1, item); 
-    } finally { 
+    try {
+      await addToCart(productId, 1, item);
+    } finally {
       setLoading(true); // Keep loading state briefly for UX
       setTimeout(() => setLoading(false), 500);
     }
@@ -56,7 +56,7 @@ const ProductCard = ({ item }) => {
     <div className={itemsPageStyles.productCard}>
       <div className={itemsPageStyles.imageContainer}>
         <OptimizedImage
-          src={imgSrc || "https://via.placeholder.com/300x200?text=No+Image"}
+          src={imgSrc || "https://placehold.co/300x200?text=No+Image"}
           alt={item.name}
           className={itemsPageStyles.productImage}
           width={300}
@@ -118,14 +118,14 @@ const Items = () => {
     try {
       setLoading(true);
       const products = await productService.getProducts();
-      
+
       const grouped = products.reduce((acc, item) => {
         const cat = item.category || "Uncategorized";
         if (!acc[cat]) acc[cat] = { id: cat, name: cat, items: [] };
         acc[cat].items.push(item);
         return acc;
       }, {});
-      
+
       setData(Object.values(grouped));
     } catch (err) {
       console.error('[Items] Fetching error:', err);
@@ -140,11 +140,11 @@ const Items = () => {
 
   const filteredData = searchTerm
     ? data.map(category => ({
-        ...category,
-        items: category.items.filter(item => 
-          item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      })).filter(category => category.items.length > 0)
+      ...category,
+      items: category.items.filter(item =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    })).filter(category => category.items.length > 0)
     : data;
 
   return (
@@ -199,7 +199,7 @@ const Items = () => {
                   </div>
                   {hasMoreItems && (
                     <div className="mt-10 flex justify-center">
-                      <button 
+                      <button
                         onClick={() => setExpandedCategories(prev => ({ ...prev, [category.id]: !prev[category.id] }))}
                         className={itemsPageStyles.showMoreButton}
                       >
