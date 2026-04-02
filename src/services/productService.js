@@ -13,11 +13,7 @@ const productService = {
    * Create a new product with image file upload
    */
   createProduct: async (formData) => {
-    const response = await API.post('/api/products', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await API.post('/api/products', formData);
     return response.data.product || response.data;
   },
 
@@ -25,11 +21,7 @@ const productService = {
    * Update an existing product
    */
   updateProduct: async (id, formData) => {
-    const response = await API.put(`/api/products/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await API.put(`/api/products/${id}`, formData);
     return response.data.product || response.data;
   },
 
