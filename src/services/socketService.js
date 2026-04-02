@@ -36,7 +36,15 @@ class SocketService {
         });
 
         this.socket.on('connect_error', (error) => {
-            console.error('🔌 Socket connection error:', error);
+            // Only log errors in development to keep production console clean
+            if (import.meta.env.MODE === 'development') {
+                console.error('🔌 Socket connection error:', error);
+            }
+
+            // If on Vercel, connection failure is expected; stop trying after a few attempts
+            if (isVercel && this.socket.active === false) {
+                this.socket.disconnect();
+            }
         });
 
         return this.socket;
