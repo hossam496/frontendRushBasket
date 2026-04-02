@@ -246,12 +246,12 @@ const MyOrders = () => {
                       {selectedOrder.items.map((item, index) => (
                         <div key={item._id || `${item.name}-${index}`}
                           className={`flex items-center p-4 bg-emerald-900/30 ${index !== selectedOrder.items.length - 1
-                              ? "border-b border-emerald-700"
-                              : ""
+                            ? "border-b border-emerald-700"
+                            : ""
                             }`}>
                           {item.imageUrl ? (
                             <img
-                              src={resolveImageSrc(item.imageUrl)}
+                              src={resolveImageSrc(item.image || item.imageUrl)}
                               alt={item.name}
                               className='w-16 h-16 object-contain rounded-lg mr-4'
                               onError={(e) => {
@@ -331,9 +331,9 @@ const MyOrders = () => {
                       <div className='flex justify-between mb-3'>
                         <span className='text-emerald-300'>Status:</span>
                         <span className={`px-4 py-1.5 rounded-full text-xs font-bold shrink-0 shadow-sm ${selectedOrder.status === 'Delivered' ? 'bg-emerald-500/20 text-emerald-200' :
-                            selectedOrder.status === 'Shipped' ? 'bg-blue-500/20 text-blue-200' :
-                              selectedOrder.status === 'Cancelled' ? 'bg-red-500/20 text-red-200' :
-                                'bg-amber-500/20 text-amber-200'
+                          selectedOrder.status === 'Shipped' ? 'bg-blue-500/20 text-blue-200' :
+                            selectedOrder.status === 'Cancelled' ? 'bg-red-500/20 text-red-200' :
+                              'bg-amber-500/20 text-amber-200'
                           }`}>
                           {selectedOrder.status}
                         </span>
