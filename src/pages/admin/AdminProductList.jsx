@@ -127,7 +127,7 @@ const AdminProductList = () => {
         toast.success('Product updated successfully!');
       } else {
         const created = await productService.createProduct(formData);
-        setProducts(prev => [...prev, created.product]);
+        setProducts(prev => [...prev, created]);
         toast.success('Product added successfully!');
       }
       closeModals();
