@@ -280,15 +280,37 @@ const AdminProductList = () => {
               <div className="space-y-4">
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500" onClick={() => document.getElementById('image-upload').click()}>
                   {newProduct.image ? (
-                    <img src={URL.createObjectURL(newProduct.image)} className="h-32 mx-auto object-contain" alt="Preview" />
+                    <img src={URL.createObjectURL(newProduct.image)} className="h-40 mx-auto object-contain rounded-lg" alt="Preview (new upload)" />
+                  ) : newProduct.imageUrl ? (
+                    <img src={resolveImageSrc(newProduct.imageUrl)} className="h-40 mx-auto object-contain rounded-lg" alt="Preview (existing)" />
                   ) : (
-                    <div className="py-4 text-gray-500"><FiUploadCloud size={40} className="mx-auto mb-2" /> Click to upload</div>
+                    <div className="py-4 text-gray-500">
+                      <FiUploadCloud size={40} className="mx-auto mb-2 text-gray-400" /> 
+                      <p className="font-medium text-gray-700">Click to upload product image</p>
+                      <p className="text-xs text-gray-400 mt-1">PNG, JPG or WebP up to 5MB</p>
+                    </div>
                   )}
-                  <input id="image-upload" type="file" hidden onChange={e => setNewProduct({...newProduct, image: e.target.files[0]})} />
+                  <input id="image-upload" type="file" accept="image/*" hidden onChange={e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      setNewProduct({...newProduct, image: file});
+                    }
+                  }} />
                 </div>
               </div>
-              <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                {isEditModalOpen ? 'Update Product' : 'Add Product'}
+              <button 
+                type="submit" 
+                disabled={loading || !newProduct.name || !newProduct.price}
+                className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    Saving Changes...
+                  </>
+                ) : (
+                  isEditModalOpen ? 'Update Product' : 'Add Product'
+                )}
               </button>
             </form>
           </div>
