@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 import AdminLayout from '../../components/admin/AdminLayout';
 import StatCard from '../../components/admin/StatCard';
 import { adminStyles } from '../../assets/adminDashboardStyles';
+import { resolveImageSrc } from '../../services/imageService';
 
 const AdminOrderList = () => {
   const pollingIntervalRef = useRef(null);
@@ -34,19 +35,7 @@ const AdminOrderList = () => {
     };
   }, []);
 
-  const getImageSrc = useCallback((item) => {
-    const rawImage = item?.imageUrl || item?.image;
-    if (!rawImage) return null;
-    if (typeof rawImage !== 'string') return null;
-    if (rawImage.startsWith('http') || rawImage.startsWith('data:')) return rawImage;
-    
-    // Ensure we have a valid baseURL
-    const base = api.defaults.baseURL || '';
-    const cleanImage = rawImage.startsWith('/') ? rawImage : `/${rawImage}`;
-    
-    // If it's a relative path starting with uploads, ensure it's correct
-    return `${base}${cleanImage}`;
-  }, []);
+
 
   const fetchOrders = async () => {
     try {
@@ -471,8 +460,8 @@ const AdminOrderList = () => {
                           key={status}
                           onClick={() => handleStatusChange(selectedOrder._id, status)}
                           className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${selectedOrder.status === status
-                              ? 'bg-white border-indigo-600 shadow-xl scale-105'
-                              : 'bg-white border-slate-100 hover:border-slate-300'
+                            ? 'bg-white border-indigo-600 shadow-xl scale-105'
+                            : 'bg-white border-slate-100 hover:border-slate-300'
                             }`}
                         >
                           {/* أيقونات الحالة */}
@@ -498,12 +487,12 @@ const AdminOrderList = () => {
                       {selectedOrder.items?.map((item, idx) => (
                         <div key={idx} className={`flex items-center p-5 ${idx !== selectedOrder.items.length - 1 ? 'border-b border-slate-50' : ''}`}>
                           <div className="w-16 h-16 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shrink-0">
-                            {getImageSrc(item) ? (
-                              <img 
-                                src={getImageSrc(item)} 
-                                alt={item.name} 
-                                className="w-full h-full object-contain" 
-                                onError={(e) => { e.target.src = 'https://placehold.co/100?text=Error'; }}
+                            {resolveImageSrc(item.image || item.imageUrl) ? (
+                              <img
+                                src={resolveImageSrc(item.image || item.imageUrl)}
+                                alt={item.name}
+                                className="w-full h-full object-contain"
+                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/100?text=Error'; }}
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-slate-300">
