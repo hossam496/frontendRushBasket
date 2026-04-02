@@ -65,7 +65,7 @@ const CartPage = () => {
                 <div key={item.id} className={cartStyles.cartItemCard}>
                   <div className={cartStyles.cartItemImageContainer}>
                     <img
-                      src={resolveImageSrc(item.image)}
+                      src={resolveImageSrc(item.image || item.imageUrl)}
                       alt={item.name}
                       className={cartStyles.cartItemImage}
                       onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/100x100?text=Error"; }}

@@ -29,7 +29,7 @@ const normalizeItems = (rawItems = []) => {
         productId: item.product?._id || item.product || item.productId,
         name: item.product?.name || item.name || 'Unnamed',
         price: Number(item.product?.price ?? item.price ?? 0),
-        imageUrl: item.product?.imageUrl || item.imageUrl || '',
+        imageUrl: item.product?.image || item.product?.imageUrl || item.image || item.imageUrl || '',
         quantity: isNaN(quantity) ? 0 : quantity,
       };
     })
@@ -66,7 +66,7 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const res = await api.get('/api/cart');
-      
+
       const items = Array.isArray(res.data) ? res.data : [];
       const normalized = normalizeItems(items);
       setCart(normalized);
@@ -121,7 +121,7 @@ export const CartProvider = ({ children }) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.productId === productId);
       let newCart;
-      
+
       if (existingItem) {
         if (existingItem.quantity + qtyToAdd <= 0) {
           newCart = prevCart.filter(item => item.productId !== productId);
@@ -140,7 +140,7 @@ export const CartProvider = ({ children }) => {
           quantity: qtyToAdd,
           name: productData.name || 'Unnamed',
           price: Number(productData.price || 0),
-          imageUrl: productData.imageUrl || '',
+          imageUrl: productData.image || productData.imageUrl || '',
         };
         newCart = [...prevCart, newItem];
       } else {
@@ -153,7 +153,7 @@ export const CartProvider = ({ children }) => {
       } else {
         localStorage.setItem('userCartBackup', JSON.stringify(newCart));
       }
-      
+
       return newCart;
     });
   }, [isAuthenticated]);
@@ -161,17 +161,17 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (productId, quantity = 1, productData = null) => {
     // تحديث محلي فوري
     updateLocalCart(productId, quantity, productData);
-    
+
     if (!isAuthenticated) {
       return; // Guest cart - no API call needed
     }
-    
+
     try {
       const response = await api.post(
         '/api/cart',
         { productId, quantity }
       );
-      
+
       // Update local cart with real ID returned from server
       if (response.data && response.data._id) {
         setCart(prevCart => {
@@ -186,7 +186,7 @@ export const CartProvider = ({ children }) => {
           });
         });
       }
-      
+
       // جلب التحديثات من السيرفر في الخلفية
       await fetchCart(true);
     } catch (err) {
@@ -197,13 +197,13 @@ export const CartProvider = ({ children }) => {
   const updateQuantity = async (lineId, quantity) => {
     const newQty = Number(quantity);
     let updatedCart;
-    
+
     // تحديث محلي فوري
     setCart(prevCart => {
       updatedCart = prevCart.map(item =>
         item.id === lineId ? { ...item, quantity: newQty } : item
       );
-      
+
       if (!isAuthenticated) {
         saveGuestCart(updatedCart);
       } else {
@@ -222,7 +222,7 @@ export const CartProvider = ({ children }) => {
           const res = await api.get('/api/cart');
           const items = Array.isArray(res.data) ? res.data : [];
           const normalized = normalizeItems(items);
-          
+
           // Find the item that matches by productId
           const tempItem = cart.find(item => item.id === lineId);
           if (tempItem) {
@@ -238,7 +238,7 @@ export const CartProvider = ({ children }) => {
           console.error('Error fetching cart for temp ID resolution:', fetchErr);
         }
       }
-      
+
       await api.put(
         `/api/cart/${realLineId}`,
         { quantity: newQty }
@@ -280,7 +280,7 @@ export const CartProvider = ({ children }) => {
   const clearCart = async () => {
     setCart([]);
     localStorage.removeItem(GUEST_CART_KEY);
-    
+
     if (!isAuthenticated) return;
 
     try {
@@ -290,12 +290,12 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const getCartTotal = useMemo(() => 
+  const getCartTotal = useMemo(() =>
     cart.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0),
     [cart]
   );
 
-  const cartCount = useMemo(() => 
+  const cartCount = useMemo(() =>
     cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0),
     [cart]
   );
@@ -315,15 +315,15 @@ export const CartProvider = ({ children }) => {
     refreshCart,
     isAuthenticated: isAuth,
   }), [
-    cart, 
-    loading, 
-    addToCart, 
-    updateQuantity, 
-    removeFromCart, 
-    clearCart, 
-    getCartTotal, 
-    cartCount, 
-    refreshCart, 
+    cart,
+    loading,
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    getCartTotal,
+    cartCount,
+    refreshCart,
     isAuth
   ]);
 
