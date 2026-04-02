@@ -10,6 +10,7 @@ import Login from './components/Login'
 import Logout from './components/Logout'
 import Navbar from './components/Navbar'
 import Signup from './components/Signup'
+import MyOrders from './components/MyOrders'
 import Contact from './pages/Contact'
 import AdminRoute from './components/AdminRoute'
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -49,6 +50,7 @@ const App = () => {
           <Route path='/items' element={<Item />} />
 
           <Route path='/cart' element={isAuthenticated ? <Cart /> : <Navigate replace to='/login' />} />
+          <Route path='/myorders' element={isAuthenticated ? <MyOrders /> : <Navigate replace to='/login' />} />
           <Route path='/checkout' element={isAuthenticated ? <Checkout /> : <Navigate replace to='/login' />} />
 
           {/* auth routes */}
