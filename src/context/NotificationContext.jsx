@@ -31,6 +31,13 @@ export const NotificationProvider = ({ children }) => {
     }
   }, [isAuthenticated]);
 
+  // Maintain a ref to the fetch function to use in async handlers without stale closures
+  const fetchRef = useRef(fetchNotifications);
+
+  useEffect(() => {
+    fetchRef.current = fetchNotifications;
+  }, [fetchNotifications]);
+
   useEffect(() => {
     if (!isAuthenticated || !user) {
       setNotifications([]);
@@ -82,7 +89,7 @@ export const NotificationProvider = ({ children }) => {
       setUnreadCount(prev => Math.max(0, prev - 1));
       await api.patch(`/api/notifications/history/${id}/read`);
     } catch (error) {
-      fetchRef.current();
+      if (fetchRef.current) fetchRef.current();
     }
   };
 
@@ -93,7 +100,7 @@ export const NotificationProvider = ({ children }) => {
       setUnreadCount(0);
       await api.patch('/api/notifications/history/read-all');
     } catch (error) {
-      fetchRef.current();
+      if (fetchRef.current) fetchRef.current();
     }
   };
 
@@ -106,7 +113,7 @@ export const NotificationProvider = ({ children }) => {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
     } catch (error) {
-      fetchRef.current();
+      if (fetchRef.current) fetchRef.current();
     }
   };
 
