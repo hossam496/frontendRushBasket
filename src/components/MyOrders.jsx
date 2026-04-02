@@ -249,14 +249,14 @@ const MyOrders = () => {
                             ? "border-b border-emerald-700"
                             : ""
                             }`}>
-                          {item.imageUrl ? (
+                          {item.imageUrl || item.image ? (
                             <img
                               src={resolveImageSrc(item.image || item.imageUrl)}
                               alt={item.name}
                               className='w-16 h-16 object-contain rounded-lg mr-4'
                               onError={(e) => {
                                 e.currentTarget.onerror = null;
-                                e.currentTarget.src = '/placeholder-product.jpg';
+                                e.currentTarget.src = 'https://placehold.co/100?text=Error';
                               }}
                             />
                           ) : (
