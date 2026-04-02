@@ -86,7 +86,8 @@ const Login = () => {
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('Network error. Please try again.');
+      const message = err.response?.data?.message || 'Network error. Please try again.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }

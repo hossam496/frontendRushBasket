@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signupStyles } from "../assets/dummyStyles";
-import { FaArrowLeft, FaCheck, FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
+import { FaArrowLeft, FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
+import API from "../services/api";
+import toast from "react-hot-toast";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -11,35 +13,26 @@ const Signup = () => {
     remember: true,
   });
   const [showPassword, setShowPassword] = useState(false);
-
-  const [showToast, setShowToast] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => {
-        setShowToast(false);
-        navigate("/login");
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [showToast, navigate]);
 
   // form handler
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
 
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+    if (error) setError("");
   };
 
-  // validating all fiels are filled or not
+  // validating all fields
   const validate = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Name is required";
@@ -47,24 +40,39 @@ const Signup = () => {
     else if (!/\S+@\S+\.\S+/.test(formData.email))
       newErrors.email = "Invalid email format";
     if (!formData.password) newErrors.password = "Password is required";
+    else if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if(validate()){
-        setShowToast(true)
-    }
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-  const togglePasswordVisibility = (field) => {
-    setShowPassword((prev) => ({
-        ...prev,
-        [field]: !prev[field]
-    }))
-  } 
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await API.post('/api/auth/register', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      });
+
+      if (response.data.success) {
+        toast.success("Account created successfully! Please login.");
+        setTimeout(() => navigate("/login"), 1500);
+      } else {
+        setError(response.data.message || "Signup failed");
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError(err.response?.data?.message || "Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className={signupStyles.page}>
@@ -72,13 +80,6 @@ const Signup = () => {
         <FaArrowLeft className="mr-2" />
         Back to Login
       </Link>
-
-      {showToast && (
-        <div className={signupStyles.toast}>
-            <FaCheck className="mr-2" />
-            Account created successfully!
-        </div>
-      )}
 
       {/* signup card */}
       <div className={signupStyles.signupCard}>
@@ -114,13 +115,13 @@ const Signup = () => {
 
             <div className={signupStyles.inputContainer}>
                 <FaLock className={signupStyles.inputIcon} />
-                <input type={showPassword.password ? 'text' : 'password'} name="password"
+                <input type={showPassword ? 'text' : 'password'} name="password"
                  value={formData.password} onChange={handleChange}
                 placeholder="Password" required className={signupStyles.passwordInput} />
-                <button type="button" onClick={() => togglePasswordVisibility('password')}
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
                     className={signupStyles.toggleButton}
-                    aria-label={showPassword.password ? 'Hide password' : 'Show password'}>
-                        {showPassword.password ? <FaEyeSlash /> : <FaEye />}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </button>
 
                 {errors.password && <p className={signupStyles.error}>{errors.password}</p>}
@@ -128,14 +129,16 @@ const Signup = () => {
 
             <div className={signupStyles.termsContainer}>
                 <label className={signupStyles.termsLabel}>
-                    <input type="checkbox" name="remeber" checked={formData.remember}
+                    <input type="checkbox" name="remember" checked={formData.remember}
                     onChange={handleChange} className={signupStyles.termsCheckbox} required />
-                    I agree to the Terms and conditins
+                    I agree to the Terms and conditions
                 </label>
             </div>
 
-            <button type="submit" className={signupStyles.submitButton}>
-                Sign Up
+            {error && <p className={signupStyles.error}>{error}</p>}
+
+            <button type="submit" disabled={isLoading} className={signupStyles.submitButton}>
+                {isLoading ? "Creating Account..." : "Sign Up"}
             </button>
         </form>
 
