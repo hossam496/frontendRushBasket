@@ -3,6 +3,7 @@ import { useCart } from "../CartContext";
 import { cartStyles } from "../assets/dummyStyles";
 import { Link, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiMinus, FiPlus, FiTrash2 } from "react-icons/fi";
+import { resolveImageSrc } from "../services/imageService";
 
 const CartPage = () => {
   const { cart, removeFromCart, updateQuantity, clearCart, getCartTotal } =
@@ -63,7 +64,12 @@ const CartPage = () => {
               {cart.map((item) => (
                 <div key={item.id} className={cartStyles.cartItemCard}>
                   <div className={cartStyles.cartItemImageContainer}>
-                    <img src={item.image} alt={item.name} className={cartStyles.cartItemImage} />
+                    <img
+                      src={resolveImageSrc(item.image)}
+                      alt={item.name}
+                      className={cartStyles.cartItemImage}
+                      onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/100x100?text=Error"; }}
+                    />
                   </div>
                   <h3 className={cartStyles.cartItemName}>{item.name}</h3>
                   <p className={cartStyles.cartItemPrice}>
