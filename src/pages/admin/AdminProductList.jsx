@@ -27,7 +27,7 @@ const AdminProductList = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  
+
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
@@ -94,7 +94,7 @@ const AdminProductList = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!isAuthenticated || !isAdmin) {
       toast.error('You must be an admin to perform this action');
       return;
@@ -113,7 +113,7 @@ const AdminProductList = () => {
     formData.append('oldPrice', newProduct.oldPrice || newProduct.price);
     formData.append('category', newProduct.category);
     formData.append('description', newProduct.description || '');
-    
+
     if (newProduct.image) {
       formData.append('image', newProduct.image);
     } else if (newProduct.imageUrl) {
@@ -127,7 +127,7 @@ const AdminProductList = () => {
         toast.success('Product updated successfully!');
       } else {
         const created = await productService.createProduct(formData);
-        setProducts(prev => [...prev, created]);
+        setProducts(prev => [...prev, created.product]);
         toast.success('Product added successfully!');
       }
       closeModals();
@@ -212,12 +212,12 @@ const AdminProductList = () => {
               cell: (row) => (
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gray-100 rounded-lg mr-3 overflow-hidden shrink-0">
-                    <img 
-                      src={resolveImageSrc(row.image || row.imageUrl)} 
-                      alt={row.name} 
+                    <img
+                      src={resolveImageSrc(row.image || row.imageUrl)}
+                      alt={row.name}
                       className="w-full h-full object-contain"
-                      onError={(e) => { 
-                        e.target.src = 'https://placehold.co/100?text=Error'; 
+                      onError={(e) => {
+                        e.target.src = 'https://placehold.co/100?text=Error';
                       }}
                     />
                   </div>
@@ -266,28 +266,28 @@ const AdminProductList = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Product Name</label>
-                  <input required value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
+                  <input required value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} className="w-full px-4 py-2 border rounded-lg" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Price ($)</label>
-                  <input required type="number" step="0.01" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
+                  <input required type="number" step="0.01" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} className="w-full px-4 py-2 border rounded-lg" />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Old Price ($)</label>
-                  <input type="number" step="0.01" value={newProduct.oldPrice} onChange={e => setNewProduct({...newProduct, oldPrice: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
+                  <input type="number" step="0.01" value={newProduct.oldPrice} onChange={e => setNewProduct({ ...newProduct, oldPrice: e.target.value })} className="w-full px-4 py-2 border rounded-lg" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Category</label>
-                  <select value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} className="w-full px-4 py-2 border rounded-lg">
+                  <select value={newProduct.category} onChange={e => setNewProduct({ ...newProduct, category: e.target.value })} className="w-full px-4 py-2 border rounded-lg">
                     <option>Fruits</option><option>Vegetables</option><option>Dairy</option><option>Beverages</option><option>Snacks</option>
                   </select>
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Description</label>
-                <textarea rows="3" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
+                <textarea rows="3" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} className="w-full px-4 py-2 border rounded-lg" />
               </div>
               <div className="space-y-4">
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500" onClick={() => document.getElementById('image-upload').click()}>
@@ -297,7 +297,7 @@ const AdminProductList = () => {
                     <img src={resolveImageSrc(newProduct.imageUrl)} className="h-40 mx-auto object-contain rounded-lg" alt="Preview (existing)" />
                   ) : (
                     <div className="py-4 text-gray-500">
-                      <FiUploadCloud size={40} className="mx-auto mb-2 text-gray-400" /> 
+                      <FiUploadCloud size={40} className="mx-auto mb-2 text-gray-400" />
                       <p className="font-medium text-gray-700">Click to upload product image</p>
                       <p className="text-xs text-gray-400 mt-1">PNG, JPG or WebP up to 5MB</p>
                     </div>
@@ -305,13 +305,13 @@ const AdminProductList = () => {
                   <input id="image-upload" type="file" accept="image/*" hidden onChange={e => {
                     const file = e.target.files[0];
                     if (file) {
-                      setNewProduct({...newProduct, image: file});
+                      setNewProduct({ ...newProduct, image: file });
                     }
                   }} />
                 </div>
               </div>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={isSubmitting || !newProduct.name || !newProduct.price}
                 className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
