@@ -10,9 +10,13 @@ class SocketService {
     connect(userId, role) {
         if (this.socket?.connected) return;
 
+        const isVercel = window.location.hostname.endsWith('.vercel.app');
+
         this.socket = io(SOCKET_URL, {
             withCredentials: true,
-            transports: ['websocket', 'polling']
+            transports: isVercel ? ['polling'] : ['websocket', 'polling'],
+            reconnectionAttempts: 3,
+            timeout: 10000
         });
 
         this.socket.on('connect', () => {
