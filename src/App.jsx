@@ -17,6 +17,7 @@ import AdminProductList from './pages/admin/AdminProductList'
 import AdminUserList from './pages/admin/AdminUserList'
 import AdminOrderList from './pages/admin/AdminOrderList'
 import AdminAnalytics from './pages/admin/AdminAnalytics'
+import { useAuth } from './context/AuthContext'
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -27,23 +28,21 @@ const ScrollToTop = () => {
 }
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    Boolean(localStorage.getItem('rush_basket_token'))
-  )
+  const { isAuthenticated, loading } = useAuth();
 
-  useEffect(() => {
-    const handler = () => {
-      setIsAuthenticated(Boolean(localStorage.getItem('rush_basket_token')))
-    }
-    window.addEventListener('authStateChanged', handler)
-    return () => window.removeEventListener('authStateChanged', handler)
-  }, [])
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+      </div>
+    );
+  }
 
   return (
     <TranslationProvider>
       <CartProvider>
         <ScrollToTop />
-        <Navbar isAuthenticated={isAuthenticated} />
+        <Navbar />
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/contact' element={<Contact />} />
