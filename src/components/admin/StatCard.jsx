@@ -1,35 +1,35 @@
 import React from 'react';
 import { FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 
-const StatCard = ({ 
-  title, 
-  value, 
-  icon, 
-  trend, 
+const StatCard = ({
+  title,
+  value,
+  icon,
+  trend,
   trendDirection,
   color = 'indigo',
-  isLoading = false 
+  isLoading = false
 }) => {
   const colorClasses = {
     indigo: {
-      bg: 'bg-indigo-50',
-      icon: 'text-indigo-600',
-      border: 'border-indigo-200'
+      bg: 'bg-blue-500/10',
+      icon: 'text-blue-400',
+      border: 'border-blue-500/20'
     },
     emerald: {
-      bg: 'bg-emerald-50',
-      icon: 'text-emerald-600',
-      border: 'border-emerald-200'
+      bg: 'bg-emerald-500/10',
+      icon: 'text-emerald-400',
+      border: 'border-emerald-500/20'
     },
     amber: {
-      bg: 'bg-amber-50',
-      icon: 'text-amber-600',
-      border: 'border-amber-200'
+      bg: 'bg-amber-500/10',
+      icon: 'text-amber-400',
+      border: 'border-amber-500/20'
     },
     rose: {
-      bg: 'bg-rose-50',
-      icon: 'text-rose-600',
-      border: 'border-rose-200'
+      bg: 'bg-rose-500/10',
+      icon: 'text-rose-400',
+      border: 'border-rose-500/20'
     }
   };
 
@@ -37,31 +37,31 @@ const StatCard = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 animate-pulse">
+      <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-emerald-500/10 p-6 animate-pulse">
         <div className="flex justify-between items-start mb-4">
           <div className={`w-12 h-12 ${colors.bg} rounded-xl`}></div>
-          <div className="w-16 h-6 bg-gray-200 rounded-full"></div>
+          <div className="w-16 h-6 bg-slate-800 rounded-full"></div>
         </div>
-        <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-        <div className="h-8 bg-gray-200 rounded w-32"></div>
+        <div className="h-4 bg-slate-800 rounded w-24 mb-2"></div>
+        <div className="h-8 bg-slate-800 rounded w-32"></div>
       </div>
     );
   }
 
   return (
-    <div className="group bg-white rounded-2xl border border-gray-200 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-      <div className="flex justify-between items-start mb-4">
-        <div className={`${colors.bg} p-3 rounded-xl transition-all duration-300 group-hover:scale-110`}>
+    <div className="group relative bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-emerald-500/10 p-6 transition-all duration-500 hover:border-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-1 overflow-hidden">
+      <div className="flex justify-between items-start mb-4 relative z-10">
+        <div className={`${colors.bg} p-3 rounded-xl transition-all duration-500 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.2)]`}>
           <div className={`${colors.icon}`}>
-            {icon}
+            {React.isValidElement(icon) ? React.cloneElement(icon, { size: 24 }) : icon}
           </div>
         </div>
         {trend !== undefined && (
           <div className={`
-            flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-medium
-            ${trendDirection === 'up' 
-              ? 'bg-emerald-50 text-emerald-700' 
-              : 'bg-red-50 text-red-700'
+            flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-bold
+            ${trendDirection === 'up'
+              ? 'bg-emerald-500/10 text-emerald-400'
+              : 'bg-rose-500/10 text-rose-400'
             }
           `}>
             {trendDirection === 'up' ? (
@@ -73,11 +73,14 @@ const StatCard = ({
           </div>
         )}
       </div>
-      
-      <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-1">{title}</h3>
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
+
+      <div className="relative z-10">
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{title}</h3>
+        <p className="text-3xl font-black text-white">{value}</p>
       </div>
+
+      {/* Decorative Gradient Line */}
+      <div className="absolute bottom-0 left-0 h-1 w-0 bg-linear-to-r from-emerald-500 to-transparent group-hover:w-full transition-all duration-700 rounded-b-2xl" />
     </div>
   );
 };

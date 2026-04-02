@@ -2,27 +2,21 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import api from '../services/api';
 import { useAuth } from './AuthContext';
 import { toast } from 'react-hot-toast';
+import socketService from '../services/socketService';
 
 const NotificationContext = createContext();
 
 export const useNotifications = () => useContext(NotificationContext);
 
 export const NotificationProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Use a ref to track the current unread count without causing stale closures in interval callbacks
-  const unreadCountRef = useRef(0);
-  unreadCountRef.current = unreadCount;
-
   // Fetch all notifications
   const fetchNotifications = useCallback(async () => {
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
+    if (!isAuthenticated) return;
 
     try {
       const { data } = await api.get('/api/notifications/history?limit=20');
@@ -35,65 +29,51 @@ export const NotificationProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
-
-  // Setup initial fetch + stable polling interval
-  const fetchRef = useRef(fetchNotifications);
-  fetchRef.current = fetchNotifications;
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    if (!user) {
+    if (!isAuthenticated || !user) {
       setNotifications([]);
       setUnreadCount(0);
       setIsLoading(false);
+      socketService.disconnect();
       return;
     }
 
-    // Initial load
-    fetchRef.current();
+    fetchNotifications();
 
-    // 1. Polling fallback (every 10 seconds) to ensure UI stays in sync
+    // Initialize Socket Connection
+    const socket = socketService.connect(user.id, user.role);
+
+    socketService.on('new_notification', (notification) => {
+      console.log('🔔 New real-time notification:', notification);
+
+      setNotifications(prev => [notification, ...prev].slice(0, 50));
+      setUnreadCount(prev => prev + 1);
+
+      toast.success(
+        (t) => (
+          <div onClick={() => { toast.dismiss(t.id); }}>
+            <p className="font-bold text-sm">{notification.title}</p>
+            <p className="text-xs">{notification.message}</p>
+          </div>
+        ),
+        { duration: 5000, icon: '🔔' }
+      );
+    });
+
+    // Fallback polling (less frequent now with sockets)
     const intervalId = setInterval(() => {
       if (document.visibilityState === 'visible') {
-        fetchRef.current();
+        fetchNotifications();
       }
-    }, 10000);
+    }, 60000);
 
-    // 2. Real-time update via Service Worker postMessage
-    let handleMessage;
-    if ('serviceWorker' in navigator) {
-      handleMessage = (event) => {
-        if (event.data && event.data.type === 'PUSH_NOTIFICATION_RECEIVED') {
-          console.log('[NotificationContext] Real-time push received, updating UI...');
-          const payload = event.data.data;
-          
-          if (payload) {
-            toast.success(
-              (t) => (
-                <div onClick={() => { toast.dismiss(t.id); }}>
-                  <p className="font-bold text-sm">{payload.title || 'New Notification'}</p>
-                  <p className="text-xs">{payload.body || ''}</p>
-                </div>
-              ),
-              { duration: 5000, icon: '🔔' }
-            );
-          }
-          
-          // Refresh notification list instantly upon receiving push
-          fetchRef.current();
-        }
-      };
-      
-      navigator.serviceWorker.addEventListener('message', handleMessage);
-    }
-    
     return () => {
       clearInterval(intervalId);
-      if (handleMessage) {
-        navigator.serviceWorker.removeEventListener('message', handleMessage);
-      }
+      socketService.off('new_notification');
     };
-  }, [user]);
+  }, [isAuthenticated, user, fetchNotifications]);
 
   // Mark single as read
   const markAsRead = async (id) => {
@@ -102,7 +82,7 @@ export const NotificationProvider = ({ children }) => {
       setUnreadCount(prev => Math.max(0, prev - 1));
       await api.patch(`/api/notifications/history/${id}/read`);
     } catch (error) {
-      fetchRef.current(); 
+      fetchRef.current();
     }
   };
 
@@ -119,14 +99,14 @@ export const NotificationProvider = ({ children }) => {
 
   const deleteNotification = async (id) => {
     try {
-        await api.delete(`/api/notifications/history/${id}`);
-        const deletedNotif = notifications.find(n => n._id === id);
-        setNotifications(prev => prev.filter(n => n._id !== id));
-        if (deletedNotif && !deletedNotif.isRead) {
-            setUnreadCount(prev => Math.max(0, prev - 1));
-        }
+      await api.delete(`/api/notifications/history/${id}`);
+      const deletedNotif = notifications.find(n => n._id === id);
+      setNotifications(prev => prev.filter(n => n._id !== id));
+      if (deletedNotif && !deletedNotif.isRead) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
     } catch (error) {
-        fetchRef.current();
+      fetchRef.current();
     }
   };
 

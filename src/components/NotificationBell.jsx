@@ -1,27 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Trash2, CheckCircle2, MoreHorizontal, Settings } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { FiBell, FiTrash2, FiCheck, FiInfo, FiBox, FiUserPlus, FiClock } from 'react-icons/fi';
 import { useNotifications } from '../context/NotificationContext';
-import { useAuth } from '../context/AuthContext';
-import NotificationItem from './NotificationItem';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const NotificationBell = () => {
-    const { isAuthenticated } = useAuth();
-    const { 
-        notifications, 
-        unreadCount, 
-        markAsRead, 
-        markAllAsRead, 
-        deleteNotification,
-        refreshNotifications
-    } = useNotifications();
-    
+    const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
-    const navigate = useNavigate();
 
-    // Close dropdown on click outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -32,125 +19,122 @@ const NotificationBell = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleToggle = () => {
-        setIsOpen(!isOpen);
-    };
-
-    const handleNotificationClick = async (notif) => {
-        if (!notif.isRead) {
-            await markAsRead(notif._id);
-        }
-        if (notif.link) {
-            setIsOpen(false);
-            navigate(notif.link);
+    const getIcon = (type) => {
+        switch (type) {
+            case 'order': return <FiBox className="text-emerald-500" />;
+            case 'registration': return <FiUserPlus className="text-blue-500" />;
+            case 'product': return <FiInfo className="text-purple-500" />;
+            case 'status': return <FiClock className="text-orange-500" />;
+            default: return <FiBell className="text-gray-500" />;
         }
     };
-
-    if (!isAuthenticated) return null;
 
     return (
         <div className="relative" ref={dropdownRef}>
-            {/* Bell Button */}
-            <button 
-                onClick={handleToggle}
-                className="relative p-2.5 rounded-xl hover:bg-white/10 transition-all duration-300 group active:scale-95"
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="relative p-2 text-white hover:bg-emerald-500/10 rounded-full transition-colors"
                 aria-label="Notifications"
             >
-                <Bell className={`w-5 h-5 transition-colors ${isOpen ? 'text-emerald-400' : 'text-slate-200 group-hover:text-white'}`} />
+                <FiBell className="text-2xl" />
                 {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
-                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                         <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 text-[10px] text-black font-bold items-center justify-center border border-black/20 text-center leading-none">
-                            {unreadCount > 9 ? '9+' : unreadCount}
-                         </span>
+                    <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-slate-900">
+                        {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
             </button>
 
-            {/* Dropdown Panel */}
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    <motion.div
+                        initial={{ opacity: 0, y: 15, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="fixed sm:absolute inset-0 sm:inset-auto sm:right-0 sm:top-full sm:mt-3 w-full sm:w-96 h-dvh sm:h-auto bg-gray-900 sm:bg-gray-900/80 backdrop-blur-2xl border-t sm:border border-white/10 sm:rounded-2xl shadow-2xl z-9999 overflow-hidden flex flex-col"
+                        exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 mt-3 w-80 md:w-96 bg-slate-900 border border-emerald-500/30 rounded-2xl shadow-2xl z-100 overflow-hidden"
                     >
-                        {/* Header */}
-                        <div className="sticky top-0 px-5 py-5 border-b border-white/5 flex justify-between items-center bg-white/5 z-10 backdrop-blur-md">
-                            <div className="flex items-center gap-3">
-                                <button 
-                                    onClick={() => setIsOpen(false)}
-                                    className="sm:hidden p-2 -ml-2 text-gray-400 hover:text-white transition-colors"
+                        <div className="p-4 border-b border-emerald-500/20 flex justify-between items-center bg-slate-900/50">
+                            <h3 className="text-white font-bold">Notifications</h3>
+                            {unreadCount > 0 && (
+                                <button
+                                    onClick={markAllAsRead}
+                                    className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
                                 >
-                                    <Bell className="w-5 h-5 rotate-12 text-emerald-400" />
+                                    <FiCheck size={14} /> Mark all as read
                                 </button>
-                                <div>
-                                    <h3 className="text-sm font-bold text-white">Notifications</h3>
-                                    <p className="text-[10px] text-gray-500 font-medium sm:hidden">
-                                        Stay updated with your activities
-                                    </p>
-                                </div>
-                                {unreadCount > 0 && (
-                                    <span className="bg-emerald-500 text-black text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg shadow-emerald-500/20">
-                                        {unreadCount}
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); markAllAsRead(); }}
-                                    className="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-emerald-500/10"
-                                >
-                                    Clear All
-                                </button>
-                                <button 
-                                    onClick={() => setIsOpen(false)}
-                                    className="sm:hidden p-2 text-gray-400 hover:text-white transition-colors hover:bg-white/5 rounded-full"
-                                >
-                                    <Trash2 className="w-5 h-5" /> 
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* List Area */}
-                        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent overscroll-contain pb-20 sm:pb-0 sm:max-h-[440px]">
-                            {notifications.length > 0 ? (
-                                <div className="divide-y divide-white/5">
-                                    {notifications.map((notif) => (
-                                        <NotificationItem 
-                                            key={notif._id} 
-                                            notification={notif}
-                                            onClick={() => handleNotificationClick(notif)}
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <motion.div 
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="h-full flex flex-col items-center justify-center py-20 px-6 text-center"
-                                >
-                                    <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mb-6 border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
-                                        <Bell className="w-10 h-10 text-gray-700" />
-                                    </div>
-                                    <p className="text-base font-bold text-gray-300">No notifications yet</p>
-                                    <p className="text-sm text-gray-600 mt-2 max-w-[200px]">We'll alert you when something happens</p>
-                                </motion.div>
                             )}
                         </div>
 
-                        {/* Footer (Always sticky at bottom on mobile) */}
-                        <div className="mt-auto p-4 border-t border-white/5 bg-gray-950/80 backdrop-blur-xl sm:rounded-b-2xl">
-                            <button 
-                                onClick={() => { setIsOpen(false); navigate('/notifications'); }}
-                                className="w-full py-3.5 text-xs font-black uppercase tracking-widest text-white bg-emerald-600 hover:bg-emerald-500 transition-all rounded-xl shadow-xl shadow-emerald-900/40 active:scale-[0.98] flex items-center justify-center gap-2"
-                            >
-                                <Settings className="w-3.5 h-3.5" />
-                                View All Notifications
-                            </button>
+                        <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                            {notifications.length === 0 ? (
+                                <div className="p-10 text-center text-slate-500">
+                                    <FiBell className="mx-auto text-4xl mb-3 opacity-20" />
+                                    <p>No notifications yet</p>
+                                </div>
+                            ) : (
+                                notifications.map((notif) => (
+                                    <div
+                                        key={notif._id}
+                                        className={`p-4 border-b border-emerald-500/10 hover:bg-emerald-500/5 transition-colors flex gap-3 relative group ${!notif.isRead ? 'bg-emerald-500/5' : ''}`}
+                                    >
+                                        <div className="mt-1 bg-slate-800 p-2 rounded-lg h-fit">
+                                            {getIcon(notif.type)}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className={`text-sm ${!notif.isRead ? 'text-white font-semibold' : 'text-slate-300'}`}>
+                                                {notif.title}
+                                            </p>
+                                            <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                                                {notif.message}
+                                            </p>
+                                            <span className="text-[10px] text-slate-500 mt-2 block">
+                                                {new Date(notif.createdAt).toLocaleString()}
+                                            </span>
+                                            {notif.link && (
+                                                <Link
+                                                    to={notif.link}
+                                                    onClick={() => {
+                                                        setIsOpen(false);
+                                                        markAsRead(notif._id);
+                                                    }}
+                                                    className="text-[10px] text-emerald-400 mt-1 block hover:underline"
+                                                >
+                                                    View details
+                                                </Link>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            {!notif.isRead && (
+                                                <button
+                                                    onClick={() => markAsRead(notif._id)}
+                                                    className="h-2 w-2 rounded-full bg-emerald-500 mt-2 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                                                    title="Mark as read"
+                                                />
+                                            )}
+                                            <button
+                                                onClick={() => deleteNotification(notif._id)}
+                                                className="p-1.5 text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                                                title="Delete"
+                                            >
+                                                <FiTrash2 size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
+
+                        {notifications.length > 0 && (
+                            <div className="p-3 text-center border-t border-emerald-500/20">
+                                <Link
+                                    to="/myorders"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-xs text-slate-400 hover:text-emerald-400 transition-colors"
+                                >
+                                    View all history
+                                </Link>
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import api, { clearAuthTokens } from '../../services/api';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
-import { 
+import {
   FiHome,
   FiPackage,
   FiShoppingBag,
@@ -47,85 +47,105 @@ const Sidebar = ({ isCollapsed, isMobileOpen, onMobileClose }) => {
     <>
       {/* Mobile Overlay */}
       {isMobileOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
           onClick={onMobileClose}
         />
       )}
-      
+
       {/* Sidebar */}
       <div className={`
-        fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-50 transition-all duration-300 ease-in-out
+        fixed top-0 left-0 h-full bg-slate-900/80 backdrop-blur-xl border-r border-emerald-500/10 z-50 transition-all duration-500 ease-in-out
         ${isCollapsed ? 'w-20' : 'w-64'}
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-          <div className="flex items-center">
-            <img src={logo} alt="FlashBasket Logo" className="w-10 h-10 object-contain" />
+        <div className="flex items-center justify-between h-20 px-6 border-b border-emerald-500/10">
+          <Link to="/admin" className="flex items-center group">
+            <div className="relative">
+              <img src={logo} alt="Logo" className="w-10 h-10 object-contain transition-transform group-hover:rotate-12" />
+              <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full scale-0 group-hover:scale-100 transition-transform" />
+            </div>
             {!isCollapsed && (
-              <span className="ml-3 text-xl font-bold text-gray-900">
-                FlashBasket
+              <span className="ml-3 text-xl font-bold bg-linear-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                RushBasket
               </span>
             )}
-          </div>
-          <button 
+          </Link>
+          <button
             onClick={onMobileClose}
-            className="lg:hidden text-gray-500 hover:text-gray-700"
+            className="lg:hidden text-slate-400 hover:text-white transition-colors"
           >
-            <FiX size={20} />
+            <FiX size={24} />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 mt-4 space-y-2">
           {navLinks.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
               onClick={() => isMobileOpen && onMobileClose()}
               className={({ isActive }) => `
-                flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 group
-                ${isActive 
-                  ? 'bg-indigo-50 text-indigo-700 shadow-sm' 
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group relative
+                ${isActive
+                  ? 'text-emerald-400'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-emerald-500/5'
                 }
                 ${isCollapsed ? 'justify-center' : ''}
               `}
             >
-              <span className="transition-all duration-200 text-indigo-600 group-hover:text-indigo-700">
-                {link.icon}
-              </span>
-              {!isCollapsed && (
-                <span className="ml-3 font-medium">{link.name}</span>
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-pill"
+                      className="absolute inset-0 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl z-0"
+                    />
+                  )}
+                  <span className={`relative z-10 text-xl ${isActive ? 'text-emerald-400' : 'text-slate-400 group-hover:text-emerald-400/80'}`}>
+                    {link.icon}
+                  </span>
+                  {!isCollapsed && (
+                    <span className="relative z-10 ml-3 font-medium tracking-wide">{link.name}</span>
+                  )}
+                  {isActive && !isCollapsed && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="ml-auto w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.8)]"
+                    />
+                  )}
+                </>
               )}
             </NavLink>
           ))}
         </nav>
 
         {/* Bottom Section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-emerald-500/10 bg-slate-900/40">
           <Link
             to="/"
             className={`
-              flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 group mb-2
-              text-gray-600 hover:bg-gray-50 hover:text-gray-900
+              flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group mb-2
+              text-slate-400 hover:text-slate-200 hover:bg-slate-800
               ${isCollapsed ? 'justify-center' : ''}
             `}
           >
-            <FiArrowLeft className="text-gray-500 group-hover:text-gray-700" />
+            <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
             {!isCollapsed && <span className="ml-3 font-medium">Back to Shop</span>}
           </Link>
-          
+
           <button
             onClick={handleLogout}
             className={`
-              w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 group
-              text-red-600 hover:bg-red-50 hover:text-red-700
+              w-full flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group
+              text-slate-400 hover:text-rose-400 hover:bg-rose-500/10
               ${isCollapsed ? 'justify-center' : ''}
             `}
           >
-            <FiLogOut className="text-red-500 group-hover:text-red-600" />
+            <FiLogOut className="group-hover:rotate-12 transition-transform" />
             {!isCollapsed && <span className="ml-3 font-medium">Logout</span>}
           </button>
         </div>

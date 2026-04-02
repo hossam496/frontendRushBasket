@@ -13,13 +13,13 @@ import {
   AreaChart
 } from 'recharts';
 
-const ChartCard = ({ 
-  title, 
-  type = 'line', 
-  data, 
+const ChartCard = ({
+  title,
+  type = 'line',
+  data,
   height = 320,
-  color = '#4f46e5',
-  gradientColor = '#4f46e5',
+  color = '#10b981',
+  gradientColor = '#10b981',
   showFilter = true,
   filterOptions = ['Last 7 Days', 'Last 30 Days', 'Last 3 Months'],
   onFilterChange
@@ -27,19 +27,19 @@ const ChartCard = ({
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 rounded-xl shadow-lg border border-gray-200">
-          <p className="text-sm font-medium text-gray-900 mb-2">{label}</p>
+        <div className="bg-slate-900/90 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-emerald-500/20">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">{label}</p>
           {payload.map((entry, index) => (
-            <div key={index} className="flex items-center justify-between space-x-4">
+            <div key={index} className="flex items-center justify-between space-x-6">
               <div className="flex items-center space-x-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: entry.color }}
+                <div
+                  className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                  style={{ backgroundColor: entry.color || color }}
                 ></div>
-                <span className="text-sm text-gray-600">{entry.name}</span>
+                <span className="text-sm text-slate-300 font-medium">{entry.name}</span>
               </div>
-              <span className="text-sm font-bold text-gray-900">
-                ${entry.value.toLocaleString()}
+              <span className="text-sm font-black text-white">
+                {typeof entry.value === 'number' ? `${entry.value.toLocaleString()}` : entry.value}
               </span>
             </div>
           ))}
@@ -65,15 +65,15 @@ const ChartCard = ({
                 <stop offset="95%" stopColor={gradientColor} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis 
-              dataKey="name" 
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+            <XAxis
+              dataKey="name"
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#64748b', fontSize: 12 }}
               dy={10}
             />
-            <YAxis 
+            <YAxis
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#64748b', fontSize: 12 }}
@@ -89,44 +89,44 @@ const ChartCard = ({
             />
           </AreaChart>
         );
-      
+
       case 'bar':
         return (
           <BarChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis 
-              dataKey="name" 
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+            <XAxis
+              dataKey="name"
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#64748b', fontSize: 12 }}
               dy={10}
             />
-            <YAxis 
+            <YAxis
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#64748b', fontSize: 12 }}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Bar 
-              dataKey="value" 
+            <Bar
+              dataKey="value"
               fill={color}
               radius={[8, 8, 0, 0]}
             />
           </BarChart>
         );
-      
+
       default: // line
         return (
           <LineChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis 
-              dataKey="name" 
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+            <XAxis
+              dataKey="name"
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#64748b', fontSize: 12 }}
               dy={10}
             />
-            <YAxis 
+            <YAxis
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#64748b', fontSize: 12 }}
@@ -146,16 +146,16 @@ const ChartCard = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6 transition-all duration-300 hover:shadow-lg">
+    <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-emerald-500/10 p-6 transition-all duration-500 hover:border-emerald-500/30">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-          <p className="text-sm text-gray-500 mt-1">Track your performance over time</p>
+          <h3 className="text-lg font-black text-white tracking-tight">{title}</h3>
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Performance Analytics</p>
         </div>
         {showFilter && (
-          <select 
-            className="text-sm border border-gray-200 bg-white rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          <select
+            className="text-xs font-bold uppercase tracking-widest border border-emerald-500/10 bg-slate-800 text-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/30 transition-all cursor-pointer"
             onChange={(e) => onFilterChange && onFilterChange(e.target.value)}
           >
             {filterOptions.map(option => (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import { FaBell, FaBellSlash, FaCheck, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const PushNotificationToggle = () => {
   const {
@@ -23,7 +24,6 @@ const PushNotificationToggle = () => {
     refreshSubscriptions();
   }, [refreshSubscriptions]);
 
-  // Handle subscribe/unsubscribe toggle
   const handleToggle = async () => {
     setIsToggling(true);
     try {
@@ -37,7 +37,6 @@ const PushNotificationToggle = () => {
     }
   };
 
-  // Handle test notification
   const handleTest = async () => {
     const result = await testNotification();
     if (result) {
@@ -48,62 +47,53 @@ const PushNotificationToggle = () => {
 
   const isLoading = loading || isToggling;
 
-  // Not supported
   if (!isSupported) {
     return (
-      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="flex items-center text-gray-500">
-          <FaBellSlash className="mr-2" />
-          <span className="text-sm">Push notifications not supported in this browser</span>
+      <div className="p-5 bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-emerald-500/10">
+        <div className="flex items-center text-slate-400">
+          <FaBellSlash className="mr-3 text-rose-400" size={18} />
+          <span className="text-sm font-bold uppercase tracking-widest">Web Push Unsupported</span>
         </div>
-        <p className="text-xs text-gray-400 mt-2">
-          Please use a modern browser like Chrome, Firefox, or Edge.
+        <p className="text-xs text-slate-500 mt-2 font-medium">
+          Please use a modern browser like Chrome or Edge for background alerts.
         </p>
       </div>
     );
   }
 
-  // Permission denied
   if (permission === 'denied') {
     return (
-      <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-        <div className="flex items-center text-red-700 mb-2">
-          <FaExclamationTriangle className="mr-2" />
-          <span className="font-medium">Notifications Blocked</span>
+      <div className="p-5 bg-rose-500/5 backdrop-blur-xl rounded-2xl border border-rose-500/20">
+        <div className="flex items-center text-rose-400 mb-2">
+          <FaExclamationTriangle className="mr-3" size={18} />
+          <span className="font-black text-rose-100 tracking-tight">Notifications Blocked</span>
         </div>
-        <p className="text-sm text-red-600">
-          Please enable notifications in your browser settings to receive order alerts.
+        <p className="text-sm text-rose-200/70 font-medium">
+          Enable system notifications in browser settings to receive critical system alerts.
         </p>
         <button
-          onClick={() => {
-            // Show instructions for enabling notifications
-            if (window.chrome) {
-              alert('To enable notifications:\n1. Click the lock/info icon in address bar\n2. Find "Notifications" setting\n3. Change to "Allow"');
-            } else {
-              alert('Please check your browser settings to enable notifications for this site.');
-            }
-          }}
-          className="mt-2 text-xs text-red-700 underline hover:text-red-800"
+          onClick={() => alert('To enable notifications:\n1. Click the lock/info icon in address bar\n2. Find "Notifications"\n3. Change to "Allow"')}
+          className="mt-3 text-xs font-bold text-rose-400 uppercase tracking-widest hover:text-rose-300 transition-colors underline underline-offset-4"
         >
-          How to enable?
+          Configuration Guide
         </button>
       </div>
     );
   }
 
   return (
-    <div className="p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
+    <div className="p-6 bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-emerald-500/10 hover:border-emerald-500/20 transition-all duration-500">
+      <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <div className={`p-2 rounded-full mr-3 ${hasSubscription ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
-            <FaBell size={20} />
+          <div className={`p-4 rounded-2xl mr-4 transition-all duration-500 ${hasSubscription ? 'bg-emerald-500/10 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'bg-slate-800 text-slate-500'}`}>
+            <FaBell size={24} className={hasSubscription ? 'animate-bounce' : ''} />
           </div>
           <div>
-            <h3 className="font-medium text-gray-900">Push Notifications</h3>
-            <p className="text-sm text-gray-500">
+            <h3 className="font-black text-white tracking-tight">Push Engine</h3>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">
               {hasSubscription
-                ? `Active on ${subscriptionCount} device(s)`
-                : 'Get notified when new orders arrive'}
+                ? `Synched with ${subscriptionCount} device(s)`
+                : 'Background delivery inactive'}
             </p>
           </div>
         </div>
@@ -111,64 +101,69 @@ const PushNotificationToggle = () => {
         <button
           onClick={handleToggle}
           disabled={isLoading}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${hasSubscription
-              ? 'bg-red-100 text-red-700 hover:bg-red-200'
-              : 'bg-indigo-600 text-white hover:bg-indigo-700'
+          className={`relative overflow-hidden px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-300 ${hasSubscription
+            ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20'
+            : 'bg-emerald-600 text-white border border-emerald-500/50 hover:bg-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]'
             } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          {isLoading ? (
-            <span className="flex items-center">
-              <FaSpinner className="animate-spin mr-2" size={14} />
-              Processing...
-            </span>
-          ) : hasSubscription ? 'Disable' : 'Enable'}
+          <span className="relative z-10 flex items-center">
+            {isLoading ? (
+              <>
+                <FaSpinner className="animate-spin mr-2" size={12} />
+                Processing
+              </>
+            ) : hasSubscription ? 'Disconnect' : 'Connect'}
+          </span>
         </button>
       </div>
 
-      {/* Error message */}
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 rounded-lg text-sm text-red-700 border border-red-200">
-          <strong>Error:</strong> {error}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="mt-4 p-3 bg-rose-500/10 rounded-xl text-xs font-medium text-rose-400 border border-rose-500/20 overflow-hidden"
+          >
+            <strong className="font-black">Alert:</strong> {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Test notification button */}
       {hasSubscription && (
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-          <p className="text-sm text-gray-500">
-            Test if notifications are working
+        <div className="mt-6 pt-6 border-t border-emerald-500/10 flex items-center justify-between">
+          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">
+            System Connectivity Verified
           </p>
           <div className="flex items-center">
             {showTestSuccess && (
-              <span className="mr-3 text-sm text-green-600 flex items-center">
-                <FaCheck className="mr-1" /> Sent!
-              </span>
+              <motion.span
+                initial={{ x: 10, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="mr-4 text-xs font-black text-emerald-400 flex items-center"
+              >
+                <FaCheck className="mr-1.5" /> EMITTED
+              </motion.span>
             )}
             <button
               onClick={handleTest}
               disabled={isLoading}
-              className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-[10px] font-black uppercase tracking-widest bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition-all border border-emerald-500/5 disabled:opacity-50"
             >
-              {isLoading ? 'Sending...' : 'Test Notification'}
+              {isLoading ? 'Emitting...' : 'Test Sync'}
             </button>
           </div>
         </div>
       )}
 
-      {/* Info text */}
-      <div className="mt-3 pt-3 border-t border-gray-100">
-        <p className="text-xs text-gray-400">
+      <div className="mt-4 pt-4 border-t border-emerald-500/5">
+        <p className="text-[10px] text-slate-600 font-medium leading-relaxed italic">
           {hasSubscription ? (
-            '✓ You will receive notifications for new orders and important updates.'
+            '✓ Production status: Real-time order synchronization active across all registered service workers.'
           ) : (
-            '💡 Enable notifications to get instant alerts when customers place orders.'
+            '💡 Integration required: Enable background push to maintain operational awareness even when the dashboard is closed.'
           )}
         </p>
-        {hasSubscription && (
-          <p className="text-xs text-gray-400 mt-1">
-            Note: Keep your browser installed to receive notifications even when the site is closed.
-          </p>
-        )}
       </div>
     </div>
   );
