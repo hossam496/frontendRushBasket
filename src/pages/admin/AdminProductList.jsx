@@ -22,6 +22,7 @@ const AdminProductList = () => {
   const { isAuthenticated, isAdmin } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -95,9 +96,16 @@ const AdminProductList = () => {
     e.preventDefault();
     
     if (!isAuthenticated || !isAdmin) {
-      toast.error('Unauthorized access');
+      toast.error('You must be an admin to perform this action');
       return;
     }
+
+    if (!newProduct.name || !newProduct.price) {
+      toast.error('Product name and price are required');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     const formData = new FormData();
     formData.append('name', newProduct.name);
@@ -115,19 +123,23 @@ const AdminProductList = () => {
     try {
       if (isEditModalOpen && editingProduct) {
         const updated = await productService.updateProduct(editingProduct._id, formData);
-        setProducts(products.map(p => p._id === editingProduct._id ? updated : p));
-        toast.success('Product updated successfully');
+        setProducts(prev => prev.map(p => p._id === editingProduct._id ? updated : p));
+        toast.success('Product updated successfully!');
       } else {
         const created = await productService.createProduct(formData);
-        setProducts([...products, created]);
-        toast.success('Product added successfully');
+        setProducts(prev => [...prev, created]);
+        toast.success('Product added successfully!');
       }
-      
       closeModals();
     } catch (err) {
       console.error('Error saving product:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to save product';
+      const status = err.response?.status;
+      let errorMessage = err.response?.data?.message || err.message || 'Failed to save product';
+      if (status === 401) errorMessage = 'Session expired. Please log in again.';
+      if (status === 403) errorMessage = 'Access denied. Admin privileges required.';
       toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -300,10 +312,10 @@ const AdminProductList = () => {
               </div>
               <button 
                 type="submit" 
-                disabled={loading || !newProduct.name || !newProduct.price}
+                disabled={isSubmitting || !newProduct.name || !newProduct.price}
                 className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {loading ? (
+                {isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
                     Saving Changes...
