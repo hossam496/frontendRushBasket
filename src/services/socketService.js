@@ -12,9 +12,14 @@ class SocketService {
 
         const isVercel = window.location.hostname.endsWith('.vercel.app');
 
+        if (isVercel) {
+            console.log('ℹ️ Real-time sockets disabled for Vercel/Serverless. Using background polling fallback.');
+            return null;
+        }
+
         this.socket = io(SOCKET_URL, {
             withCredentials: true,
-            transports: isVercel ? ['polling'] : ['websocket', 'polling'],
+            transports: ['websocket', 'polling'],
             reconnectionAttempts: 3,
             timeout: 10000
         });
