@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { FiSearch, FiSettings } from 'react-icons/fi';
-import { FiSearch, FiSettings } from 'react-icons/fi';
 
 const getAdminInfo = () => {
   try {
