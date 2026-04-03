@@ -6,7 +6,8 @@ const productService = {
    */
   getProducts: async () => {
     const response = await API.get('/api/products');
-    return response.data;
+    // The backend returns { success: true, data: [...] }
+    return response.data.data || [];
   },
 
   /**
