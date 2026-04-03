@@ -17,7 +17,6 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminProductList from './pages/admin/AdminProductList'
 import AdminUserList from './pages/admin/AdminUserList'
 import AdminOrderList from './pages/admin/AdminOrderList'
-import AdminAnalytics from './pages/admin/AdminAnalytics'
 import { useAuth } from './context/AuthContext'
 
 const ScrollToTop = () => {
@@ -79,11 +78,7 @@ const App = () => {
               <AdminOrderList />
             </AdminRoute>
           } />
-          <Route path='/admin/analytics' element={
-            <AdminRoute>
-              <AdminAnalytics />
-            </AdminRoute>
-          } />
+
 
           {/* fallback to home */}
           <Route path='*' element={<Navigate replace to='/' />} />

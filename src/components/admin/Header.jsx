@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { FiSearch, FiSettings } from 'react-icons/fi';
-import NotificationBell from './NotificationBell';
+import { FiSearch, FiSettings } from 'react-icons/fi';
 
 const getAdminInfo = () => {
   try {
@@ -63,7 +63,7 @@ const Header = React.memo(({ title, onSidebarToggle }) => {
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
-              placeholder="Search analytics, orders, products..."
+              placeholder="Search orders, products..."
               className="w-full pl-12 pr-4 py-3 bg-slate-800/50 hover:bg-slate-800/80 border border-emerald-500/10 rounded-2xl text-sm text-slate-200 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500/30 transition-all duration-500 placeholder:text-slate-500"
               aria-label="Search"
             />
@@ -82,8 +82,7 @@ const Header = React.memo(({ title, onSidebarToggle }) => {
           </button>
 
           {/* Notifications */}
-          <div className="relative z-50">
-            <NotificationBell />
+          <div className="relative">
           </div>
 
           <button

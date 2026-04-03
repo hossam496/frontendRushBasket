@@ -8,7 +8,6 @@ import { FiMenu, FiUser, FiX } from 'react-icons/fi'
 import { FaOpencart } from 'react-icons/fa'
 import { useCart } from '../CartContext'
 import { useAuth } from '../context/AuthContext'
-import NotificationBell from './NotificationBell'
 
 const Navbar = () => {
     const location = useLocation()
@@ -158,7 +157,7 @@ const Navbar = () => {
                             </Link>
                         )}
 
-                        {isAuthenticated && <NotificationBell />}
+
 
                         <Link to='/cart' className={`${navbarStyles.cartLink} ml-2`}>
                             <FaOpencart className={`${navbarStyles.cartIcon} ${cartBouns ?
