@@ -9,7 +9,7 @@ const getApiUrl = () => {
   
   // Fallback to environment detection
   if (import.meta.env.PROD) {
-    return 'https://backend1-eight-lovat.vercel.app';
+    return 'https://backend-euypvlhdw-hossam496s-projects.vercel.app';
   }
   
   // Default to localhost for development
