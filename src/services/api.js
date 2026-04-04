@@ -1,7 +1,23 @@
 import axios from 'axios';
 
+// Environment-aware API URL configuration
+const getApiUrl = () => {
+  // Check if VITE_API_URL is available (from environment variables)
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Fallback to environment detection
+  if (import.meta.env.PROD) {
+    return 'https://backend1-eight-lovat.vercel.app';
+  }
+  
+  // Default to localhost for development
+  return 'http://localhost:5000';
+};
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: getApiUrl(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -44,5 +60,4 @@ API.interceptors.response.use(
   }
 );
 
-export { API_URL };
 export default API;
