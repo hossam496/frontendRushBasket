@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import productService from '../../services/productService';
 import { 
   FiPlus, 
   FiSearch, 
-  FiFilter, 
   FiGrid, 
-  FiList, 
   FiLayout,
   FiShoppingBag,
   FiClock,
-  FiTrendingUp
+  FiTrendingUp,
+  FiBox,
+  FiCheckCircle
 } from 'react-icons/fi';
+import { CATEGORIES } from '../../constants/categories';
 import AdminLayout from '../../components/admin/AdminLayout';
 import StatCard from '../../components/admin/StatCard';
 import ProductCard from '../../components/admin/ProductCard';
@@ -28,6 +29,8 @@ const AdminProductList = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -43,7 +46,7 @@ const AdminProductList = () => {
     try {
       setLoading(true);
       const data = await productService.getProducts();
-      setProducts(data);
+      setProducts(data || []);
     } catch (err) {
       console.error('Error fetching products:', err);
       toast.error('Failed to sync product inventory');
@@ -109,18 +112,27 @@ const AdminProductList = () => {
     }
   };
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'All' || product.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           product.category.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = categoryFilter === 'All' || product.category === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchTerm, categoryFilter]);
 
-  const productStats = {
+  const stats = useMemo(() => ({
     total: products.length,
-    newToday: 2, // Mocked
-    valuation: products.reduce((acc, curr) => acc + (curr.price || 0), 0).toFixed(2),
-  };
+    active: products.filter(p => p.status === 'active').length,
+    recent: products.filter(p => {
+        const createdDate = new Date(p.createdAt);
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        return createdDate > yesterday;
+    }).length
+  }), [products]);
+
+  useEffect(() => setCurrentPage(1), [searchTerm, categoryFilter]);
 
   return (
     <AdminLayout title="Inventory Control">
@@ -132,21 +144,21 @@ const AdminProductList = () => {
       >
         <StatCard 
           title="Global Inventory" 
-          value={productStats.total} 
+          value={stats.total} 
           icon={<FiShoppingBag size={24} />} 
           color="indigo" 
           description="Total active listings"
         />
         <StatCard 
-          title="Stock Valuation" 
-          value={`$${productStats.valuation}`} 
-          icon={<FiTrendingUp size={24} />} 
+          title="Active Coverage" 
+          value={stats.active} 
+          icon={<FiCheckCircle size={24} />} 
           color="emerald" 
-          description="Combined asset worth"
+          description="Currently live"
         />
         <StatCard 
           title="Recently Updated" 
-          value={productStats.newToday} 
+          value={stats.recent} 
           icon={<FiClock size={24} />} 
           color="amber" 
           description="Changes in last 24h"
@@ -172,17 +184,28 @@ const AdminProductList = () => {
 
           {/* Category Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar w-full">
-            {['All', 'Fruits', 'Vegetables', 'Dairy', 'Snacks'].map(cat => (
+            <button
+              onClick={() => setCategoryFilter('All')}
+              className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap flex items-center gap-2 ${
+                categoryFilter === 'All' 
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-none translate-y-[-2px]" 
+                  : "bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+              }`}
+            >
+              <FiGrid size={14} /> All
+            </button>
+            {CATEGORIES.map(cat => (
               <button
-                key={cat}
-                onClick={() => setCategoryFilter(cat)}
-                className={`px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                  categoryFilter === cat 
+                key={cat.id}
+                onClick={() => setCategoryFilter(cat.name)}
+                className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap flex items-center gap-2 ${
+                  categoryFilter === cat.name 
                     ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-none translate-y-[-2px]" 
                     : "bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                 }`}
               >
-                {cat}
+                <span className="text-lg opacity-70">{cat.icon}</span>
+                {cat.name}
               </button>
             ))}
           </div>

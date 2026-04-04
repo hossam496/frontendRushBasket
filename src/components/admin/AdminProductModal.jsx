@@ -4,14 +4,14 @@ import { FiX, FiUploadCloud, FiTrash2, FiPlus, FiBox, FiCheckCircle } from 'reac
 import { resolveImageSrc } from '../../services/imageService';
 import toast from 'react-hot-toast';
 
-const categories = ['Fruits', 'Vegetables', 'Dairy', 'Beverages', 'Snacks', 'Bakery'];
+import { CATEGORIES } from '../../constants/categories';
 
 const AdminProductModal = ({ isOpen, onClose, onSubmit, editingProduct, isSubmitting }) => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
     oldPrice: '',
-    category: 'Fruits',
+    category: CATEGORIES[0].name,
     description: '',
     image: null,
     imageUrl: '',
@@ -26,7 +26,7 @@ const AdminProductModal = ({ isOpen, onClose, onSubmit, editingProduct, isSubmit
         name: editingProduct.name || '',
         price: editingProduct.price?.toString() || '',
         oldPrice: editingProduct.oldPrice?.toString() || '',
-        category: editingProduct.category || 'Fruits',
+        category: editingProduct.category || CATEGORIES[0].name,
         description: editingProduct.description || '',
         image: null,
         imageUrl: editingProduct.imageUrl || '',
@@ -37,7 +37,7 @@ const AdminProductModal = ({ isOpen, onClose, onSubmit, editingProduct, isSubmit
         name: '',
         price: '',
         oldPrice: '',
-        category: 'Fruits',
+        category: CATEGORIES[0].name,
         description: '',
         image: null,
         imageUrl: '',
@@ -161,7 +161,11 @@ const AdminProductModal = ({ isOpen, onClose, onSubmit, editingProduct, isSubmit
                         onChange={handleInputChange}
                         className="w-full px-6 py-5 bg-white/5 border border-white/5 rounded-3xl focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all text-white font-bold appearance-none cursor-pointer"
                       >
-                        {categories.map(cat => <option key={cat} className="bg-slate-900">{cat}</option>)}
+                        {CATEGORIES.map(cat => (
+                          <option key={cat.id} value={cat.name} className="bg-slate-900">
+                            {cat.name}
+                          </option>
+                        ))}
                       </select>
                       <FiPlus className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                     </div>

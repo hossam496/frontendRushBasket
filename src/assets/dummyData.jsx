@@ -1,4 +1,4 @@
-
+import React from 'react';
 import Apples from '../assets/Apples.png'; // ← Replace with your actual image path
 import Bananas from "../assets/Bananas.png"
 import Strawberries from "../assets/Strawberries.png"
@@ -63,52 +63,12 @@ import DuckBreast from "../assets/Duck Breast.png"
 import Ham from "../assets/Ham.png"
 import MeatBalls from "../assets/Meatballs.png"
 import PorkRibs from "../assets/Pork Ribs.png"
-// Categories data
-import {
-  GiAppleCore,
-  GiBroccoli,
-  GiMilkCarton,
-  GiWineGlass,
-  GiPopcorn,
-  GiShrimp,
-  GiCroissant,
-  GiChickenLeg
-} from 'react-icons/gi';
+import { CATEGORIES } from '../constants/categories';
 
-export const categories = [
-  {
-    name: 'Fruits',
-    icon: <GiAppleCore className="text-red-500 text-2xl" />
-  },
-  {
-    name: 'Vegetables',
-    icon: <GiBroccoli className="text-green-100 text-2xl" />
-  },
-  {
-    name: 'Dairy',
-    icon: <GiMilkCarton className="text-yellow-400 text-2xl" />
-  },
-  {
-    name: 'Beverages',
-    icon: <GiWineGlass className="text-blue-500 text-2xl" />
-  },
-  {
-    name: 'Snacks',
-    icon: <GiPopcorn className="text-amber-600 text-2xl" />
-  },
-  {
-    name: 'Seafood',
-    icon: <GiShrimp className="text-teal-100 text-2xl" />
-  },
-  {
-    name: 'Bakery',
-    icon: <GiCroissant className="text-amber-700 text-2xl" />
-  },
-  {
-    name: 'Meat',
-    icon: <GiChickenLeg className="text-red-700 text-2xl" />
-  }
-];
+export const categories = CATEGORIES.map(cat => ({
+  name: cat.name,
+  icon: React.cloneElement(cat.icon, { className: 'text-2xl' })
+}));
 
 
 // Products data with more items
