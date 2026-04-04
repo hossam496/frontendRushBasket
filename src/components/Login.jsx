@@ -72,7 +72,7 @@ const Login = () => {
 
       if (data.success) {
         // Use the AuthContext login method
-        login(data.user, data.accessToken, formData.remember);
+        login(data.user, data.token, formData.remember);
         toast.success(`Welcome back, ${data.user.name}!`);
 
         // Redirect will happen in useEffect based on role

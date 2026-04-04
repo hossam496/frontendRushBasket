@@ -4,15 +4,18 @@ import axios from 'axios';
 const getApiUrl = () => {
   // Check if VITE_API_URL is available (from environment variables)
   if (import.meta.env.VITE_API_URL) {
+    console.log("API URL from env:", import.meta.env.VITE_API_URL);
     return import.meta.env.VITE_API_URL;
   }
   
   // Fallback to environment detection
   if (import.meta.env.PROD) {
+    console.log("API URL (production): https://backend1-eight-lovat.vercel.app");
     return 'https://backend1-eight-lovat.vercel.app';
   }
   
   // Default to localhost for development
+  console.log("API URL (development): http://localhost:5000");
   return 'http://localhost:5000';
 };
 
@@ -22,7 +25,6 @@ const API = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
 });
 
 // Helper functions for Auth
@@ -44,6 +46,10 @@ API.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log("TOKEN:", token ? "Present" : "Missing");
+    console.log("Request URL:", config.baseURL + config.url);
+  } else {
+    console.log("TOKEN: Missing for request:", config.baseURL + config.url);
   }
   return config;
 });
@@ -53,8 +59,7 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      clearAuthTokens();
-      localStorage.removeItem('userData');
+      console.warn("Unauthorized request - check token validity");
     }
     return Promise.reject(error);
   }
