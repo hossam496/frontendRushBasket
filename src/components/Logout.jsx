@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
+import { FaSignOutAlt } from 'react-icons/fa'
 
 const Logout = () => {
   const { logout } = useAuth();
@@ -17,7 +18,7 @@ const Logout = () => {
         Logout
       </button>
       <p className='mt-4 text-gray-600'>
-        You are already singed in. Click above to logout
+        You are already signed in. Click above to logout
       </p>
     </div>
   )
