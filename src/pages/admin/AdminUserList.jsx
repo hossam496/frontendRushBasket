@@ -159,7 +159,7 @@ const AdminUserList = () => {
               <button
                 key={role.id}
                 onClick={() => setRoleFilter(role.id)}
-                className={`px-6 py-4 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                className={`px-6 py-4 rounded-full text-xs font-bold uppercase tracking-wide transition-all whitespace-nowrap ${
                   roleFilter === role.id 
                     ? "bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 translate-y-[-2px]" 
                     : "bg-slate-900/40 backdrop-blur-xl text-slate-500 hover:text-slate-300 hover:bg-white/5"
@@ -173,7 +173,7 @@ const AdminUserList = () => {
 
         <button 
           onClick={fetchUsers}
-          className="flex items-center justify-center gap-3 px-8 py-5 bg-white/5 border border-white/5 text-slate-300 rounded-[24px] font-black shadow-xl hover:bg-white/10 transition-all text-[10px] uppercase tracking-widest"
+          className="flex items-center justify-center gap-3 px-8 py-5 bg-white/5 border border-white/5 text-slate-300 rounded-[24px] font-bold shadow-xl hover:bg-white/10 transition-all text-xs uppercase tracking-wide"
         >
           <FiRefresh size={18} /> Resync Directory
         </button>
@@ -205,7 +205,7 @@ const AdminUserList = () => {
 
             {/* Pagination Controls */}
             <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 px-4">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                 Active Nodes <span className="text-white">{paginatedUsers.length}</span> of {filteredUsers.length} Detected
               </span>
 
@@ -223,7 +223,7 @@ const AdminUserList = () => {
                     <button
                       key={i + 1}
                       onClick={() => setCurrentPage(i + 1)}
-                      className={`w-10 h-10 rounded-xl text-[10px] font-black transition-all ${
+                      className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${
                         currentPage === i + 1 
                           ? "bg-emerald-500 text-white shadow-xl shadow-emerald-500/20" 
                           : "text-slate-500 hover:text-white"
