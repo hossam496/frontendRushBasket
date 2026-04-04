@@ -52,6 +52,10 @@ export const AuthProvider = ({ children }) => {
 
   // Login handler
   const login = useCallback((userData, token) => {
+    console.log("Login userData:", userData);
+    console.log("User role:", userData.role);
+    console.log("Is admin:", userData.role === 'admin');
+    
     localStorage.setItem('rush_basket_token', token);
     localStorage.setItem('userData', JSON.stringify(userData));
     localStorage.setItem('userRole', userData.role || 'user');

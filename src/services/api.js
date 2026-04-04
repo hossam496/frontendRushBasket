@@ -60,9 +60,28 @@ API.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       console.warn("Unauthorized request - check token validity");
+      console.log("Request URL:", error.config?.baseURL + error.config?.url);
+      console.log("Token used:", error.config?.headers?.Authorization ? "Present" : "Missing");
+      
+      // Check if this is an admin route
+      if (error.config?.url?.includes('/api/stats')) {
+        console.error("Admin stats access denied - user may not have admin role");
+      }
     }
     return Promise.reject(error);
   }
 );
 
 export default API;
+
+// Debug function to check current user role
+export const checkUserRole = async () => {
+  try {
+    const response = await API.get('/api/auth/check-role');
+    console.log("Current user role:", response.data.user.role);
+    return response.data.user;
+  } catch (error) {
+    console.error("Error checking user role:", error);
+    return null;
+  }
+};
