@@ -31,40 +31,51 @@ const UserCard = ({ user, onToggleRole, onDelete }) => {
         </div>
       </div>
 
-      {/* Profile Section */}
-      <div className="flex flex-col items-center text-center mt-4">
-        <div className={`relative w-20 h-20 rounded-[28px] flex items-center justify-center text-2xl font-black mb-4 border-2 ${
-          isAdmin ? 'border-purple-500 bg-purple-500/10 text-purple-400' : 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+      {/* Profile Core - Gemstone Theme */}
+      <div className="flex flex-col items-center text-center mt-6">
+        {/* Crystal Avatar Node */}
+        <div className={`relative w-24 h-24 rounded-[32px] flex items-center justify-center text-3xl font-black mb-6 border-2 shadow-[inset_0_0_20px_rgba(255,255,255,0.05)] transition-all duration-500 group-hover:scale-105 ${
+          isAdmin 
+            ? 'border-purple-500/50 bg-purple-500/10 text-purple-400 shadow-purple-500/10' 
+            : 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-emerald-500/10'
         }`}>
           {name?.charAt(0).toUpperCase()}
-          {/* Active Status Pulse */}
-          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-slate-900 rounded-full flex items-center justify-center">
-            <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+          {/* Neural Activity Pulse */}
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-slate-900 rounded-full flex items-center justify-center">
+            <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
           </div>
         </div>
 
-        <h3 className="text-lg font-black text-white tracking-tight leading-none mb-1 group-hover:text-emerald-400 transition-colors">
-          {name}
-        </h3>
-        <p className="text-xs text-slate-500 font-medium flex items-center gap-1.5 justify-center mb-6">
-          <FiMail size={12} className="opacity-50" /> {email}
+        {/* Identity Crystal Node */}
+        <div className="bg-white/5 backdrop-blur-md px-6 py-2 rounded-2xl border border-white/5 mb-2 group-hover:border-emerald-500/20 transition-all">
+          <h3 className="text-xl font-black text-white tracking-widest leading-none capitalize group-hover:text-emerald-400 transition-colors">
+            {name}
+          </h3>
+        </div>
+        
+        <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1.5 justify-center mb-6 uppercase tracking-[0.2em] opacity-60">
+          <FiMail size={12} className="text-slate-600" /> {email}
         </p>
       </div>
 
-      {/* Meta Data Grid */}
+      {/* Meta Data Cluster - Quartz Nodes */}
       <div className="grid grid-cols-2 gap-3 mb-8">
-        <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
-          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">Access Level</span>
+        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-3 border border-white/5 hover:bg-white/10 transition-all group/node">
+          <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-1.5 opacity-60">Access Level</span>
           <div className="flex items-center gap-2 text-white">
-            {isAdmin ? <FiShield size={14} className="text-purple-400" /> : <FiUser size={14} className="text-blue-400" />}
-            <span className="text-xs font-bold capitalize">{role}</span>
+            <div className={`p-1.5 rounded-lg ${isAdmin ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
+              {isAdmin ? <FiShield size={12} /> : <FiUser size={12} />}
+            </div>
+            <span className="text-[11px] font-black uppercase tracking-widest">{role}</span>
           </div>
         </div>
-        <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
-          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">Joined Core</span>
+        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-3 border border-white/5 hover:bg-white/10 transition-all group/node">
+          <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-1.5 opacity-60">Joined Core</span>
           <div className="flex items-center gap-2 text-white">
-            <FiCalendar size={14} className="text-emerald-400" />
-            <span className="text-xs font-bold">{joinedDate}</span>
+            <div className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg">
+              <FiCalendar size={12} />
+            </div>
+            <span className="text-[11px] font-black uppercase tracking-widest">{joinedDate}</span>
           </div>
         </div>
       </div>
