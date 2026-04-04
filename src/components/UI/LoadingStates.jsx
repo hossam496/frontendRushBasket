@@ -83,16 +83,17 @@ export const PageLoading = () => (
 // Product card skeleton — mirrors the exact layout of ProductCard in ItemsHome
 // Showing this during API load prevents CLS (grid doesn't shift when real cards appear)
 export const ProductCardSkeleton = memo(() => (
-  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
-    {/* Image placeholder — same aspect ratio as product images */}
-    <div className="w-full h-48 bg-gray-200" />
-    <div className="p-4 space-y-3">
+  <div className="bg-slate-900/40 backdrop-blur-xl rounded-[32px] border border-emerald-500/10 p-2 overflow-hidden animate-pulse">
+    {/* Image placeholder */}
+    <div className="w-full aspect-square bg-slate-800/50 rounded-[28px]" />
+    <div className="p-5 space-y-4">
       {/* Title */}
-      <div className="h-4 bg-gray-200 rounded w-3/4" />
+      <div className="h-5 bg-slate-800 rounded-full w-3/4" />
+      <div className="h-2 bg-slate-700 rounded-full w-1/4 mt-2" />
       {/* Price row */}
-      <div className="flex items-center justify-between pt-1">
-        <div className="h-5 bg-gray-200 rounded w-1/3" />
-        <div className="h-8 bg-gray-200 rounded-lg w-1/3" />
+      <div className="flex items-center justify-between pt-2">
+        <div className="h-8 bg-slate-800 rounded-xl w-1/3" />
+        <div className="h-8 bg-slate-800 rounded-xl w-1/4" />
       </div>
     </div>
   </div>
