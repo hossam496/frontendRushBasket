@@ -195,7 +195,7 @@ const AdminProductList = () => {
             setEditingProduct(null);
             setIsModalOpen(true);
           }} 
-          className="flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-[20px] font-black shadow-xl shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-all text-sm uppercase tracking-[0.1em]"
+          className="flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-[20px] font-black shadow-xl shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-all text-sm uppercase tracking-widest"
         >
           <FiPlus size={20} /> Launch Product
         </motion.button>
