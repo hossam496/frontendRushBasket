@@ -1,6 +1,6 @@
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
-import { FaSignOutAlt } from 'react-icons/fa'
+import { FaSignOutAlt } from 'react-icons/fa6'
 
 const Logout = () => {
   const { logout } = useAuth();
